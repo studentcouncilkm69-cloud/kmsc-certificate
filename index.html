@@ -100,9 +100,8 @@
     <!-- ==================== PUBLIC VIEW ==================== -->
     <main id="public-view" class="flex-1 max-w-4xl w-full mx-auto px-4 py-5">
 
-        <!-- Hero Banner (ดีไซน์สีแดง-ขาวตามต้นแบบ) -->
+        <!-- Hero Banner -->
         <section class="hero-gradient rounded-[26px] p-6 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-red-900/10 mb-6">
-            <!-- ลายน้ำดาวมุมขวา -->
             <svg class="absolute -right-8 -bottom-10 w-52 h-52 text-white/10 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
@@ -115,7 +114,7 @@
                     คลังเกียรติบัตรออนไลน์
                 </h2>
                 <p class="text-sm sm:text-[15px] text-white/90 font-normal leading-relaxed">
-                    ค้นหาและดาวน์โหลดไฟล์เกียรติบัตรต้นฉบับจากกิจกรรมต่างๆ ของสภานักเรียนได้อย่างง่ายดาย
+                    ค้นหาและดาวน์โหลดไฟล์เกียรติบัตรต้นฉบับจากกิจกรรมต่างๆ ของโรงเรียนคำม่วงได้อย่างง่ายดาย
                 </p>
             </div>
         </section>
@@ -144,7 +143,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                    <!-- Dropdown เลือกประเภทผู้รับ (ทั้งหมด / รายบุคคล / ห้องเรียน) -->
+                    <!-- Dropdown เลือกประเภทผู้รับ -->
                     <div class="sm:col-span-3 relative">
                         <i class="ph ph-users absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none"></i>
                         <select id="global-type-filter" onchange="onGlobalTypeChange()" class="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-10 pr-8 text-sm text-gray-700 font-medium focus:outline-none focus:border-[#d91b42] focus:bg-white appearance-none transition-colors">
@@ -222,6 +221,7 @@
                     <div class="flex flex-wrap items-center gap-2 mb-2">
                         <span id="detail-year" class="px-2.5 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-xs font-bold">ปีการศึกษา -</span>
                         <span id="detail-count" class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">0 เกียรติบัตร</span>
+                        <span id="detail-organizer" class="hidden px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold"></span>
                     </div>
                     <h2 id="detail-name" class="text-lg sm:text-xl font-extrabold text-gray-900 mb-1"></h2>
                     <p id="detail-desc" class="text-xs text-gray-500 mb-4 leading-relaxed"></p>
@@ -255,7 +255,7 @@
                         <i class="ph-duotone ph-shield-check text-3xl"></i>
                     </div>
                     <h3 class="text-lg font-extrabold text-gray-900">ตรวจสอบความถูกต้องเกียรติบัตร</h3>
-                    <p class="text-xs text-gray-500 mt-1">กรอกเลขที่เกียรติบัตรเพื่อยืนยันข้อมูลจากฐานข้อมูลกลางสภานักเรียน</p>
+                    <p class="text-xs text-gray-500 mt-1">กรอกเลขที่เกียรติบัตรเพื่อยืนยันข้อมูลจากฐานข้อมูลกลางโรงเรียนคำม่วง</p>
                 </div>
 
                 <form id="verify-form" onsubmit="handleVerifySubmit(event)" class="flex gap-2 mb-5">
@@ -458,7 +458,7 @@
                     </div>
                 </div>
 
-                <!-- แถบตั้งค่าพร้อมกันหลายคน (แสดงเมื่อติ๊กเลือกรายการ) -->
+                <!-- แถบตั้งค่าพร้อมกันหลายคน -->
                 <div id="bulk-action-bar" class="hidden mb-4 bg-red-50/70 border border-red-200 rounded-2xl p-4 animate-fade-in">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2">
@@ -633,8 +633,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขที่เกียรติบัตร (ปล่อยว่าง=ซ่อนป้าย)</label>
-                        <input type="text" id="edit-cert-no" placeholder="เช่น 1612/2569 หรือปล่อยว่าง" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ปีการศึกษา (พ.ศ.) *</label>
+                        <input type="text" id="act-year" required placeholder="เช่น 2569" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">สถานะ</label>
@@ -643,6 +643,24 @@
                             <option value="hidden">ซ่อนไว้ก่อน</option>
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">ผู้ดูแลกิจกรรม (เลือกหรือพิมพ์เอง)</label>
+                    <input type="text" id="act-organizer" list="organizer-suggestions" placeholder="เช่น สภานักเรียน, งานกิจการนักเรียน, กลุ่มสาระฯ วิทย์" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
+                    <datalist id="organizer-suggestions">
+                        <option value="สภานักเรียน"></option>
+                        <option value="งานกิจการนักเรียน"></option>
+                        <option value="กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี"></option>
+                        <option value="กลุ่มสาระฯ คณิตศาสตร์"></option>
+                        <option value="กลุ่มสาระฯ ภาษาไทย"></option>
+                        <option value="กลุ่มสาระฯ ภาษาต่างประเทศ"></option>
+                        <option value="กลุ่มสาระฯ สังคมศึกษาฯ"></option>
+                        <option value="กลุ่มสาระฯ ศิลปะ"></option>
+                        <option value="กลุ่มสาระฯ สุขศึกษาและพลศึกษา"></option>
+                        <option value="กลุ่มสาระฯ การงานอาชีพ"></option>
+                        <option value="กิจกรรมพัฒนาผู้เรียน"></option>
+                        <option value="โรงเรียนคำม่วง"></option>
+                    </datalist>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">หมวดหมู่ (ไม่บังคับ)</label>
@@ -677,8 +695,8 @@
                 <input type="hidden" id="edit-cert-id">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขที่เกียรติบัตร</label>
-                        <input type="text" id="edit-cert-no" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขที่ (ปล่อยว่าง=ซ่อนป้าย)</label>
+                        <input type="text" id="edit-cert-no" placeholder="เช่น 1612/2569" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">สถานะ</label>
@@ -787,7 +805,7 @@
         </div>
     </div>
 
-    <!-- 6. Custom Confirm Modal (แทนการใช้ confirm() ของเบราว์เซอร์) -->
+    <!-- 6. Custom Confirm Modal -->
     <div id="modal-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center">
             <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3">
@@ -882,13 +900,34 @@
             });
         }
 
-        // แปลงวันที่ ISO (เช่น 2569-06-29T00:00:00.000Z หรือ YYYY-MM-DD) เป็นวันที่ภาษาไทย พ.ศ.
+        // เรียงลำดับกิจกรรม: ปักหมุดอยู่บนสุด -> เรียงตาม sortOrder -> ใหม่ล่าสุดอยู่บน
+        function sortActivitiesList(list) {
+            return [...list].sort((a, b) => {
+                const pinA = a.isPinned ? 1 : 0;
+                const pinB = b.isPinned ? 1 : 0;
+                if (pinA !== pinB) return pinB - pinA;
+
+                const ordA = (a.sortOrder !== '' && a.sortOrder !== null && a.sortOrder !== undefined && !isNaN(Number(a.sortOrder)))
+                    ? Number(a.sortOrder)
+                    : null;
+                const ordB = (b.sortOrder !== '' && b.sortOrder !== null && b.sortOrder !== undefined && !isNaN(Number(b.sortOrder)))
+                    ? Number(b.sortOrder)
+                    : null;
+
+                if (ordA !== null && ordB !== null && ordA !== ordB) return ordA - ordB;
+                if (ordA !== null && ordB === null) return -1;
+                if (ordA === null && ordB !== null) return 1;
+
+                return Number(b.createdAt || 0) - Number(a.createdAt || 0);
+            });
+        }
+
+        // แปลงวันที่ ISO เป็นวันที่ภาษาไทย พ.ศ.
         function formatThaiDate(val) {
             if (!val) return '';
             const s = String(val).trim().replace(/^'+/, '');
             if (!s) return '';
 
-            // ตรวจจับรูปแบบ ISO เช่น 2569-06-29T00:00:00.000Z หรือ 2026-06-29
             const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
             if (isoMatch) {
                 let y = parseInt(isoMatch[1], 10);
@@ -910,7 +949,7 @@
             return 'KM ' + clean;
         }
 
-        // ปรับรูปแบบเลขที่สำหรับการค้นหา (ตัด KM ออก เพื่อให้พิมพ์ 1612/2569 หรือ KM 1612/2569 ก็เจอ)
+        // ปรับรูปแบบเลขที่สำหรับการค้นหา
         function normalizeCertNo(val) {
             return String(val || '')
                 .trim()
@@ -985,7 +1024,7 @@
             return 55;
         }
 
-        // ตัดคำนำหน้าชื่อเพื่อใช้เรียงลำดับภาษาไทย ก-ฮ ให้ตรงตามชื่อจริง
+        // ตัดคำนำหน้าชื่อเพื่อใช้เรียงลำดับภาษาไทย ก-ฮ
         function stripThaiPrefix(name) {
             return String(name || '')
                 .trim()
@@ -1019,7 +1058,6 @@
             });
         }
 
-        // ส่งคำขอ API ไปยัง Google Apps Script
         async function apiGet(params) {
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`${API_URL}?${query}`);
@@ -1078,7 +1116,6 @@
                 renderPublicActivities();
                 renderGlobalSearch();
 
-                // ถ้าเปิดจากลิงก์แชร์เฉพาะกิจกรรม (?activity=...)
                 const sharedActId = new URLSearchParams(window.location.search).get('activity');
                 if (sharedActId) {
                     const exists = publicActivities.some(a => a.id === sharedActId);
@@ -1163,7 +1200,7 @@
 
         // สร้าง HTML การ์ดเกียรติบัตร 1 ใบ
         function buildCertCardHTML(cert, actMap) {
-            const act = actMap[cert.activityId] || { name: '-', year: '-' };
+            const act = actMap[cert.activityId] || { name: '-', year: '-', organizer: '' };
             const isPdf = String(cert.mimeType || '').includes('pdf') || /\.pdf$/i.test(cert.fileName || '');
             const fileBadge = isPdf ? 'PDF' : 'รูปภาพ';
             const downloadUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
@@ -1188,9 +1225,10 @@
                         ${cert.award ? `<div class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-full mb-1.5"><i class="ph-fill ph-medal"></i> ${escapeHtml(cert.award)}</div>` : ''}
                         <p class="text-xs text-gray-500 line-clamp-2 mb-2.5">${escapeHtml(act.name)}</p>
 
-                        <div class="flex flex-wrap items-center gap-3 text-[11px] text-gray-400 mb-4">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400 mb-4">
                             <span class="flex items-center gap-1"><i class="ph ph-calendar-blank"></i> ปี ${escapeHtml(act.year)}</span>
                             ${thaiDate ? `<span class="flex items-center gap-1"><i class="ph ph-clock"></i> ${escapeHtml(thaiDate)}</span>` : ''}
+                            ${act.organizer ? `<span class="flex items-center gap-1"><i class="ph ph-buildings"></i> ผู้ดูแล: ${escapeHtml(act.organizer)}</span>` : ''}
                         </div>
                     </div>
 
@@ -1227,7 +1265,7 @@
             publicActivities.forEach(a => actMap[a.id] = a);
 
             const filtered = publicCertificates.filter(c => {
-                const act = actMap[c.activityId] || { name: '', year: '' };
+                const act = actMap[c.activityId] || { name: '', year: '', organizer: '' };
                 if (year && String(act.year) !== String(year)) return false;
                 if (typeFilter === 'classroom' && !isClassroomCert(c)) return false;
                 if (typeFilter === 'individual' && isClassroomCert(c)) return false;
@@ -1239,6 +1277,7 @@
                     (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
                     formatGradeRoom(c).toLowerCase().includes(q) ||
                     String(act.name || '').toLowerCase().includes(q) ||
+                    String(act.organizer || '').toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
             });
@@ -1294,7 +1333,10 @@
                         </div>
                         <div class="p-4 flex-1 flex flex-col justify-between">
                             <div>
-                                ${act.category ? `<span class="inline-block bg-red-50 text-[#d91b42] text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-2">${escapeHtml(act.category)}</span>` : ''}
+                                <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                                    ${act.category ? `<span class="inline-block bg-red-50 text-[#d91b42] text-[10px] font-bold px-2.5 py-0.5 rounded-full">${escapeHtml(act.category)}</span>` : ''}
+                                    ${act.organizer ? `<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full"><i class="ph-fill ph-buildings"></i> ผู้ดูแล: ${escapeHtml(act.organizer)}</span>` : ''}
+                                </div>
                                 <h4 class="text-base font-extrabold text-gray-900 group-hover:text-[#d91b42] transition-colors line-clamp-2 mb-1">${escapeHtml(act.name)}</h4>
                                 ${act.desc ? `<p class="text-xs text-gray-500 line-clamp-2 mb-3">${escapeHtml(act.desc)}</p>` : ''}
                             </div>
@@ -1332,6 +1374,16 @@
             const count = publicCertificates.filter(c => c.activityId === act.id).length;
             document.getElementById('detail-year').textContent = `ปีการศึกษา ${act.year}`;
             document.getElementById('detail-count').textContent = `${count} เกียรติบัตร`;
+
+            const orgEl = document.getElementById('detail-organizer');
+            if (act.organizer) {
+                orgEl.textContent = `ผู้ดูแล: ${act.organizer}`;
+                orgEl.classList.remove('hidden');
+            } else {
+                orgEl.textContent = '';
+                orgEl.classList.add('hidden');
+            }
+
             document.getElementById('detail-name').textContent = act.name;
             document.getElementById('detail-desc').textContent = act.desc || '';
             document.getElementById('detail-type-filter').value = 'all';
@@ -1437,7 +1489,7 @@
                         <div class="bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
                             <i class="ph-fill ph-x-circle text-4xl text-red-500 mb-2"></i>
                             <h4 class="text-sm font-extrabold text-red-800">ไม่พบข้อมูลเกียรติบัตร</h4>
-                            <p class="text-xs text-red-600 mt-1">ไม่พบเลขที่ "${escapeHtml(certNo)}" ในฐานข้อมูลสภานักเรียน</p>
+                            <p class="text-xs text-red-600 mt-1">ไม่พบเลขที่ "${escapeHtml(certNo)}" ในฐานข้อมูลโรงเรียนคำม่วง</p>
                         </div>`;
                 } else if (res.status === 'cancelled' || res.status === 'suspended') {
                     const label = res.status === 'cancelled' ? 'เกียรติบัตรฉบับนี้ถูกยกเลิก' : 'เกียรติบัตรฉบับนี้ถูกระงับการใช้งาน';
@@ -1462,7 +1514,8 @@
                                 ${c.award ? `<p><span class="font-bold text-gray-500">รางวัล/ประเภท:</span> ${escapeHtml(c.award)}</p>` : ''}
                                 <p><span class="font-bold text-gray-500">ปีการศึกษา:</span> ${escapeHtml(c.year)}</p>
                                 ${thaiDate ? `<p><span class="font-bold text-gray-500">วันที่ออก:</span> ${escapeHtml(thaiDate)}</p>` : ''}
-                                <p><span class="font-bold text-gray-500">หน่วยงานผู้ออก:</span> สภานักเรียนโรงเรียนคำม่วง</p>
+                                <p><span class="font-bold text-gray-500">หน่วยงานผู้ออก:</span> โรงเรียนคำม่วง</p>
+                                ${c.organizer ? `<p><span class="font-bold text-gray-500">ผู้ดูแลกิจกรรม:</span> ${escapeHtml(c.organizer)}</p>` : ''}
                             </div>
                             ${c.fileId ? `
                                 <a href="https://drive.google.com/uc?export=download&id=${encodeURIComponent(c.fileId)}" target="_blank" rel="noopener" class="mt-3 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5">
@@ -1490,7 +1543,7 @@
             const shareUrl = getActivityShareUrl(currentActivityDetail.id);
 
             document.getElementById('share-act-title').textContent = currentActivityDetail.name;
-            document.getElementById('share-act-year').textContent = `ปีการศึกษา ${currentActivityDetail.year}`;
+            document.getElementById('share-act-year').textContent = `ปีการศึกษา ${currentActivityDetail.year}` + (currentActivityDetail.organizer ? ` • ผู้ดูแล: ${currentActivityDetail.organizer}` : '');
             document.getElementById('share-link-input').value = shareUrl;
 
             const qrBox = document.getElementById('share-qr-box');
@@ -1568,7 +1621,7 @@
             ctx.font = 'bold 26px "Noto Sans Thai", sans-serif';
             ctx.fillText('คลังเกียรติบัตรออนไลน์', w / 2, 52);
             ctx.font = '500 18px "Noto Sans Thai", sans-serif';
-            ctx.fillText('สภานักเรียนโรงเรียนคำม่วง', w / 2, 86);
+            ctx.fillText('โรงเรียนคำม่วง', w / 2, 86);
 
             const qrSize = 380;
             ctx.drawImage(qrCanvas, (w - qrSize) / 2, 155, qrSize, qrSize);
@@ -1586,7 +1639,8 @@
 
             ctx.fillStyle = '#d91b42';
             ctx.font = 'bold 18px "Noto Sans Thai", sans-serif';
-            ctx.fillText(`ปีการศึกษา ${currentActivityDetail.year}`, w / 2, 660);
+            const subLine = `ปีการศึกษา ${currentActivityDetail.year}` + (currentActivityDetail.organizer ? ` • ผู้ดูแล: ${currentActivityDetail.organizer}` : '');
+            ctx.fillText(subLine, w / 2, 660);
 
             ctx.fillStyle = '#6B7280';
             ctx.font = '400 15px "Noto Sans Thai", sans-serif';
@@ -1640,7 +1694,6 @@
             document.getElementById('header-admin-controls').classList.add('flex');
             document.getElementById('admin-welcome-text').textContent = `ผู้ใช้งาน: ${adminUser ? adminUser.displayName : 'Admin'}`;
 
-            // ตั้งค่าวันที่เริ่มต้นเป็นวันนี้
             const dateInput = document.getElementById('upload-default-date');
             if (!dateInput.value) {
                 dateInput.value = new Date().toISOString().split('T')[0];
@@ -1743,6 +1796,7 @@
                                     ${a.isPinned ? `<span class="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1"><i class="ph-fill ph-push-pin"></i> ปักหมุด</span>` : ''}
                                     <span class="text-[11px] font-bold text-[#d91b42] bg-red-50 px-2 py-0.5 rounded-full">ปี ${escapeHtml(a.year)}</span>
                                     ${badge}
+                                    ${a.organizer ? `<span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">ผู้ดูแล: ${escapeHtml(a.organizer)}</span>` : ''}
                                     <span class="text-[11px] text-gray-400">${count} เกียรติบัตร</span>
                                 </div>
                                 <h4 class="text-sm font-bold text-gray-900">${escapeHtml(a.name)}</h4>
@@ -1834,6 +1888,7 @@
                     document.getElementById('act-id').value = a.id;
                     document.getElementById('act-name').value = a.name || '';
                     document.getElementById('act-year').value = a.year || '';
+                    document.getElementById('act-organizer').value = a.organizer || '';
                     document.getElementById('act-category').value = a.category || '';
                     document.getElementById('act-desc').value = a.desc || '';
                     document.getElementById('act-status').value = a.status || 'published';
@@ -1843,6 +1898,7 @@
             } else {
                 document.getElementById('modal-act-title').textContent = 'เพิ่มกิจกรรมใหม่';
                 document.getElementById('act-year').value = String(new Date().getFullYear() + 543);
+                document.getElementById('act-organizer').value = 'สภานักเรียน';
             }
             modal.classList.remove('hidden');
         }
@@ -1858,6 +1914,7 @@
                     id: document.getElementById('act-id').value,
                     name: document.getElementById('act-name').value.trim(),
                     year: document.getElementById('act-year').value.trim(),
+                    organizer: document.getElementById('act-organizer').value.trim(),
                     category: document.getElementById('act-category').value.trim(),
                     desc: document.getElementById('act-desc').value.trim(),
                     status: document.getElementById('act-status').value,
@@ -2155,6 +2212,7 @@
                             <input type="checkbox" ${checked} onchange="toggleSelectCert('${escapeHtml(c.id)}', this.checked)" class="w-4 h-4 rounded accent-[#d91b42] cursor-pointer">
                         </td>
                         <td class="py-3 px-2 font-mono font-bold text-[#d91b42] whitespace-nowrap">${certNoDisplay ? escapeHtml(certNoDisplay) : '<span class="text-gray-300 font-sans font-normal">ไม่ระบุ</span>'}</td>
+                        <td class="py-3 px-2 font-bold text-gray-900">
                             ${escapeHtml(c.recipientName)}
                             ${formatGradeRoom(c) ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px]">${escapeHtml(formatGradeRoom(c))}</span>` : ''}
                             ${isClassroomCert(c) ? '<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[9px]">ห้อง</span>' : ''}
@@ -2241,7 +2299,6 @@
                 return;
             }
 
-            // เรียงรายการที่เลือกตามลำดับที่แสดงในตาราง เพื่อให้เลขที่รันต่อกันเป๊ะ
             const orderedSelected = lastRenderedAdminCerts.filter(c => selectedCertIds.has(String(c.id)));
             let currentSeq = hasStartNo ? parseInt(startNoStr, 10) : 0;
             const awardValue = bulkAwardSel === '__custom__' ? bulkAwardCustom : bulkAwardSel;
