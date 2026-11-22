@@ -458,10 +458,9 @@
                             <span class="w-6 h-6 rounded-full bg-[#d91b42] text-white text-xs font-extrabold flex items-center justify-center" id="bulk-selected-count">0</span>
                             <span class="text-xs sm:text-sm font-extrabold text-gray-900">ตั้งค่าพร้อมกันสำหรับรายการที่เลือก</span>
                         </div>
-                        <button type="button" onclick="clearCertSelection()" class="text-xs font-bold text-gray-500 hover:text-gray-800 underline">ล้างการเลือก</button>
+                        <button type="button" onclick="clearCertSelection()" class="text-xs font-bold text-gray-500 hover:text-gray-800">ยกเลิกการเลือก</button>
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 mb-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 mb-3">
                         <div>
                             <label class="block text-[11px] font-bold text-gray-700 mb-1">รันเลขที่เริ่มจาก (เว้นว่าง=ไม่เปลี่ยน)</label>
                             <div class="flex items-center gap-1">
@@ -469,6 +468,10 @@
                                 <span class="text-gray-400 font-bold text-xs">/</span>
                                 <input type="text" id="bulk-year" placeholder="2569" class="w-20 bg-white border border-gray-200 rounded-xl py-2 px-2 text-xs font-mono text-center focus:outline-none focus:border-[#d91b42]">
                             </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">ลบคำส่วนเกินในชื่อ</label>
+                            <input type="text" id="bulk-strip-text" placeholder="เช่น มนต์รักฯ 1 - " class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs focus:outline-none focus:border-[#d91b42]">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-700 mb-1">รางวัล / ประเภท</label>
@@ -508,8 +511,11 @@
                             </select>
                         </div>
                     </div>
-
-                    <div class="flex justify-end">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 cursor-pointer select-none">
+                            <input type="checkbox" id="bulk-strip-before-dash" class="w-4 h-4 rounded accent-[#d91b42]">
+                            <span>ตัดคำหน้าขีด "-" อัตโนมัติ (เช่น ลบชื่อกิจกรรมหน้าชื่อคน)</span>
+                        </label>
                         <button type="button" id="btn-bulk-save" onclick="handleBulkUpdateCerts()" class="bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-colors">
                             <i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก
                         </button>
@@ -540,7 +546,7 @@
 
     <!-- ==================== FOOTER ==================== -->
     <footer class="mt-auto py-6 text-center text-xs text-gray-400 border-t border-gray-100 bg-white">
-        <p class="font-semibold text-gray-500">สภานักเรียนโรงเรียนคำม่วง (Kham Muang School Student Council)</p>
+        <p class="font-semibold text-gray-500">สภานักเรียนโรงเรียนคำม่วง (Student Council Of Khammuang School)</p>
         <p class="mt-0.5 text-[11px]">ระบบคลังเกียรติบัตรออนไลน์ • Certificate Archive System</p>
     </footer>
 
@@ -796,32 +802,26 @@
         let publicCertificates = [];
         let adminActivities = [];
         let adminCertificates = [];
+        let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
+        let adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
         let currentActivityDetail = null;
         let uploadQueue = [];
         let selectedCertIds = new Set();
         let lastRenderedAdminCerts = [];
 
-        let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
-        let adminUser = null;
-        try {
-            adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
-        } catch (e) {
-            adminUser = null;
-        }
-
         const THAI_MONTHS = [
-            'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-            'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-        ];
+            let cleanName = base
+                .replace(/^\s*\d+[\.\-\)\s_]+/, '')
+                .replace(/_/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
 
-        // ================= UTILITIES =================
-        function escapeHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            const dashSplit = cleanName.match(/^.+?[\s]+[-–—][\s]+((?:นางสาว|เด็กชาย|เด็กหญิง|นาย|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.|ว่าที่ร้อยตรี|ครู|อาจารย์|ชั้น|ห้อง|ม\.\s*\d|ป\.\s*\d).*)$/i);
+            if (dashSplit && dashSplit[1]) {
+                cleanName = dashSplit[1].trim();
+            }
+
+            return { recipientName: cleanName || rawFileName, certNo: extractedCertNo };
         }
 
         function showToast(message, type = 'info') {
@@ -2085,6 +2085,8 @@
 
             const startNoStr = document.getElementById('bulk-start-no').value.trim();
             const bulkYear = document.getElementById('bulk-year').value.trim() || String(new Date().getFullYear() + 543);
+            const bulkStripText = document.getElementById('bulk-strip-text').value;
+            const bulkStripBeforeDash = document.getElementById('bulk-strip-before-dash').checked;
             const bulkAwardSel = document.getElementById('bulk-award').value;
             const bulkAwardCustom = document.getElementById('bulk-award-custom').value.trim();
             const bulkCertType = document.getElementById('bulk-certtype').value;
@@ -2092,12 +2094,13 @@
             const bulkStatus = document.getElementById('bulk-status').value;
 
             const hasStartNo = startNoStr !== '' && !isNaN(parseInt(startNoStr, 10));
+            const hasStripText = bulkStripText.length > 0 || bulkStripBeforeDash;
             const hasAward = bulkAwardSel !== '__keep__';
             const hasCertType = bulkCertType !== '__keep__';
             const hasDate = bulkDateRaw !== '';
             const hasStatus = bulkStatus !== '__keep__';
 
-            if (!hasStartNo && !hasAward && !hasCertType && !hasDate && !hasStatus) {
+            if (!hasStartNo && !hasStripText && !hasAward && !hasCertType && !hasDate && !hasStatus) {
                 showToast('กรุณาเลือกอย่างน้อย 1 ค่าที่ต้องการแก้ไขพร้อมกัน', 'info');
                 return;
             }
@@ -2113,6 +2116,22 @@
                 if (hasStartNo) {
                     payload.certNo = `${currentSeq}/${bulkYear}`;
                     currentSeq++;
+                }
+                if (hasStripText) {
+                    let nextName = String(c.recipientName || '');
+                    if (bulkStripText.length > 0) {
+                        nextName = nextName.split(bulkStripText).join('');
+                    }
+                    if (bulkStripBeforeDash) {
+                        const idx = nextName.indexOf(' - ');
+                        if (idx !== -1) nextName = nextName.slice(idx + 3);
+                        else {
+                            const dashMatch = nextName.match(/^.+?[-–—]\s*(.+)$/);
+                            if (dashMatch && dashMatch[1]) nextName = dashMatch[1];
+                        }
+                    }
+                    nextName = nextName.replace(/\s+/g, ' ').trim();
+                    if (nextName) payload.recipientName = nextName;
                 }
                 if (hasAward) payload.award = awardValue;
                 if (hasCertType) payload.certType = bulkCertType;
@@ -2134,6 +2153,8 @@
                 if (res.success) {
                     showToast(res.message || `อัปเดตสำเร็จ ${items.length} รายการ`, 'success');
                     document.getElementById('bulk-start-no').value = '';
+                    document.getElementById('bulk-strip-text').value = '';
+                    document.getElementById('bulk-strip-before-dash').checked = false;
                     document.getElementById('bulk-award').value = '__keep__';
                     document.getElementById('bulk-award-custom').classList.add('hidden');
                     document.getElementById('bulk-certtype').value = '__keep__';
