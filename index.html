@@ -479,6 +479,22 @@
 
         <!-- ADMIN TAB 4: MANAGE CERTIFICATES -->
         <section id="admin-sec-certs" class="hidden">
+            <!-- แถบสถานะและตั้งค่า AI อ่านชื่อ -->
+            <div class="bg-gradient-to-r from-violet-50 to-fuchsia-50 border border-violet-200 rounded-2xl p-3.5 mb-4 flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <i class="ph-fill ph-sparkle text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-extrabold text-violet-950">AI อ่านชื่อจากรูปเกียรติบัตรอัตโนมัติ (Gemini)</p>
+                        <p id="gemini-key-status" class="text-[11px] text-violet-700">ยังไม่ได้ตั้งค่า API Key — กดปุ่มขวาเพื่อตั้งค่าฟรี</p>
+                    </div>
+                </div>
+                <button type="button" onclick="openGeminiKeyModal()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-violet-100 border border-violet-200 text-violet-800 text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0 transition-colors">
+                    <i class="ph-bold ph-key"></i> ตั้งค่า Gemini API Key
+                </button>
+            </div>
+
             <!-- แถบค้นหาและตัวกรอง -->
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                 <div class="sm:col-span-5">
@@ -571,10 +587,30 @@
                             <input type="checkbox" id="bulk-clear-certno" class="w-4 h-4 rounded accent-[#d91b42]">
                             <span>ล้างเลขที่ (ซ่อนป้ายเลขที่)</span>
                         </label>
+                        <label class="inline-flex items-center gap-1.5 text-xs text-violet-800 font-semibold cursor-pointer">
+                            <input type="checkbox" id="bulk-ai-include-certno" class="w-4 h-4 rounded accent-violet-600">
+                            <span>ให้ AI ดึงเลขที่ด้วย (ถ้ามี)</span>
+                        </label>
                     </div>
-                    <button type="button" id="btn-bulk-save" onclick="handleBulkUpdateCerts()" class="px-4 py-2 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                        <i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btn-bulk-ai-scan" onclick="handleBatchAiScan()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                            <i class="ph-fill ph-sparkle"></i> ให้ AI อ่านชื่อจากรูปที่เลือก
+                        </button>
+                        <button type="button" id="btn-bulk-save" onclick="handleBulkUpdateCerts()" class="px-4 py-2 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                            <i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก
+                        </button>
+                    </div>
+                </div>
+
+                <!-- แถบความคืบหน้าขณะให้ AI อ่านชื่อ -->
+                <div id="ai-scan-progress-box" class="hidden bg-white border border-violet-200 rounded-xl p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <p id="ai-scan-progress-text" class="text-xs font-bold text-violet-900">กำลังเตรียมข้อมูล...</p>
+                        <button type="button" onclick="stopBatchAiScan()" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold">หยุดสแกน</button>
+                    </div>
+                    <div class="w-full bg-violet-100 rounded-full h-2 overflow-hidden">
+                        <div id="ai-scan-progress-bar" class="bg-violet-600 h-2 transition-all duration-300" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
 
@@ -897,6 +933,36 @@
         </div>
     </div>
 
+    <!-- 7. Gemini API Key Settings Modal -->
+    <div id="modal-gemini-key" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-base font-extrabold text-gray-900 flex items-center gap-1.5">
+                    <i class="ph-fill ph-sparkle text-violet-600"></i> ตั้งค่า Gemini API Key
+                </h3>
+                <button type="button" onclick="document.getElementById('modal-gemini-key').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1.5">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+            <div class="bg-violet-50 border border-violet-100 rounded-2xl p-3.5 text-xs text-violet-900 space-y-1 mb-4">
+                <p class="font-bold">วิธีขอคีย์ฟรี (ใช้เวลา 30 วินาที):</p>
+                <p>1. เข้าเว็บ <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="underline font-bold text-violet-700">aistudio.google.com/apikey</a> แล้วล็อกอินด้วยบัญชี Google</p>
+                <p>2. กดปุ่ม <b>Create API key</b> แล้วคัดลอกรหัส (ขึ้นต้นด้วย <span class="font-mono">AIza...</span>)</p>
+                <p>3. นำมาวางในช่องด้านล่างแล้วกดบันทึกได้เลย (คีย์จะถูกเก็บไว้ที่หลังบ้านอย่างปลอดภัย)</p>
+            </div>
+            <form onsubmit="handleSaveGeminiKey(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Gemini API Key (ปล่อยว่างแล้วกดบันทึกเพื่อลบคีย์)</label>
+                    <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-mono focus:outline-none focus:border-violet-600">
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="document.getElementById('modal-gemini-key').classList.add('hidden')" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600">ยกเลิก</button>
+                    <button type="submit" id="btn-save-gemini-key" class="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-sm">บันทึก API Key</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[130] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
@@ -921,6 +987,9 @@
         let selectedCertIds = new Set();
         let lastRenderedAdminCerts = [];
         let saveActOrderTimer = null;
+        let hasGeminiKey = false;
+        let isAiScanning = false;
+        let aiScanAborted = false;
 
         const THAI_MONTHS = [
             'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -2250,6 +2319,8 @@
                     document.getElementById('stat-total-visits').textContent = Number(res.stats.totalVisits || 0).toLocaleString('th-TH');
                     document.getElementById('stat-today-visits').textContent = Number(res.stats.todayVisits || 0).toLocaleString('th-TH');
                 }
+                hasGeminiKey = Boolean(res.hasGeminiKey);
+                updateGeminiKeyBadge();
 
                 populateAdminActivityDropdowns();
                 renderAdminActivitiesList();
@@ -2688,12 +2759,203 @@
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadge[c.status] || statusBadge.draft}">${statusText[c.status] || c.status}</span>
                         </td>
                         <td class="py-2.5 px-2 text-right whitespace-nowrap">
+                            <button type="button" onclick="aiScanSingleCert('${escapeHtml(c.id)}', this)" class="p-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700" title="ให้ AI อ่านชื่อจากรูป"><i class="ph-fill ph-sparkle"></i></button>
                             <button type="button" onclick="openPreviewModal('${escapeHtml(c.id)}')" class="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700" title="ดูไฟล์"><i class="ph-bold ph-eye"></i></button>
                             <button type="button" onclick="openEditCertModal('${escapeHtml(c.id)}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700" title="แก้ไข"><i class="ph-bold ph-pencil-simple"></i></button>
                             <button type="button" onclick="deleteCert('${escapeHtml(c.id)}')" class="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-[#d91b42]" title="ลบ"><i class="ph-bold ph-trash"></i></button>
                         </td>
                     </tr>`;
             }).join('');
+        }
+
+        // ================= ADMIN: GEMINI AI NAME EXTRACTION =================
+        function updateGeminiKeyBadge() {
+            const el = document.getElementById('gemini-key-status');
+            if (!el) return;
+            if (hasGeminiKey) {
+                el.innerHTML = `<span class="text-emerald-700 font-bold">ตั้งค่า API Key พร้อมใช้งานแล้ว ✓</span> • กดปุ่มประกายดาวท้ายแถว หรือติ๊กเลือกหลายใบเพื่อสแกนพร้อมกัน`;
+            } else {
+                el.textContent = 'ยังไม่ได้ตั้งค่า API Key — กดปุ่มขวาเพื่อตั้งค่าฟรี';
+            }
+        }
+
+        function openGeminiKeyModal() {
+            document.getElementById('gemini-api-key-input').value = '';
+            document.getElementById('modal-gemini-key').classList.remove('hidden');
+            setTimeout(() => document.getElementById('gemini-api-key-input').focus(), 100);
+        }
+
+        async function handleSaveGeminiKey(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-gemini-key');
+            const apiKey = document.getElementById('gemini-api-key-input').value.trim();
+            btn.disabled = true;
+            btn.textContent = 'กำลังบันทึก...';
+            try {
+                const res = await apiPost({ action: 'saveGeminiKey', token: adminToken, data: { apiKey } });
+                if (!res.success) {
+                    showToast(res.error || 'บันทึกไม่สำเร็จ', 'error');
+                    return;
+                }
+                hasGeminiKey = Boolean(res.hasGeminiKey);
+                updateGeminiKeyBadge();
+                document.getElementById('modal-gemini-key').classList.add('hidden');
+                showToast(res.message || 'บันทึก API Key แล้ว', 'success');
+            } catch (err) {
+                showToast('เชื่อมต่อไม่สำเร็จ', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'บันทึก API Key';
+            }
+        }
+
+        async function aiScanSingleCert(certId, btnEl) {
+            if (!hasGeminiKey) {
+                openGeminiKeyModal();
+                showToast('กรุณาตั้งค่า Gemini API Key ก่อนใช้งาน', 'info');
+                return;
+            }
+            if (isAiScanning) {
+                showToast('กำลังสแกนชุดอื่นอยู่ กรุณารอสักครู่', 'info');
+                return;
+            }
+            const includeCertNo = document.getElementById('bulk-ai-include-certno')?.checked || false;
+            const origHtml = btnEl ? btnEl.innerHTML : '';
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+            }
+            try {
+                const res = await apiPost({
+                    action: 'aiExtractCertName',
+                    token: adminToken,
+                    data: { id: certId, includeCertNo }
+                });
+                if (res.needApiKey) {
+                    openGeminiKeyModal();
+                    showToast(res.error, 'error');
+                    return;
+                }
+                if (!res.success) {
+                    showToast(res.error || 'AI อ่านไม่สำเร็จ', 'error');
+                    return;
+                }
+                if (res.skipped) {
+                    showToast(res.message || 'ไม่พบชื่อบนเกียรติบัตรนี้', 'info');
+                } else {
+                    const target = adminCertificates.find(c => String(c.id) === String(certId));
+                    if (target) {
+                        target.recipientName = res.recipientName;
+                        if (includeCertNo && res.certNo) target.certNo = res.certNo;
+                    }
+                    renderAdminCertsTable();
+                    showToast(`AI อ่านชื่อได้: ${res.recipientName}`, 'success');
+                }
+            } catch (err) {
+                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ AI', 'error');
+            } finally {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = origHtml;
+                }
+            }
+        }
+
+        function stopBatchAiScan() {
+            aiScanAborted = true;
+            const txt = document.getElementById('ai-scan-progress-text');
+            if (txt) txt.textContent = 'กำลังหยุดการสแกน...';
+        }
+
+        async function handleBatchAiScan() {
+            if (!hasGeminiKey) {
+                openGeminiKeyModal();
+                showToast('กรุณาตั้งค่า Gemini API Key ฟรีก่อนเริ่มสแกน', 'info');
+                return;
+            }
+            if (selectedCertIds.size === 0 || isAiScanning) return;
+
+            const ids = Array.from(selectedCertIds);
+            const includeCertNo = document.getElementById('bulk-ai-include-certno')?.checked || false;
+            const ok = await showConfirmModal(
+                'ให้ AI อ่านชื่อจากรูป?',
+                `ระบบจะให้ Gemini AI อ่านชื่อจากเกียรติบัตรที่เลือกทั้งหมด ${ids.length} รายการ และอัปเดตลงตารางอัตโนมัติ (ใช้เวลาประมาณ ${Math.ceil(ids.length * 4 / 60)} นาที)`
+            );
+            if (!ok) return;
+
+            isAiScanning = true;
+            aiScanAborted = false;
+
+            const scanBtn = document.getElementById('btn-bulk-ai-scan');
+            const saveBtn = document.getElementById('btn-bulk-save');
+            const progBox = document.getElementById('ai-scan-progress-box');
+            const progText = document.getElementById('ai-scan-progress-text');
+            const progBar = document.getElementById('ai-scan-progress-bar');
+
+            scanBtn.disabled = true;
+            saveBtn.disabled = true;
+            progBox.classList.remove('hidden');
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < ids.length; i++) {
+                if (aiScanAborted) break;
+                const certId = ids[i];
+                progText.textContent = `กำลังให้ AI อ่านใบที่ ${i + 1} / ${ids.length}... (สำเร็จ ${successCount})`;
+                progBar.style.width = `${Math.round((i / ids.length) * 100)}%`;
+
+                let attempt = 0;
+                let done = false;
+                while (attempt < 2 && !done && !aiScanAborted) {
+                    attempt++;
+                    try {
+                        const res = await apiPost({
+                            action: 'aiExtractCertName',
+                            token: adminToken,
+                            data: { id: certId, includeCertNo }
+                        });
+                        if (res.rateLimited && attempt === 1) {
+                            progText.textContent = `โควตาฟรีเต็มชั่วคราว รอ 12 วินาทีแล้วลองใหม่ (ใบที่ ${i + 1}/${ids.length})...`;
+                            await new Promise(r => setTimeout(r, 12000));
+                            continue;
+                        }
+                        if (res.success && !res.skipped) {
+                            const target = adminCertificates.find(c => String(c.id) === String(certId));
+                            if (target) {
+                                target.recipientName = res.recipientName;
+                                if (includeCertNo && res.certNo) target.certNo = res.certNo;
+                            }
+                            successCount++;
+                            renderAdminCertsTable();
+                        } else {
+                            failCount++;
+                        }
+                        done = true;
+                    } catch (err) {
+                        failCount++;
+                        done = true;
+                    }
+                }
+
+                progBar.style.width = `${Math.round(((i + 1) / ids.length) * 100)}%`;
+
+                // เว้นจังหวะเล็กน้อยเพื่อไม่ให้ชนลิมิตฟรี (RPM) ของ Gemini API
+                if (i < ids.length - 1 && !aiScanAborted) {
+                    await new Promise(r => setTimeout(r, ids.length > 5 ? 3800 : 1200));
+                }
+            }
+
+            isAiScanning = false;
+            scanBtn.disabled = false;
+            saveBtn.disabled = false;
+            progBox.classList.add('hidden');
+            showToast(
+                aiScanAborted
+                    ? `หยุดสแกนแล้ว (อ่านชื่อสำเร็จ ${successCount} ใบ)`
+                    : `AI อ่านชื่อเสร็จสิ้น! สำเร็จ ${successCount} ใบ${failCount > 0 ? ` (ข้าม/ไม่สำเร็จ ${failCount} ใบ)` : ''}`,
+                successCount > 0 ? 'success' : 'info'
+            );
         }
 
         function toggleSelectCert(id, isChecked) {
