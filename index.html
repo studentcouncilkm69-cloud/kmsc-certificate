@@ -1181,6 +1181,12 @@
             if (!clean) return true;
             if (isNumericOnlyName(clean)) return true;
 
+            // ตรวจจับชื่อไฟล์แบบ UUID หรือรหัสสุ่มจากระบบ/เครื่อง (เช่น 0D6CF548-1FB2-4CAE-B3B1-...)
+            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(clean)) return true;
+            if (/^[0-9a-f\-_]{16,}$/i.test(clean)) return true;
+            if (/^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,}){2,}$/i.test(clean)) return true;
+            if (/^(?:img|dsc|pxl|vid|doc|scan|file|cert|page|slide|pic|photo|screenshot|untitled)[\s\-_]*\d*/i.test(clean)) return true;
+
             const normName = normalizeLabelKey(clean);
             const normSub = normalizeLabelKey(gradeRoom);
             if (normSub && normName === normSub) return true;
@@ -1454,6 +1460,7 @@
             const gradeRoom = formatGradeRoom(cert);
             const certNoLabel = formatCertNoDisplay(cert.certNo);
             const showName = !isNonPersonFileName(cert.recipientName, gradeRoom, currentActivityDuplicateNames);
+            const hasMeta = Boolean(gradeRoom || certNoLabel || showName || cert.award);
             const safeFileIdAttr = escapeHtml(cert.fileId).replace(/'/g, "\\'");
 
             const previewMedia = `<img src="${thumbUrl}" loading="lazy" alt="เกียรติบัตร" class="w-full h-full object-contain bg-gray-50 group-hover:scale-[1.03] transition-transform duration-300" onerror="handleGalleryThumbError(this, '${safeFileIdAttr}', ${isPdf ? 'true' : 'false'})">`;
@@ -1468,15 +1475,17 @@
                         </span>
                     </div>
                     <div class="p-3 flex-1 flex flex-col justify-between">
+                        ${hasMeta ? `
                         <div class="mb-2.5">
+                            ${(gradeRoom || certNoLabel) ? `
                             <div class="flex flex-wrap items-center gap-1 ${showName || cert.award ? 'mb-1' : ''}">
                                 ${gradeRoom ? `<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold line-clamp-1">${escapeHtml(gradeRoom)}</span>` : ''}
                                 ${certNoLabel ? `<span class="px-2 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-mono font-bold">${escapeHtml(certNoLabel)}</span>` : ''}
-                            </div>
+                            </div>` : ''}
                             ${showName ? `<p class="text-xs font-bold text-gray-800 truncate" title="${escapeHtml(cert.recipientName)}">${escapeHtml(cert.recipientName)}</p>` : ''}
                             ${cert.award ? `<p class="text-[10px] font-bold text-amber-700 mt-0.5 truncate"><i class="ph-fill ph-medal"></i> ${escapeHtml(cert.award)}</p>` : ''}
-                        </div>
-                        <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-50">
+                        </div>` : ''}
+                        <div class="grid grid-cols-2 gap-1.5 ${hasMeta ? 'pt-2 border-t border-gray-50' : ''}">
                             <button type="button" onclick="openPreviewModal('${escapeHtml(cert.id)}')" class="py-2 px-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors">
                                 <i class="ph-bold ph-eye"></i> ขยายดู
                             </button>
