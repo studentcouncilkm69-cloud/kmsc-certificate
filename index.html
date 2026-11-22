@@ -256,7 +256,7 @@
                         <div class="relative">
                             <i class="ph-fill ph-folder-open absolute left-3.5 top-1/2 -translate-y-1/2 text-[#d91b42] text-base pointer-events-none"></i>
                             <select id="detail-subfolder-filter" onchange="onDetailSubfolderChange()" class="w-full bg-red-50/50 border border-red-200 rounded-xl py-2.5 pl-10 pr-8 text-xs sm:text-sm text-gray-900 font-bold focus:outline-none focus:border-[#d91b42] focus:bg-white appearance-none transition-colors">
-                                <option value="">ทุกหมวด / ทุกห้อง</option>
+                                <option value="">ทุกหมวดหมู่ / ทุกห้อง</option>
                             </select>
                             <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-[#d91b42] text-xs pointer-events-none"></i>
                         </div>
@@ -295,7 +295,7 @@
 
             <div id="detail-gallery-hint" class="hidden mb-4 bg-blue-50/80 border border-blue-200 rounded-2xl px-4 py-2.5 text-xs text-blue-800 flex items-center gap-2">
                 <i class="ph-fill ph-info text-blue-600 text-base shrink-0"></i>
-                <span>เลือกหมวดการแข่งขันด้านบน แล้วเลื่อนดูรูปเกียรติบัตรเพื่อกด <b>ขยายดู</b> หรือ <b>ดาวน์โหลด</b> ได้เลย</span>
+                <span>เลือกหมวดหมู่ / กิจกรรมย่อย / ห้องเรียนด้านบน แล้วเลื่อนดูตัวอย่างเกียรติบัตรเพื่อกด <b>ขยายดู</b> หรือ <b>ดาวน์โหลด</b> ได้เลย</span>
             </div>
 
             <div id="detail-certs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -422,7 +422,7 @@
                 <h3 class="text-sm font-extrabold text-gray-900 mb-1 flex items-center gap-1.5">
                     <i class="ph-fill ph-google-drive-logo text-emerald-600 text-base"></i> 2A. ดึงไฟล์ยกโฟลเดอร์จาก Google Drive (แนะนำ)
                 </h3>
-                <p class="text-xs text-gray-500 mb-3">รองรับทั้งโฟลเดอร์เดี่ยวและโฟลเดอร์ใหญ่ที่มีโฟลเดอร์ย่อยแยกห้อง/แยกหมวดการแข่งขัน (ตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์สามารถดูได้")</p>
+                <p class="text-xs text-gray-500 mb-3">รองรับทั้งโฟลเดอร์เดี่ยวและโฟลเดอร์ใหญ่ที่มีโฟลเดอร์ย่อยแยกห้อง/แยกหมวด (ตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์สามารถดูได้")</p>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 mb-3">
                     <input type="text" id="drive-folder-url" placeholder="วางลิงก์โฟลเดอร์ Google Drive ที่นี่..." class="flex-1 border border-gray-200 rounded-xl py-2.5 px-3.5 text-xs bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
@@ -886,6 +886,7 @@
         let currentActivityDetail = null;
         let currentDetailViewMode = 'list';
         let isCurrentActivityGalleryOnly = false;
+        let currentActivityDuplicateNames = new Set();
         let detailVisibleCount = 24;
         let uploadQueue = [];
         let selectedCertIds = new Set();
@@ -997,6 +998,13 @@
             return 'KM ' + clean;
         }
 
+        function formatGradeRoom(cert) {
+            const g = String(cert.grade || '').trim();
+            const r = String(cert.room || '').trim();
+            if (g && r) return `${g}/${r}`;
+            return g || r || '';
+        }
+
         function normalizeCertNo(val) {
             return String(val || '')
                 .trim()
@@ -1045,14 +1053,53 @@
             return /^(ชั้น|ห้อง|ม\.\s*\d|ป\.\s*\d|\d+\/\d+)/.test(name);
         }
 
+        function normalizeLabelKey(str) {
+            return String(str || '')
+                .toLowerCase()
+                .replace(/\s*\(\d+\)\s*$/, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function isNumericOnlyName(name) {
             return /^\s*\d+(\s*\(\d+\))?\s*$/.test(String(name || ''));
         }
 
-        function isNumericOnlyActivity(actCerts) {
+        function getDuplicateNameSet(certs) {
+            const counts = {};
+            (certs || []).forEach(c => {
+                const key = normalizeLabelKey(c.recipientName);
+                if (key) counts[key] = (counts[key] || 0) + 1;
+            });
+            const dups = new Set();
+            Object.keys(counts).forEach(k => {
+                if (counts[k] >= 2) dups.add(k);
+            });
+            return dups;
+        }
+
+        function isNonPersonFileName(name, gradeRoom, duplicateNamesSet) {
+            const clean = String(name || '').trim();
+            if (!clean) return true;
+            if (isNumericOnlyName(clean)) return true;
+
+            const normName = normalizeLabelKey(clean);
+            const normSub = normalizeLabelKey(gradeRoom);
+            if (normSub && normName === normSub) return true;
+            if (duplicateNamesSet && duplicateNamesSet.has(normName)) return true;
+
+            if (/^(เกียรติบัตร|ประกาศนียบัตร|วุฒิบัตร|สำเนาของ|certificate|img|image|photo|scan|doc|page)/i.test(clean)) {
+                return true;
+            }
+            return false;
+        }
+
+        function isNonPersonActivity(actCerts, duplicateNamesSet) {
             if (!actCerts || actCerts.length === 0) return false;
-            const numericCount = actCerts.filter(c => isNumericOnlyName(c.recipientName)).length;
-            return (numericCount / actCerts.length) >= 0.5;
+            const nonPersonCount = actCerts.filter(c =>
+                isNonPersonFileName(c.recipientName, formatGradeRoom(c), duplicateNamesSet)
+            ).length;
+            return (nonPersonCount / actCerts.length) >= 0.5;
         }
 
         function getAwardRank(award) {
@@ -1278,26 +1325,38 @@
                 </div>`;
         }
 
-        // สร้าง HTML การ์ดเกียรติบัตรแบบแกลเลอรี (โชว์รูปตัวอย่างบนการ์ด + ซ่อนตัวเลขล้วน)
+        // สร้าง HTML การ์ดเกียรติบัตรแบบแกลเลอรี (โชว์รูปตัวอย่างทั้งไฟล์รูปและ PDF + ซ่อนชื่อซ้ำ/ชื่อกิจกรรม/ตัวเลขล้วน)
+        function handleGalleryThumbError(imgEl, fileId, isPdf) {
+            if (!imgEl.dataset.fallbackTried) {
+                imgEl.dataset.fallbackTried = '1';
+                imgEl.src = isPdf
+                    ? `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}=w800`
+                    : `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w800`;
+                return;
+            }
+            imgEl.outerHTML = isPdf
+                ? `<div class="w-full h-full bg-gradient-to-br from-red-50 to-gray-100 flex flex-col items-center justify-center text-gray-400 p-4"><i class="ph-duotone ph-file-pdf text-5xl text-[#d91b42]/70 mb-1"></i><span class="text-[11px] font-bold text-gray-500">แตะเพื่อดูไฟล์ PDF</span></div>`
+                : `<div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50"><i class="ph-duotone ph-image text-4xl mb-1"></i><span class="text-[10px]">แตะเพื่อเปิดดู</span></div>`;
+        }
+
         function buildGalleryCertCardHTML(cert) {
             const isPdf = String(cert.mimeType || '').includes('pdf') || /\.pdf$/i.test(cert.fileName || '');
             const downloadUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
-            const thumbUrl = `https://lh3.googleusercontent.com/d/${encodeURIComponent(cert.fileId)}=w600`;
+            const thumbUrl = isPdf
+                ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(cert.fileId)}&sz=w800`
+                : `https://lh3.googleusercontent.com/d/${encodeURIComponent(cert.fileId)}=w600`;
             const gradeRoom = formatGradeRoom(cert);
             const certNoLabel = formatCertNoDisplay(cert.certNo);
-            const showName = cert.recipientName && !isNumericOnlyName(cert.recipientName);
+            const showName = !isNonPersonFileName(cert.recipientName, gradeRoom, currentActivityDuplicateNames);
+            const safeFileIdAttr = escapeHtml(cert.fileId).replace(/'/g, "\\'");
 
-            const previewMedia = isPdf
-                ? `<div class="w-full h-full bg-gradient-to-br from-red-50 to-gray-100 flex flex-col items-center justify-center text-gray-400 p-4">
-                        <i class="ph-duotone ph-file-pdf text-5xl text-[#d91b42]/70 mb-1"></i>
-                        <span class="text-[11px] font-bold text-gray-500">แตะเพื่อดูไฟล์ PDF</span>
-                   </div>`
-                : `<img src="${thumbUrl}" loading="lazy" alt="${escapeHtml(cert.recipientName)}" class="w-full h-full object-contain bg-gray-50 group-hover:scale-[1.03] transition-transform duration-300" onerror="this.outerHTML='<div class=\\'w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50\\'><i class=\\'ph-duotone ph-image text-4xl mb-1\\'></i><span class=\\'text-[10px]\\'>แตะเพื่อเปิดดู</span></div>'">`;
+            const previewMedia = `<img src="${thumbUrl}" loading="lazy" alt="เกียรติบัตร" class="w-full h-full object-contain bg-gray-50 group-hover:scale-[1.03] transition-transform duration-300" onerror="handleGalleryThumbError(this, '${safeFileIdAttr}', ${isPdf ? 'true' : 'false'})">`;
 
             return `
                 <div class="group bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
                     <div onclick="openPreviewModal('${escapeHtml(cert.id)}')" class="aspect-[1.414/1] w-full bg-gray-100 relative overflow-hidden cursor-pointer border-b border-gray-100">
                         ${previewMedia}
+                        ${isPdf ? `<span class="absolute top-2 left-2 bg-[#d91b42]/90 backdrop-blur-sm text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md shadow-sm">PDF</span>` : ''}
                         <span class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                             <i class="ph-bold ph-magnifying-glass-plus"></i> ขยายดู
                         </span>
@@ -1335,9 +1394,8 @@
             const downloadUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
             const certNoLabel = formatCertNoDisplay(cert.certNo);
             const gradeRoom = formatGradeRoom(cert);
-            const displayTitle = (cert.recipientName && !isNumericOnlyName(cert.recipientName))
-                ? cert.recipientName
-                : (gradeRoom || 'ตัวอย่างเกียรติบัตร');
+            const hasRealName = !isNonPersonFileName(cert.recipientName, gradeRoom, currentActivityDuplicateNames);
+            const displayTitle = hasRealName ? cert.recipientName : (gradeRoom || 'ตัวอย่างเกียรติบัตร');
 
             document.getElementById('preview-title').textContent = displayTitle;
             document.getElementById('preview-subtitle').textContent = [certNoLabel, displayTitle === gradeRoom ? '' : gradeRoom, cert.award].filter(Boolean).join(' • ');
@@ -1485,6 +1543,7 @@
 
             const actCerts = publicCertificates.filter(c => c.activityId === act.id);
             const count = actCerts.length;
+            currentActivityDuplicateNames = getDuplicateNameSet(actCerts);
 
             document.getElementById('detail-name').textContent = act.name;
             document.getElementById('detail-desc').textContent = act.desc || '';
@@ -1517,16 +1576,16 @@
             const subfolderWrap = document.getElementById('detail-subfolder-wrap');
             const subfolderSel = document.getElementById('detail-subfolder-filter');
 
-            const numericOnly = isNumericOnlyActivity(actCerts);
-            isCurrentActivityGalleryOnly = (act.displayMode === 'gallery' || numericOnly);
+            const nonPerson = isNonPersonActivity(actCerts, currentActivityDuplicateNames);
+            isCurrentActivityGalleryOnly = (act.displayMode === 'gallery' || nonPerson);
 
             if (subfolderKeys.length > 0) {
                 const isGalleryAct = isCurrentActivityGalleryOnly;
                 const defaultOption = isGalleryAct
-                    ? `<option value="">-- กรุณาเลือกหมวดการแข่งขัน / ห้องเรียน --</option>`
-                    : `<option value="">ทุกหมวด / ทุกห้อง (${count} รายการ)</option>`;
+                    ? `<option value="">-- กรุณาเลือกหมวดหมู่ / กิจกรรมย่อย / ห้องเรียน --</option>`
+                    : `<option value="">ทุกหมวดหมู่ / ทุกห้อง (${count} รายการ)</option>`;
                 const allOption = isGalleryAct
-                    ? `<option value="__ALL__">แสดงทั้งหมดทุกหมวด (${count} รายการ)</option>`
+                    ? `<option value="__ALL__">แสดงทั้งหมดทุกหมวดหมู่ (${count} รายการ)</option>`
                     : '';
                 subfolderSel.innerHTML =
                     defaultOption +
@@ -1535,7 +1594,7 @@
                 subfolderSel.value = '';
                 subfolderWrap.classList.remove('hidden');
             } else {
-                subfolderSel.innerHTML = `<option value="">ทุกหมวด / ทุกห้อง</option>`;
+                subfolderSel.innerHTML = `<option value="">ทุกหมวดหมู่ / ทุกห้อง</option>`;
                 subfolderWrap.classList.add('hidden');
             }
 
@@ -1568,8 +1627,8 @@
                 btnList.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors text-gray-500 hover:text-gray-800';
                 hint.classList.remove('hidden');
                 searchInput.placeholder = isCurrentActivityGalleryOnly
-                    ? 'ค้นหาชื่อหมวดการแข่งขัน...'
-                    : 'ค้นหาชื่อหมวด หรือชื่อไฟล์ในกิจกรรมนี้...';
+                    ? 'ค้นหาชื่อหมวดหมู่ / กิจกรรมย่อย / ห้องเรียน...'
+                    : 'ค้นหาชื่อหมวดหมู่ หรือชื่อไฟล์ในกิจกรรมนี้...';
             } else {
                 btnList.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors bg-[#d91b42] text-white';
                 btnGallery.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors text-gray-500 hover:text-gray-800';
@@ -1646,8 +1705,8 @@
                         <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3">
                             <i class="ph-duotone ph-folder-open text-3xl"></i>
                         </div>
-                        <h4 class="text-base font-extrabold text-gray-900 mb-1">กรุณาเลือกหมวดการแข่งขันก่อน</h4>
-                        <p class="text-xs text-gray-500 mb-5">แตะเลือกหมวดที่ต้องการด้านล่าง เพื่อเปิดดูรูปและดาวน์โหลดเกียรติบัตร</p>
+                        <h4 class="text-base font-extrabold text-gray-900 mb-1">กรุณาเลือกหมวดหมู่ / กิจกรรมย่อยก่อน</h4>
+                        <p class="text-xs text-gray-500 mb-5">แตะเลือกหมวดหมู่หรือห้องเรียนที่ต้องการด้านล่าง เพื่อเปิดดูตัวอย่างและดาวน์โหลดเกียรติบัตร</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
                             ${subfolderKeys.map(k => `
                                 <button type="button" onclick="selectDetailSubfolder('${escapeHtml(k).replace(/'/g, "\\'")}')" class="w-full p-3.5 rounded-2xl border border-gray-200 hover:border-[#d91b42] hover:bg-red-50/40 bg-gray-50/50 transition-all flex items-center justify-between gap-2 group">
