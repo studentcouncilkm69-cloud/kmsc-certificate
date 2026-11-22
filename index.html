@@ -43,9 +43,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .tab-active { border-bottom-color: #d91b42; color: #d91b42; font-weight: 700; }
         .tab-inactive { border-bottom-color: transparent; color: #6B7280; }
-        .toast-enter { transform: translateY(100%); opacity: 0; }
-        .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s ease-out; }
-        .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s ease-in; }
+        .touch-manipulation { touch-action: manipulation; }
     </style>
 </head>
 <body class="text-gray-800 antialiased font-sans flex flex-col min-h-screen relative pb-16">
@@ -61,9 +59,9 @@
 
     <!-- Header (คงดีไซน์เดิมตามภาพ Reference) -->
     <header class="bg-white sticky top-0 z-30 px-4 py-3 shadow-sm flex items-center justify-between">
-        <div class="flex items-center gap-3 cursor-pointer select-none" id="logo-container" title="สภานักเรียนโรงเรียนคำม่วง">
-            <img src="https://i.postimg.cc/wBN5btrp/rong-re-yn-kham-wng.png" alt="โลโก้โรงเรียนคำม่วง" class="w-10 h-10 rounded-full border border-red-100 shadow-sm object-cover bg-white">
-            <div>
+        <div class="flex items-center gap-3 cursor-pointer select-none touch-manipulation" id="logo-container" title="สภานักเรียนโรงเรียนคำม่วง">
+            <img src="https://i.postimg.cc/wBN5btrp/rong-re-yn-kham-wng.png" alt="โลโก้โรงเรียนคำม่วง" class="w-10 h-10 rounded-full border border-red-100 shadow-sm object-cover bg-white pointer-events-none">
+            <div class="pointer-events-none">
                 <h1 class="text-sm font-bold text-gray-900 leading-tight">ระบบคลังเกียรติบัตรออนไลน์</h1>
                 <p class="text-[9px] text-gray-500 uppercase tracking-wide">CERTIFICATE ARCHIVE SYSTEM</p>
             </div>
@@ -81,9 +79,9 @@
         </div>
     </header>
 
-    <!-- Demo Mode Notice (ซ่อนอัตโนมัติเมื่อใส่ลิงก์ Google Apps Script แล้ว) -->
+    <!-- Demo Mode Notice -->
     <div id="demo-banner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-800">
-        <i class="ph-fill ph-warning-circle"></i> <b>โหมดตัวอย่าง (Demo Mode):</b> ยังไม่ได้เชื่อมต่อ Google Apps Script — กรุณานำ Web App URL มาวางที่ตัวแปร <code class="bg-amber-100 px-1 rounded">API_URL</code> ในไฟล์ <code>index.html</code>
+        <i class="ph-fill ph-warning-circle"></i> <b>โหมดตัวอย่าง (Demo Mode):</b> ยังไม่ได้เชื่อมต่อ Google Apps Script
     </div>
 
     <!-- ================= PUBLIC VIEW ================= -->
@@ -114,7 +112,7 @@
             </button>
         </div>
 
-        <!-- TAB 1: ค้นหาเกียรติบัตร (ค้นหาง่ายด้วย ชื่อ + ปีการศึกษา) -->
+        <!-- TAB 1: ค้นหาเกียรติบัตร -->
         <section id="section-search" class="block">
             <div class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-5 mb-6">
                 <div class="flex items-center gap-2 mb-4">
@@ -166,7 +164,7 @@
             </div>
         </section>
 
-        <!-- SUB-VIEW: รายละเอียดกิจกรรม (เมื่อกดการ์ดกิจกรรม) -->
+        <!-- SUB-VIEW: รายละเอียดกิจกรรม -->
         <section id="section-activity-detail" class="hidden">
             <button id="btn-back-activities" class="mb-4 text-sm text-gray-600 hover:text-[#d91b42] flex items-center gap-1.5 font-medium transition-colors">
                 <i class="ph-bold ph-arrow-left"></i> กลับไปหน้ารายการกิจกรรม
@@ -275,7 +273,7 @@
                 <p class="font-bold mb-1"><i class="ph-fill ph-info"></i> วิธีใช้งานระบบอัปโหลดจาก Canva แบบรวดเร็ว:</p>
                 <ol class="list-decimal list-inside space-y-1">
                     <li>ไปที่แท็บ <b>"จัดการกิจกรรม"</b> เพื่อสร้างกิจกรรมใหม่ (ระบบจะสร้างการ์ดบนหน้าเว็บอัตโนมัติ)</li>
-                    <li>ไปที่แท็บ <b>"อัปโหลดเกียรติบัตร (Canva)"</b> เลือกกิจกรรม แล้วลากไฟล์ PDF หรือรูปภาพ (PNG/JPG) ที่ทำเสร็จแล้วมาวางทีเดียวหลายไฟล์ได้เลย</li>
+                    <li>ไปที่แท็บ <b>"อัปโหลดเกียรติบัตร (Canva)"</b> เลือกกิจกรรม แล้วเลือกไฟล์ PDF หรือรูปภาพ (PNG/JPG) ที่ทำเสร็จแล้วมาวางทีเดียวหลายไฟล์ได้เลย</li>
                     <li>ระบบจะดึงชื่อไฟล์มาใส่เป็นชื่อผู้ได้รับให้อัตโนมัติ และอัปโหลดไฟล์ต้นฉบับไปเก็บใน Google Drive พร้อมสร้างเลขที่เกียรติบัตรให้ทันที</li>
                 </ol>
             </div>
@@ -375,8 +373,8 @@
         <section id="admin-sec-certs" class="hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row gap-3 justify-between">
-                    <div class="flex flex-1 gap-2">
-                        <input type="text" id="admin-cert-search" placeholder="ค้นหาชื่อ, เลขที่เกียรติบัตร..." class="flex-1 border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none focus:border-[#d91b42]">
+                    <div class="flex flex-1 flex-wrap gap-2">
+                        <input type="text" id="admin-cert-search" placeholder="ค้นหาชื่อ, เลขที่เกียรติบัตร..." class="flex-1 min-w-[180px] border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none focus:border-[#d91b42]">
                         <select id="admin-cert-act-filter" class="border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none">
                             <option value="">ทุกกิจกรรม</option>
                         </select>
@@ -409,7 +407,7 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- Preview Certificate Modal (ใช้ดูได้ทั้ง PDF และรูปภาพ) -->
+    <!-- Preview Certificate Modal -->
     <div id="preview-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-3 md:p-6">
         <div class="bg-white rounded-3xl w-full max-w-4xl h-[88vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="px-5 py-3.5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -418,7 +416,7 @@
                     <p id="preview-subtitle" class="text-[11px] text-gray-500 truncate"></p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <a id="preview-download-btn" href="#" target="_blank" class="bg-[#d91b42] text-white px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-[#b51435] flex items-center gap-1.5">
+                    <a id="preview-download-btn" href="#" target="_blank" rel="noopener noreferrer" class="bg-[#d91b42] text-white px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-[#b51435] flex items-center gap-1.5">
                         <i class="ph-bold ph-download-simple"></i> ดาวน์โหลด
                     </a>
                     <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-800 bg-gray-200/70 rounded-full p-1.5">
@@ -426,9 +424,7 @@
                     </button>
                 </div>
             </div>
-            <div id="preview-body" class="flex-1 bg-gray-900 relative flex items-center justify-center overflow-hidden">
-                <!-- iframe หรือ img จะถูกใส่ตรงนี้ -->
-            </div>
+            <div id="preview-body" class="flex-1 bg-gray-900 relative flex items-center justify-center overflow-hidden"></div>
         </div>
     </div>
 
@@ -567,11 +563,1021 @@
     <script>
         /**
          * ====================================================================
-         * การตั้งค่าเชื่อมต่อ Google Apps Script (สำคัญมาก!)
-         * ให้นำ Web App URL ที่ได้จากการ Deploy ไฟล์ Code.gs มาวางแทนข้อความด้านล่าง
+         * การตั้งค่าเชื่อมต่อ Google Apps Script
          * ====================================================================
          */
         const API_URL = 'https://script.google.com/macros/s/AKfycbwFa0ZPgkEMxBBLBy1I-VUdSBnANQQ6zrWRXOGNDF5QGHh3aQCtPdg7F45K6X0oaxtzEA/exec';
 
         const isDemoMode = !API_URL || API_URL.includes('YOUR_GOOGLE_APPS_SCRIPT');
-// ... existing code ... -->
+
+        // ================= GLOBAL STATE =================
+        let publicActivities = [];
+        let publicCertificates = [];
+        let adminActivities = [];
+        let adminCertificates = [];
+        let currentActivityDetail = null;
+        let uploadQueue = [];
+
+        let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
+        let adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
+
+        // ================= UTILITIES =================
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showLoading(text = 'กำลังโหลดข้อมูล...') {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const styles = {
+                success: 'bg-emerald-600 text-white',
+                error: 'bg-red-600 text-white',
+                info: 'bg-gray-900 text-white'
+            };
+            const icons = {
+                success: 'ph-check-circle',
+                error: 'ph-warning-circle',
+                info: 'ph-info'
+            };
+            toast.className = `${styles[type] || styles.info} px-4 py-3 rounded-2xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = `<i class="ph-fill ${icons[type] || icons.info} text-base shrink-0"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result || '';
+                    const base64 = String(result).split(',')[1] || '';
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function getDriveDownloadUrl(fileId) {
+            return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+        }
+
+        function getDrivePreviewUrl(fileId) {
+            return `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`;
+        }
+
+        function getDriveImageUrl(fileId) {
+            return `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`;
+        }
+
+        // ================= API CALLERS =================
+        async function apiGet(params) {
+            const url = new URL(API_URL);
+            Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url.toString(), { method: 'GET' });
+            if (!res.ok) throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+            return await res.json();
+        }
+
+        async function apiPost(payload) {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+            const data = await res.json();
+            if (data.authError) {
+                logoutAdmin(true);
+            }
+            return data;
+        }
+
+        // ================= HIDDEN ADMIN TRIGGER (5 CLICKS IN 2 SECONDS) =================
+        let logoClickCount = 0;
+        let logoClickTimer = null;
+
+        document.getElementById('logo-container').addEventListener('click', () => {
+            if (adminToken) {
+                switchMainView('admin');
+                return;
+            }
+            logoClickCount++;
+            if (logoClickTimer) clearTimeout(logoClickTimer);
+            if (logoClickCount >= 5) {
+                logoClickCount = 0;
+                document.getElementById('admin-login-form').reset();
+                document.getElementById('admin-login-modal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('admin-username').focus(), 100);
+            } else {
+                logoClickTimer = setTimeout(() => {
+                    logoClickCount = 0;
+                }, 2000);
+            }
+        });
+
+        // ================= VIEW & TAB SWITCHING =================
+        function updateHeaderButtons(currentView) {
+            const navAdmin = document.getElementById('nav-admin-btn');
+            const navHome = document.getElementById('nav-home-btn');
+            const logoutBtn = document.getElementById('admin-logout-btn');
+
+            if (adminToken) {
+                logoutBtn.classList.remove('hidden');
+                if (currentView === 'admin') {
+                    navAdmin.classList.add('hidden');
+                    navHome.classList.remove('hidden');
+                } else {
+                    navAdmin.classList.remove('hidden');
+                    navHome.classList.add('hidden');
+                }
+            } else {
+                navAdmin.classList.add('hidden');
+                navHome.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        function switchMainView(view) {
+            const pub = document.getElementById('public-view');
+            const adm = document.getElementById('admin-view');
+            if (view === 'admin' && adminToken) {
+                pub.classList.add('hidden');
+                adm.classList.remove('hidden');
+                updateHeaderButtons('admin');
+                if (adminUser) {
+                    document.getElementById('admin-welcome-text').textContent = `เข้าสู่ระบบโดย: ${adminUser.displayName || adminUser.username}`;
+                }
+                refreshAdminData();
+            } else {
+                adm.classList.add('hidden');
+                pub.classList.remove('hidden');
+                updateHeaderButtons('public');
+            }
+        }
+
+        document.getElementById('nav-admin-btn').addEventListener('click', () => switchMainView('admin'));
+        document.getElementById('nav-home-btn').addEventListener('click', () => {
+            switchMainView('public');
+            loadPublicData(false);
+        });
+        document.getElementById('admin-logout-btn').addEventListener('click', () => logoutAdmin(false));
+
+        function switchPublicTab(tabName) {
+            const tabs = ['search', 'activities', 'verify'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const sec = document.getElementById(`section-${t}`);
+                if (t === tabName) {
+                    btn.classList.replace('tab-inactive', 'tab-active');
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.classList.replace('tab-active', 'tab-inactive');
+                    sec.classList.add('hidden');
+                }
+            });
+            document.getElementById('section-activity-detail').classList.add('hidden');
+        }
+
+        document.getElementById('tab-search').addEventListener('click', () => switchPublicTab('search'));
+        document.getElementById('tab-activities').addEventListener('click', () => switchPublicTab('activities'));
+        document.getElementById('tab-verify').addEventListener('click', () => switchPublicTab('verify'));
+        document.getElementById('btn-back-activities').addEventListener('click', () => switchPublicTab('activities'));
+
+        function switchAdminTab(tabName) {
+            const tabs = ['dash', 'activities', 'upload', 'certs'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`admin-tab-${t}`);
+                const sec = document.getElementById(`admin-sec-${t}`);
+                if (t === tabName) {
+                    btn.classList.replace('tab-inactive', 'tab-active');
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.classList.replace('tab-active', 'tab-inactive');
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        document.getElementById('admin-tab-dash').addEventListener('click', () => switchAdminTab('dash'));
+        document.getElementById('admin-tab-activities').addEventListener('click', () => switchAdminTab('activities'));
+        document.getElementById('admin-tab-upload').addEventListener('click', () => switchAdminTab('upload'));
+        document.getElementById('admin-tab-certs').addEventListener('click', () => switchAdminTab('certs'));
+
+        // ================= PUBLIC DATA & RENDERING =================
+        async function loadPublicData(showSpinner = true) {
+            if (isDemoMode) {
+                document.getElementById('demo-banner').classList.remove('hidden');
+                return;
+            }
+            if (showSpinner) showLoading('กำลังโหลดข้อมูลเกียรติบัตร...');
+            try {
+                const res = await apiGet({ action: 'publicData' });
+                if (!res.success) throw new Error(res.error || 'โหลดข้อมูลไม่สำเร็จ');
+                publicActivities = res.activities || [];
+                publicCertificates = res.certificates || [];
+                populateYearFilters();
+                renderPublicActivities();
+                renderGlobalSearch();
+            } catch (err) {
+                showToast('โหลดข้อมูลไม่สำเร็จ: ' + err.message, 'error');
+            } finally {
+                if (showSpinner) hideLoading();
+            }
+        }
+
+        function populateYearFilters() {
+            const years = [...new Set(publicActivities.map(a => String(a.year)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+            ['global-year-filter', 'activity-year-filter'].forEach(id => {
+                const sel = document.getElementById(id);
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">ทุกปีการศึกษา</option>' +
+                    years.map(y => `<option value="${escapeHtml(y)}">ปีการศึกษา ${escapeHtml(y)}</option>`).join('');
+                if (years.includes(prev)) sel.value = prev;
+            });
+        }
+
+        function createCertCardHTML(cert, act) {
+            const actName = act ? act.name : 'กิจกรรมสภานักเรียน';
+            const actYear = act ? act.year : '-';
+            const isPdf = (cert.mimeType || '').includes('pdf') || (cert.fileName || '').toLowerCase().endsWith('.pdf');
+            const badgeText = isPdf ? 'PDF' : 'รูปภาพ';
+            const subInfo = [
+                cert.grade ? `ชั้น ${cert.grade}${cert.room ? '/' + cert.room : ''}` : '',
+                cert.award || cert.certType || ''
+            ].filter(Boolean).join(' • ');
+
+            return `
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all flex flex-col justify-between gap-3">
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-1.5">
+                            <span class="text-[11px] font-mono font-bold text-[#d91b42] bg-red-50 px-2.5 py-0.5 rounded-lg">${escapeHtml(cert.certNo)}</span>
+                            <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">${badgeText}</span>
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-base leading-snug">${escapeHtml(cert.recipientName)}</h4>
+                        <p class="text-xs text-gray-600 mt-1 line-clamp-2">${escapeHtml(actName)}</p>
+                        ${subInfo ? `<p class="text-[11px] text-emerald-700 font-medium mt-1">${escapeHtml(subInfo)}</p>` : ''}
+                        <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-400">
+                            <span><i class="ph ph-calendar-blank"></i> ปี ${escapeHtml(actYear)}</span>
+                            ${cert.issueDate ? `<span><i class="ph ph-clock"></i> ${escapeHtml(cert.issueDate)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t border-gray-50">
+                        <button onclick="openCertPreview('${escapeHtml(cert.id)}')" class="flex-1 py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+                            <i class="ph-bold ph-eye"></i> ดูตัวอย่าง
+                        </button>
+                        <a href="${getDriveDownloadUrl(cert.fileId)}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 px-3 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                            <i class="ph-bold ph-download-simple"></i> ดาวน์โหลด
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGlobalSearch() {
+            const q = document.getElementById('global-search-input').value.trim().toLowerCase();
+            const year = document.getElementById('global-year-filter').value;
+            const listEl = document.getElementById('global-certs-list');
+            const emptyEl = document.getElementById('global-certs-empty');
+            const emptyTitle = document.getElementById('global-empty-title');
+            const emptySub = document.getElementById('global-empty-sub');
+
+            if (!q && !year) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                emptyTitle.textContent = 'พิมพ์ชื่อ-นามสกุลเพื่อค้นหา';
+                emptySub.textContent = publicCertificates.length > 0
+                    ? `มีเกียรติบัตรพร้อมดาวน์โหลดทั้งหมด ${publicCertificates.length} รายการ`
+                    : 'หรือเลือกดูจากแท็บ "กิจกรรมทั้งหมด" ด้านบน';
+                return;
+            }
+
+            const actMap = new Map(publicActivities.map(a => [String(a.id), a]));
+            const filtered = publicCertificates.filter(c => {
+                const act = actMap.get(String(c.activityId));
+                if (year && (!act || String(act.year) !== year)) return false;
+                if (!q) return true;
+                const haystack = [
+                    c.recipientName, c.certNo, c.award, c.certType,
+                    act ? act.name : '', act ? act.year : ''
+                ].join(' ').toLowerCase();
+                return haystack.includes(q);
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                emptyTitle.textContent = 'ไม่พบข้อมูลเกียรติบัตร';
+                emptySub.textContent = 'ลองตรวจสอบการสะกดชื่อ หรือเลือกปีการศึกษาใหม่อีกครั้ง';
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            listEl.innerHTML = filtered.slice(0, 60).map(c => createCertCardHTML(c, actMap.get(String(c.activityId)))).join('');
+        }
+
+        document.getElementById('global-search-input').addEventListener('input', renderGlobalSearch);
+        document.getElementById('global-year-filter').addEventListener('change', renderGlobalSearch);
+
+        function renderPublicActivities() {
+            const year = document.getElementById('activity-year-filter').value;
+            const grid = document.getElementById('public-activities-grid');
+            const empty = document.getElementById('public-activities-empty');
+
+            const filtered = publicActivities.filter(a => !year || String(a.year) === year);
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.innerHTML = filtered.map(act => {
+                const count = publicCertificates.filter(c => String(c.activityId) === String(act.id)).length;
+                const coverHTML = act.coverUrl
+                    ? `<img src="${escapeHtml(act.coverUrl)}" alt="${escapeHtml(act.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                    : `<div class="w-full h-full bg-gradient-to-br from-[#d91b42] to-[#8a0c26] flex items-center justify-center text-white/30"><i class="ph-fill ph-certificate text-6xl"></i></div>`;
+
+                return `
+                    <div onclick="openActivityDetail('${escapeHtml(act.id)}')" class="group bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-md overflow-hidden cursor-pointer transition-all flex flex-col">
+                        <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                            ${coverHTML}
+                            <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                ปี ${escapeHtml(act.year)}
+                            </span>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col justify-between">
+                            <div>
+                                ${act.category ? `<span class="inline-block text-[10px] font-bold text-[#d91b42] bg-red-50 px-2 py-0.5 rounded-md mb-1.5">${escapeHtml(act.category)}</span>` : ''}
+                                <h4 class="font-bold text-gray-900 text-sm md:text-base line-clamp-2 group-hover:text-[#d91b42] transition-colors">${escapeHtml(act.name)}</h4>
+                                ${act.desc ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${escapeHtml(act.desc)}</p>` : ''}
+                            </div>
+                            <div class="mt-3 pt-2.5 border-t border-gray-50 flex items-center justify-between text-xs">
+                                <span class="text-emerald-700 font-semibold"><i class="ph-fill ph-files"></i> ${count} เกียรติบัตร</span>
+                                <span class="text-[#d91b42] font-bold flex items-center gap-0.5">ดูรายชื่อ <i class="ph-bold ph-caret-right"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('activity-year-filter').addEventListener('change', renderPublicActivities);
+
+        function openActivityDetail(actId) {
+            const act = publicActivities.find(a => String(a.id) === String(actId));
+            if (!act) return;
+            currentActivityDetail = act;
+
+            document.getElementById('section-activities').classList.add('hidden');
+            document.getElementById('section-search').classList.add('hidden');
+            document.getElementById('section-verify').classList.add('hidden');
+            document.getElementById('section-activity-detail').classList.remove('hidden');
+
+            const coverEl = document.getElementById('detail-cover');
+            coverEl.innerHTML = act.coverUrl
+                ? `<img src="${escapeHtml(act.coverUrl)}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full bg-gradient-to-br from-[#d91b42] to-[#8a0c26] flex items-center justify-center text-white/30"><i class="ph-fill ph-certificate text-6xl"></i></div>`;
+
+            const actCerts = publicCertificates.filter(c => String(c.activityId) === String(act.id));
+            document.getElementById('detail-year').textContent = `ปีการศึกษา ${act.year}`;
+            const catEl = document.getElementById('detail-category');
+            if (act.category) {
+                catEl.textContent = act.category;
+                catEl.classList.remove('hidden');
+            } else {
+                catEl.classList.add('hidden');
+            }
+            document.getElementById('detail-count').textContent = `${actCerts.length} เกียรติบัตร`;
+            document.getElementById('detail-name').textContent = act.name;
+            document.getElementById('detail-desc').textContent = act.desc || '';
+            document.getElementById('detail-search-input').value = '';
+
+            renderActivityDetailCerts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderActivityDetailCerts() {
+            if (!currentActivityDetail) return;
+            const q = document.getElementById('detail-search-input').value.trim().toLowerCase();
+            const listEl = document.getElementById('detail-certs-list');
+            const emptyEl = document.getElementById('detail-certs-empty');
+
+            const filtered = publicCertificates.filter(c => {
+                if (String(c.activityId) !== String(currentActivityDetail.id)) return false;
+                if (!q) return true;
+                return `${c.recipientName} ${c.certNo} ${c.award}`.toLowerCase().includes(q);
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+            } else {
+                emptyEl.classList.add('hidden');
+                listEl.innerHTML = filtered.map(c => createCertCardHTML(c, currentActivityDetail)).join('');
+            }
+        }
+
+        document.getElementById('detail-search-input').addEventListener('input', renderActivityDetailCerts);
+
+        // ================= PREVIEW MODAL =================
+        function openCertPreview(certId) {
+            const cert = publicCertificates.find(c => String(c.id) === String(certId)) ||
+                         adminCertificates.find(c => String(c.id) === String(certId));
+            if (!cert) return;
+            const act = publicActivities.find(a => String(a.id) === String(cert.activityId)) ||
+                        adminActivities.find(a => String(a.id) === String(cert.activityId));
+
+            document.getElementById('preview-title').textContent = cert.recipientName;
+            document.getElementById('preview-subtitle').textContent = `${cert.certNo} • ${act ? act.name : ''}`;
+            document.getElementById('preview-download-btn').href = getDriveDownloadUrl(cert.fileId);
+
+            const body = document.getElementById('preview-body');
+            const isImage = (cert.mimeType || '').startsWith('image/') || /\.(png|jpe?g)$/i.test(cert.fileName || '');
+
+            if (isImage) {
+                body.innerHTML = `<img src="${getDriveImageUrl(cert.fileId)}" alt="${escapeHtml(cert.recipientName)}" class="max-w-full max-h-full object-contain p-2" onerror="this.outerHTML='<iframe src=\\'${getDrivePreviewUrl(cert.fileId)}\\' class=\\'w-full h-full border-0\\'></iframe>'">`;
+            } else {
+                body.innerHTML = `<iframe src="${getDrivePreviewUrl(cert.fileId)}" class="w-full h-full border-0 bg-white" allow="autoplay"></iframe>`;
+            }
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function openLocalFilePreview(index) {
+            const item = uploadQueue[index];
+            if (!item) return;
+            const url = URL.createObjectURL(item.file);
+            document.getElementById('preview-title').textContent = item.recipientName || item.file.name;
+            document.getElementById('preview-subtitle').textContent = 'ตัวอย่างไฟล์ก่อนอัปโหลด';
+            const dlBtn = document.getElementById('preview-download-btn');
+            dlBtn.href = url;
+            dlBtn.setAttribute('download', item.file.name);
+
+            const body = document.getElementById('preview-body');
+            if (item.file.type.startsWith('image/')) {
+                body.innerHTML = `<img src="${url}" class="max-w-full max-h-full object-contain p-2">`;
+            } else {
+                body.innerHTML = `<iframe src="${url}" class="w-full h-full border-0 bg-white"></iframe>`;
+            }
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-body').innerHTML = '';
+        }
+
+        // ================= VERIFY CERTIFICATE =================
+        document.getElementById('verify-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const certNo = document.getElementById('verify-input').value.trim().toUpperCase();
+            if (!certNo) return;
+
+            const resultBox = document.getElementById('verify-result');
+            showLoading('กำลังตรวจสอบเลขที่เกียรติบัตร...');
+            try {
+                const res = await apiGet({ action: 'verify', certNo });
+                resultBox.classList.remove('hidden');
+
+                if (!res.success || res.status === 'not_found') {
+                    resultBox.innerHTML = `
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-2">
+                                <i class="ph-fill ph-x-circle text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-red-700">ไม่พบข้อมูลเกียรติบัตร</h4>
+                            <p class="text-xs text-gray-500 mt-1">ไม่พบเลขที่ <span class="font-mono font-bold">${escapeHtml(certNo)}</span> ในฐานข้อมูล</p>
+                        </div>`;
+                } else if (res.status === 'revoked') {
+                    resultBox.innerHTML = `
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2">
+                                <i class="ph-fill ph-warning-circle text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-amber-700">เกียรติบัตรฉบับนี้ถูกยกเลิก</h4>
+                            <p class="text-xs text-gray-500 mt-1">เลขที่ ${escapeHtml(res.certificate.certNo)} ถูกระงับหรือยกเลิกการใช้งาน</p>
+                        </div>`;
+                } else if (res.status === 'pending') {
+                    resultBox.innerHTML = `
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-2">
+                                <i class="ph-fill ph-clock text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-blue-700">อยู่ระหว่างรอตรวจสอบ</h4>
+                            <p class="text-xs text-gray-500 mt-1">เกียรติบัตรฉบับนี้ยังไม่ได้รับการเผยแพร่อย่างเป็นทางการ</p>
+                        </div>`;
+                } else {
+                    const c = res.certificate;
+                    resultBox.innerHTML = `
+                        <div class="flex items-center gap-3 pb-4 mb-4 border-b border-gray-100">
+                            <div class="w-11 h-11 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="ph-fill ph-seal-check text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-emerald-700 text-sm">พบข้อมูลเกียรติบัตร (ถูกต้องและมีผลใช้งาน)</h4>
+                                <p class="text-xs text-gray-500 font-mono">${escapeHtml(c.certNo)}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between gap-2"><span class="text-gray-500">ชื่อผู้ได้รับ:</span><span class="font-bold text-gray-900 text-right">${escapeHtml(c.recipientName)}</span></div>
+                            <div class="flex justify-between gap-2"><span class="text-gray-500">กิจกรรม:</span><span class="font-semibold text-gray-800 text-right">${escapeHtml(c.activityName)}</span></div>
+                            <div class="flex justify-between gap-2"><span class="text-gray-500">ปีการศึกษา:</span><span class="text-gray-800">${escapeHtml(c.year)}</span></div>
+                            ${c.award ? `<div class="flex justify-between gap-2"><span class="text-gray-500">รางวัล/ประเภท:</span><span class="text-gray-800 text-right">${escapeHtml(c.award)}</span></div>` : ''}
+                            ${c.issueDate ? `<div class="flex justify-between gap-2"><span class="text-gray-500">วันที่ออก:</span><span class="text-gray-800">${escapeHtml(c.issueDate)}</span></div>` : ''}
+                            <div class="flex justify-between gap-2"><span class="text-gray-500">หน่วยงานผู้ออก:</span><span class="text-gray-800">สภานักเรียนโรงเรียนคำม่วง</span></div>
+                        </div>
+                        ${c.fileId ? `
+                        <a href="${getDriveDownloadUrl(c.fileId)}" target="_blank" rel="noopener noreferrer" class="mt-4 w-full py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center justify-center gap-1.5">
+                            <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดไฟล์ต้นฉบับ
+                        </a>` : ''}
+                    `;
+                }
+            } catch (err) {
+                showToast('ตรวจสอบไม่สำเร็จ: ' + err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // ================= ADMIN AUTH =================
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value.trim();
+
+            showLoading('กำลังตรวจสอบสิทธิ์...');
+            try {
+                const res = await apiPost({ action: 'login', username, password });
+                if (!res.success) {
+                    showToast(res.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+                    return;
+                }
+                adminToken = res.token;
+                adminUser = res.user;
+                sessionStorage.setItem('kmsc_admin_token', adminToken);
+                sessionStorage.setItem('kmsc_admin_user', JSON.stringify(adminUser));
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                showToast('เข้าสู่ระบบผู้ดูแลสำเร็จ', 'success');
+                switchMainView('admin');
+            } catch (err) {
+                showToast('เข้าสู่ระบบไม่สำเร็จ: ' + err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        function logoutAdmin(expired = false) {
+            adminToken = '';
+            adminUser = null;
+            sessionStorage.removeItem('kmsc_admin_token');
+            sessionStorage.removeItem('kmsc_admin_user');
+            switchMainView('public');
+            showToast(expired ? 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่' : 'ออกจากระบบเรียบร้อยแล้ว', expired ? 'error' : 'info');
+        }
+
+        // ================= ADMIN DATA & DASHBOARD =================
+        async function refreshAdminData() {
+            if (!adminToken) return;
+            showLoading('กำลังโหลดข้อมูลหลังบ้าน...');
+            try {
+                const res = await apiPost({ action: 'getAdminData', token: adminToken });
+                if (!res.success) throw new Error(res.error || 'โหลดข้อมูลไม่สำเร็จ');
+                adminActivities = res.activities || [];
+                adminCertificates = res.certificates || [];
+
+                renderAdminStats();
+                renderAdminActivitiesTable();
+                populateAdminActivityDropdowns();
+                renderAdminCertsTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderAdminStats() {
+            document.getElementById('stat-activities').textContent = adminActivities.length;
+            document.getElementById('stat-pub-activities').textContent = adminActivities.filter(a => a.status === 'published').length;
+            document.getElementById('stat-certs').textContent = adminCertificates.length;
+            document.getElementById('stat-other-certs').textContent = adminCertificates.filter(c => c.status !== 'published').length;
+        }
+
+        function populateAdminActivityDropdowns() {
+            const uploadSel = document.getElementById('upload-activity-select');
+            const filterSel = document.getElementById('admin-cert-act-filter');
+            const prevUpload = uploadSel.value;
+            const prevFilter = filterSel.value;
+
+            const opts = adminActivities.map(a => `<option value="${escapeHtml(a.id)}">[ปี ${escapeHtml(a.year)}] ${escapeHtml(a.name)}</option>`).join('');
+            uploadSel.innerHTML = '<option value="">-- กรุณาเลือกกิจกรรม --</option>' + opts;
+            filterSel.innerHTML = '<option value="">ทุกกิจกรรม</option>' + opts;
+
+            if (prevUpload) uploadSel.value = prevUpload;
+            if (prevFilter) filterSel.value = prevFilter;
+        }
+
+        // ================= ADMIN ACTIVITIES CRUD =================
+        function renderAdminActivitiesTable() {
+            const tbody = document.getElementById('table-activities');
+            if (adminActivities.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400 text-xs">ยังไม่มีกิจกรรม กดปุ่ม "เพิ่มกิจกรรมใหม่" ด้านบนเพื่อเริ่มต้น</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = adminActivities.map(a => {
+                const badge = a.status === 'published'
+                    ? `<span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">เผยแพร่</span>`
+                    : `<span class="bg-gray-100 text-gray-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full">ซ่อน/ร่าง</span>`;
+                const thumb = a.coverUrl
+                    ? `<img src="${escapeHtml(a.coverUrl)}" class="w-12 h-8 object-cover rounded-lg border border-gray-200">`
+                    : `<div class="w-12 h-8 bg-red-50 text-[#d91b42] rounded-lg flex items-center justify-center"><i class="ph ph-image"></i></div>`;
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">${thumb}</td>
+                        <td class="px-4 py-3">
+                            <p class="font-bold text-gray-900 text-xs md:text-sm">${escapeHtml(a.name)}</p>
+                            <p class="text-[11px] text-gray-400">${escapeHtml(a.category || '-')}</p>
+                        </td>
+                        <td class="px-4 py-3 text-xs">${escapeHtml(a.year)}</td>
+                        <td class="px-4 py-3">${badge}</td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="openActivityModal('${escapeHtml(a.id)}')" class="text-xs text-blue-600 hover:underline font-medium mr-3">แก้ไข</button>
+                            <button onclick="deleteActivity('${escapeHtml(a.id)}')" class="text-xs text-red-600 hover:underline font-medium">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openActivityModal(actId = '') {
+            const form = document.getElementById('form-activity');
+            form.reset();
+            document.getElementById('act-id').value = '';
+            document.getElementById('act-cover-url').value = '';
+
+            if (actId) {
+                const act = adminActivities.find(a => String(a.id) === String(actId));
+                if (!act) return;
+                document.getElementById('modal-act-title').textContent = 'แก้ไขกิจกรรม';
+                document.getElementById('act-id').value = act.id;
+                document.getElementById('act-name').value = act.name;
+                document.getElementById('act-year').value = act.year;
+                document.getElementById('act-category').value = act.category || '';
+                document.getElementById('act-status').value = act.status || 'published';
+                document.getElementById('act-desc').value = act.desc || '';
+                document.getElementById('act-cover-url').value = act.coverUrl || '';
+            } else {
+                document.getElementById('modal-act-title').textContent = 'เพิ่มกิจกรรมใหม่';
+                document.getElementById('act-year').value = String(new Date().getFullYear() + 543);
+            }
+            document.getElementById('modal-activity').classList.remove('hidden');
+        }
+
+        document.getElementById('form-activity').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('กำลังบันทึกกิจกรรม...');
+            try {
+                const data = {
+                    id: document.getElementById('act-id').value,
+                    name: document.getElementById('act-name').value.trim(),
+                    year: document.getElementById('act-year').value.trim(),
+                    category: document.getElementById('act-category').value.trim(),
+                    status: document.getElementById('act-status').value,
+                    desc: document.getElementById('act-desc').value.trim(),
+                    coverUrl: document.getElementById('act-cover-url').value
+                };
+                const fileInput = document.getElementById('act-cover-file');
+                if (fileInput.files && fileInput.files[0]) {
+                    const f = fileInput.files[0];
+                    data.coverBase64 = await fileToBase64(f);
+                    data.coverFileName = f.name;
+                    data.coverMimeType = f.type || 'image/jpeg';
+                }
+                const res = await apiPost({ action: 'saveActivity', token: adminToken, data });
+                if (!res.success) throw new Error(res.error || 'บันทึกไม่สำเร็จ');
+                document.getElementById('modal-activity').classList.add('hidden');
+                showToast(res.message || 'บันทึกกิจกรรมสำเร็จ', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        async function deleteActivity(actId) {
+            if (!confirm('ยืนยันการลบกิจกรรมนี้?')) return;
+            showLoading('กำลังลบกิจกรรม...');
+            try {
+                const res = await apiPost({ action: 'deleteActivity', token: adminToken, id: actId });
+                if (!res.success) throw new Error(res.error || 'ลบไม่สำเร็จ');
+                showToast('ลบกิจกรรมเรียบร้อยแล้ว', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ================= BATCH UPLOAD CERTIFICATES =================
+        document.getElementById('cert-file-input').addEventListener('change', (e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+
+            const defaultAward = document.getElementById('upload-default-award').value.trim();
+            const defaultDate = document.getElementById('upload-default-date').value.trim();
+
+            files.forEach(file => {
+                const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').trim();
+                uploadQueue.push({
+                    file,
+                    recipientName: nameWithoutExt,
+                    studentId: '',
+                    grade: '',
+                    room: '',
+                    award: defaultAward,
+                    issueDate: defaultDate,
+                    status: 'ready' // ready, uploading, done, error
+                });
+            });
+
+            e.target.value = '';
+            renderUploadQueue();
+        });
+
+        function renderUploadQueue() {
+            const container = document.getElementById('upload-queue-container');
+            const list = document.getElementById('upload-queue-list');
+            document.getElementById('queue-count').textContent = uploadQueue.length;
+
+            if (uploadQueue.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            list.innerHTML = uploadQueue.map((item, idx) => {
+                const statusBadge = {
+                    ready: `<span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-bold">พร้อมอัปโหลด</span>`,
+                    uploading: `<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md font-bold">กำลังอัปโหลด...</span>`,
+                    done: `<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-bold">สำเร็จ</span>`,
+                    error: `<span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold">ผิดพลาด</span>`
+                }[item.status];
+
+                return `
+                    <div class="border border-gray-200 rounded-xl p-3 bg-gray-50/50">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i class="ph-fill ${item.file.type.includes('pdf') ? 'ph-file-pdf text-red-500' : 'ph-image text-blue-500'} text-xl shrink-0"></i>
+                                <span class="text-xs font-medium text-gray-600 truncate">${escapeHtml(item.file.name)}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="openLocalFilePreview(${idx})" class="text-xs text-blue-600 hover:underline font-medium">ดูตัวอย่าง</button>
+                                <button type="button" onclick="removeQueueItem(${idx})" class="text-xs text-red-500 hover:underline font-medium">นำออก</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
+                            <input type="text" value="${escapeHtml(item.recipientName)}" oninput="uploadQueue[${idx}].recipientName=this.value" placeholder="ชื่อ-นามสกุล *" class="md:col-span-2 border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
+                            <input type="text" value="${escapeHtml(item.grade)}" oninput="uploadQueue[${idx}].grade=this.value" placeholder="ชั้น (เช่น ม.5)" class="border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
+                            <input type="text" value="${escapeHtml(item.room)}" oninput="uploadQueue[${idx}].room=this.value" placeholder="ห้อง (เช่น 1)" class="border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
+                            <input type="text" value="${escapeHtml(item.award)}" oninput="uploadQueue[${idx}].award=this.value" placeholder="รางวัล/ประเภท" class="border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function removeQueueItem(idx) {
+            uploadQueue.splice(idx, 1);
+            renderUploadQueue();
+        }
+
+        function clearUploadQueue() {
+            uploadQueue = [];
+            document.getElementById('upload-progress-wrap').classList.add('hidden');
+            renderUploadQueue();
+        }
+
+        async function startBatchUpload() {
+            const activityId = document.getElementById('upload-activity-select').value;
+            if (!activityId) {
+                showToast('กรุณาเลือกกิจกรรมก่อนอัปโหลด', 'error');
+                return;
+            }
+            const pendingItems = uploadQueue.filter(i => i.status !== 'done');
+            if (pendingItems.length === 0) return;
+
+            const btn = document.getElementById('btn-start-upload');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            const progWrap = document.getElementById('upload-progress-wrap');
+            const progBar = document.getElementById('upload-progress-bar');
+            const progLabel = document.getElementById('upload-progress-label');
+            const progPercent = document.getElementById('upload-progress-percent');
+            progWrap.classList.remove('hidden');
+
+            let successCount = 0;
+            const total = uploadQueue.length;
+
+            for (let i = 0; i < total; i++) {
+                const item = uploadQueue[i];
+                if (item.status === 'done') {
+                    successCount++;
+                    continue;
+                }
+                item.status = 'uploading';
+                renderUploadQueue();
+
+                const pct = Math.round((i / total) * 100);
+                progBar.style.width = `${pct}%`;
+                progPercent.textContent = `${pct}%`;
+                progLabel.textContent = `กำลังอัปโหลด (${i + 1}/${total}): ${item.recipientName || item.file.name}`;
+
+                try {
+                    const base64 = await fileToBase64(item.file);
+                    const res = await apiPost({
+                        action: 'uploadCertificate',
+                        token: adminToken,
+                        data: {
+                            activityId,
+                            recipientName: item.recipientName.trim() || item.file.name,
+                            studentId: item.studentId,
+                            grade: item.grade,
+                            room: item.room,
+                            award: item.award || document.getElementById('upload-default-award').value.trim(),
+                            issueDate: item.issueDate || document.getElementById('upload-default-date').value.trim(),
+                            status: 'published',
+                            fileBase64: base64,
+                            fileName: item.file.name,
+                            mimeType: item.file.type || 'application/pdf'
+                        }
+                    });
+                    if (!res.success) throw new Error(res.error || 'อัปโหลดไม่สำเร็จ');
+                    item.status = 'done';
+                    successCount++;
+                } catch (err) {
+                    item.status = 'error';
+                    showToast(`ไฟล์ ${item.file.name}: ${err.message}`, 'error');
+                }
+                renderUploadQueue();
+            }
+
+            progBar.style.width = '100%';
+            progPercent.textContent = '100%';
+            progLabel.textContent = `เสร็จสิ้น! อัปโหลดสำเร็จ ${successCount}/${total} ไฟล์`;
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+            showToast(`อัปโหลดเกียรติบัตรสำเร็จ ${successCount} ไฟล์`, 'success');
+            await refreshAdminData();
+        }
+
+        // ================= ADMIN CERTIFICATES TABLE & EDIT =================
+        function renderAdminCertsTable() {
+            const q = document.getElementById('admin-cert-search').value.trim().toLowerCase();
+            const actFilter = document.getElementById('admin-cert-act-filter').value;
+            const statusFilter = document.getElementById('admin-cert-status-filter').value;
+            const tbody = document.getElementById('table-certs');
+
+            const actMap = new Map(adminActivities.map(a => [String(a.id), a]));
+            const filtered = adminCertificates.filter(c => {
+                if (actFilter && String(c.activityId) !== actFilter) return false;
+                if (statusFilter && String(c.status) !== statusFilter) return false;
+                if (!q) return true;
+                return `${c.recipientName} ${c.certNo} ${c.studentId || ''}`.toLowerCase().includes(q);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 text-xs">ไม่พบรายการเกียรติบัตร</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.slice(0, 100).map(c => {
+                const act = actMap.get(String(c.activityId));
+                const statusBadge = {
+                    published: `<span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2 py-0.5 rounded-full">เผยแพร่</span>`,
+                    pending: `<span class="bg-amber-50 text-amber-700 text-[11px] font-bold px-2 py-0.5 rounded-full">รอตรวจ</span>`,
+                    revoked: `<span class="bg-red-50 text-red-700 text-[11px] font-bold px-2 py-0.5 rounded-full">ยกเลิก</span>`
+                }[c.status] || c.status;
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-mono text-xs font-bold text-[#d91b42] whitespace-nowrap">${escapeHtml(c.certNo)}</td>
+                        <td class="px-4 py-3">
+                            <p class="font-bold text-gray-900 text-xs">${escapeHtml(c.recipientName)}</p>
+                            <p class="text-[11px] text-gray-400">${escapeHtml(c.grade ? `ชั้น ${c.grade}${c.room ? '/' + c.room : ''}` : '')} ${escapeHtml(c.award || '')}</p>
+                        </td>
+                        <td class="px-4 py-3 text-xs text-gray-600 max-w-[180px] truncate">${escapeHtml(act ? act.name : '-')}</td>
+                        <td class="px-4 py-3">
+                            <button onclick="openCertPreview('${escapeHtml(c.id)}')" class="text-xs text-[#d91b42] hover:underline font-medium flex items-center gap-1">
+                                <i class="ph ph-eye"></i> ดูไฟล์
+                            </button>
+                        </td>
+                        <td class="px-4 py-3">${statusBadge}</td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="openEditCertModal('${escapeHtml(c.id)}')" class="text-xs text-blue-600 hover:underline font-medium mr-3">แก้ไข</button>
+                            <button onclick="deleteCertificate('${escapeHtml(c.id)}')" class="text-xs text-red-600 hover:underline font-medium">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('admin-cert-search').addEventListener('input', renderAdminCertsTable);
+        document.getElementById('admin-cert-act-filter').addEventListener('change', renderAdminCertsTable);
+        document.getElementById('admin-cert-status-filter').addEventListener('change', renderAdminCertsTable);
+
+        function openEditCertModal(certId) {
+            const c = adminCertificates.find(x => String(x.id) === String(certId));
+            if (!c) return;
+            document.getElementById('form-edit-cert').reset();
+            document.getElementById('edit-cert-id').value = c.id;
+            document.getElementById('edit-cert-no').value = c.certNo;
+            document.getElementById('edit-cert-status').value = c.status || 'published';
+            document.getElementById('edit-cert-name').value = c.recipientName || '';
+            document.getElementById('edit-cert-sid').value = c.studentId || '';
+            document.getElementById('edit-cert-grade').value = c.grade || '';
+            document.getElementById('edit-cert-room').value = c.room || '';
+            document.getElementById('edit-cert-award').value = c.award || '';
+            document.getElementById('edit-cert-date').value = c.issueDate || '';
+            document.getElementById('modal-edit-cert').classList.remove('hidden');
+        }
+
+        document.getElementById('form-edit-cert').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('กำลังบันทึกการแก้ไข...');
+            try {
+                const data = {
+                    id: document.getElementById('edit-cert-id').value,
+                    status: document.getElementById('edit-cert-status').value,
+                    recipientName: document.getElementById('edit-cert-name').value.trim(),
+                    studentId: document.getElementById('edit-cert-sid').value.trim(),
+                    grade: document.getElementById('edit-cert-grade').value.trim(),
+                    room: document.getElementById('edit-cert-room').value.trim(),
+                    award: document.getElementById('edit-cert-award').value.trim(),
+                    issueDate: document.getElementById('edit-cert-date').value.trim()
+                };
+                const fileInput = document.getElementById('edit-cert-file');
+                if (fileInput.files && fileInput.files[0]) {
+                    const f = fileInput.files[0];
+                    data.fileBase64 = await fileToBase64(f);
+                    data.fileName = f.name;
+                    data.mimeType = f.type || 'application/pdf';
+                }
+                const res = await apiPost({ action: 'updateCertificate', token: adminToken, data });
+                if (!res.success) throw new Error(res.error || 'อัปเดตไม่สำเร็จ');
+                document.getElementById('modal-edit-cert').classList.add('hidden');
+                showToast('อัปเดตข้อมูลเกียรติบัตรเรียบร้อยแล้ว', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        async function deleteCertificate(certId) {
+            if (!confirm('ยืนยันการลบเกียรติบัตรและย้ายไฟล์ลงถังขยะใน Google Drive?')) return;
+            showLoading('กำลังลบเกียรติบัตร...');
+            try {
+                const res = await apiPost({ action: 'deleteCertificate', token: adminToken, id: certId });
+                if (!res.success) throw new Error(res.error || 'ลบไม่สำเร็จ');
+                showToast('ลบเกียรติบัตรเรียบร้อยแล้ว', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ================= INITIALIZE =================
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHeaderButtons('public');
+            loadPublicData(true);
+        });
+    </script>
+</body>
+</html>
