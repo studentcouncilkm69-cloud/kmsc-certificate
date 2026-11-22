@@ -57,6 +57,21 @@
         <p id="loading-text" class="text-sm font-semibold text-gray-700">กำลังโหลดข้อมูล...</p>
     </div>
 
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl text-center">
+            <div class="w-12 h-12 bg-red-50 text-[#d91b42] rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="ph-fill ph-warning-circle text-3xl"></i>
+            </div>
+            <h3 id="confirm-title" class="text-base font-bold text-gray-900 mb-1">ยืนยันการดำเนินการ</h3>
+            <p id="confirm-message" class="text-xs text-gray-500 mb-5"></p>
+            <div class="flex gap-2">
+                <button id="confirm-cancel-btn" type="button" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                <button id="confirm-ok-btn" type="button" class="flex-1 py-2.5 rounded-xl bg-[#d91b42] text-white text-sm font-bold hover:bg-[#b51435]">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header (คงดีไซน์เดิมตามภาพ Reference) -->
     <header class="bg-white sticky top-0 z-30 px-4 py-3 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-3 cursor-pointer select-none touch-manipulation" id="logo-container" title="สภานักเรียนโรงเรียนคำม่วง">
@@ -273,8 +288,8 @@
                 <p class="font-bold mb-1"><i class="ph-fill ph-info"></i> วิธีใช้งานระบบอัปโหลดจาก Canva แบบรวดเร็ว:</p>
                 <ol class="list-decimal list-inside space-y-1">
                     <li>ไปที่แท็บ <b>"จัดการกิจกรรม"</b> เพื่อสร้างกิจกรรมใหม่ (ระบบจะสร้างการ์ดบนหน้าเว็บอัตโนมัติ)</li>
-                    <li>ไปที่แท็บ <b>"อัปโหลดเกียรติบัตร (Canva)"</b> เลือกกิจกรรม แล้วเลือกไฟล์ PDF หรือรูปภาพ (PNG/JPG) ที่ทำเสร็จแล้วมาวางทีเดียวหลายไฟล์ได้เลย</li>
-                    <li>ระบบจะดึงชื่อไฟล์มาใส่เป็นชื่อผู้ได้รับให้อัตโนมัติ และอัปโหลดไฟล์ต้นฉบับไปเก็บใน Google Drive พร้อมสร้างเลขที่เกียรติบัตรให้ทันที</li>
+                    <li>ไปที่แท็บ <b>"อัปโหลดเกียรติบัตร (Canva)"</b> เลือกกิจกรรม แล้ววางลิงก์โฟลเดอร์ Google Drive หรือเลือกไฟล์จากเครื่องทีเดียวหลายไฟล์ได้เลย</li>
+                    <li>ระบบจะดึงชื่อไฟล์มาใส่เป็นชื่อผู้ได้รับให้อัตโนมัติ และสร้างเลขที่เกียรติบัตรให้ทันที</li>
                 </ol>
             </div>
         </section>
@@ -305,7 +320,7 @@
             </div>
         </section>
 
-        <!-- ADMIN TAB 3: Upload Certificates (Single & Batch) -->
+        <!-- ADMIN TAB 3: Upload Certificates (Drive Folder + Local Single & Batch) -->
         <section id="admin-sec-upload" class="hidden">
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-5">
                 <h3 class="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
@@ -315,7 +330,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">เลือกกิจกรรม <span class="text-red-500">*</span></label>
-                        <select id="upload-activity-select" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                        <select id="upload-activity-select" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-white focus:outline-none focus:border-[#d91b42]">
                             <option value="">-- กรุณาเลือกกิจกรรม --</option>
                         </select>
                     </div>
@@ -642,6 +657,28 @@
 
         function hideLoading() {
             document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function showConfirm(message, title = 'ยืนยันการดำเนินการ') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirm-modal');
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+                modal.classList.remove('hidden');
+
+                const okBtn = document.getElementById('confirm-ok-btn');
+                const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+                const cleanup = (result) => {
+                    modal.classList.add('hidden');
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(result);
+                };
+
+                okBtn.onclick = () => cleanup(true);
+                cancelBtn.onclick = () => cleanup(false);
+            });
         }
 
         function showToast(message, type = 'info') {
@@ -1052,7 +1089,9 @@
 
             document.getElementById('preview-title').textContent = cert.recipientName;
             document.getElementById('preview-subtitle').textContent = `${cert.certNo} • ${act ? act.name : ''}`;
-            document.getElementById('preview-download-btn').href = getDriveDownloadUrl(cert.fileId);
+            const dlBtn = document.getElementById('preview-download-btn');
+            dlBtn.href = getDriveDownloadUrl(cert.fileId);
+            dlBtn.removeAttribute('download');
 
             const body = document.getElementById('preview-body');
             const isImage = (cert.mimeType || '').startsWith('image/') || /\.(png|jpe?g)$/i.test(cert.fileName || '');
@@ -1329,7 +1368,8 @@
         });
 
         async function deleteActivity(actId) {
-            if (!confirm('ยืนยันการลบกิจกรรมนี้?')) return;
+            const ok = await showConfirm('ยืนยันการลบกิจกรรมนี้? ข้อมูลกิจกรรมจะถูกลบออกจากระบบ', 'ลบกิจกรรม');
+            if (!ok) return;
             showLoading('กำลังลบกิจกรรม...');
             try {
                 const res = await apiPost({ action: 'deleteActivity', token: adminToken, id: actId });
@@ -1343,7 +1383,7 @@
             }
         }
 
-        // ================= BATCH UPLOAD CERTIFICATES =================
+        // ================= AWARD DROPDOWN & THAI DATE HELPERS =================
         function toggleCustomAwardInput() {
             const sel = document.getElementById('upload-default-award-select');
             const customInput = document.getElementById('upload-default-award-custom');
@@ -1403,6 +1443,7 @@
             updateThaiDatePreview();
         }
 
+        // ================= BATCH UPLOAD CERTIFICATES =================
         document.getElementById('cert-file-input').addEventListener('change', (e) => {
             const files = Array.from(e.target.files || []);
             if (files.length === 0) return;
@@ -1411,7 +1452,57 @@
             const defaultDate = getDefaultThaiDateValue();
 
             files.forEach(file => {
-// ... existing code ... -->
+                const nameWithoutExt = file.name
+                    .replace(/\.[^/.]+$/, '')
+                    .replace(/^\s*\d+[\.\-\)\s_]+/, '')
+                    .replace(/_/g, ' ')
+                    .trim();
+                uploadQueue.push({
+                    file,
+                    recipientName: nameWithoutExt || file.name,
+                    grade: '',
+                    room: '',
+                    award: defaultAward,
+                    issueDate: defaultDate,
+                    status: 'ready'
+                });
+            });
+
+            e.target.value = '';
+            renderUploadQueue();
+        });
+
+        function renderUploadQueue() {
+            const wrap = document.getElementById('upload-queue-container');
+            const list = document.getElementById('upload-queue-list');
+            document.getElementById('queue-count').textContent = uploadQueue.length;
+
+            if (uploadQueue.length === 0) {
+                wrap.classList.add('hidden');
+                return;
+            }
+
+            wrap.classList.remove('hidden');
+            list.innerHTML = uploadQueue.map((item, idx) => {
+                const statusBadge = item.status === 'done'
+                    ? `<span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">สำเร็จ</span>`
+                    : item.status === 'error'
+                        ? `<span class="text-[11px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full">ผิดพลาด</span>`
+                        : `<span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">รออัปโหลด</span>`;
+
+                return `
+                    <div class="border border-gray-200 rounded-xl p-3 bg-gray-50/50">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="text-xs font-bold text-gray-400">#${idx + 1}</span>
+                                <span class="text-xs font-semibold text-gray-700 truncate max-w-[220px]">${escapeHtml(item.file.name)}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="openLocalFilePreview(${idx})" class="text-xs text-blue-600 hover:underline font-medium">ดูตัวอย่าง</button>
+                                <button type="button" onclick="removeQueueItem(${idx})" class="text-xs text-red-500 hover:underline font-medium">ลบ</button>
+                            </div>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
                             <input type="text" value="${escapeHtml(item.recipientName)}" oninput="uploadQueue[${idx}].recipientName=this.value" placeholder="ชื่อ-นามสกุล *" class="md:col-span-2 border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
                             <input type="text" value="${escapeHtml(item.grade)}" oninput="uploadQueue[${idx}].grade=this.value" placeholder="ชั้น (เช่น ม.5)" class="border border-gray-200 bg-white rounded-lg py-1.5 px-2.5 text-xs">
@@ -1420,14 +1511,119 @@
                         </div>
                     </div>
                 `;
-// ... existing code ... -->
+            }).join('');
+        }
+
+        function removeQueueItem(idx) {
+            uploadQueue.splice(idx, 1);
+            renderUploadQueue();
+        }
+
+        function clearUploadQueue() {
+            uploadQueue = [];
+            document.getElementById('upload-progress-wrap').classList.add('hidden');
+            renderUploadQueue();
+        }
+
+        async function startBatchUpload() {
+            const activityId = document.getElementById('upload-activity-select').value;
+            if (!activityId) {
+                showToast('กรุณาเลือกกิจกรรมก่อนอัปโหลด', 'error');
+                return;
+            }
+            if (uploadQueue.length === 0) return;
+
+            const btn = document.getElementById('btn-start-upload');
+            const progressWrap = document.getElementById('upload-progress-wrap');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressLabel = document.getElementById('upload-progress-label');
+            const progressPercent = document.getElementById('upload-progress-percent');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            progressWrap.classList.remove('hidden');
+
+            let successCount = 0;
+            const total = uploadQueue.length;
+
+            for (let i = 0; i < total; i++) {
+                const item = uploadQueue[i];
+                if (item.status === 'done') {
+                    successCount++;
+                    continue;
+                }
+
+                const pct = Math.round(((i) / total) * 100);
+                progressBar.style.width = pct + '%';
+                progressPercent.textContent = pct + '%';
+                progressLabel.textContent = `กำลังอัปโหลดไฟล์ที่ ${i + 1} / ${total}: ${item.recipientName || item.file.name}`;
+
+                try {
+                    const base64 = await fileToBase64(item.file);
+                    const res = await apiPost({
+                        action: 'uploadCertificate',
+                        token: adminToken,
+                        data: {
+                            activityId,
+                            recipientName: (item.recipientName || item.file.name).trim(),
                             grade: item.grade,
                             room: item.room,
                             award: item.award || getDefaultAwardValue(),
                             issueDate: item.issueDate || getDefaultThaiDateValue(),
                             status: 'published',
                             fileBase64: base64,
-// ... existing code ... -->
+                            fileName: item.file.name,
+                            mimeType: item.file.type || 'application/pdf'
+                        }
+                    });
+                    if (!res.success) throw new Error(res.error || 'อัปโหลดไม่สำเร็จ');
+                    item.status = 'done';
+                    successCount++;
+                } catch (err) {
+                    item.status = 'error';
+                    showToast(`ไฟล์ "${item.file.name}" ผิดพลาด: ${err.message}`, 'error');
+                }
+                renderUploadQueue();
+            }
+
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+            progressLabel.textContent = `อัปโหลดเสร็จสิ้น ${successCount} / ${total} ไฟล์`;
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+
+            showToast(`อัปโหลดเกียรติบัตรสำเร็จ ${successCount} จาก ${total} ไฟล์`, successCount === total ? 'success' : 'info');
+            await refreshAdminData();
+
+            if (successCount === total) {
+                setTimeout(() => clearUploadQueue(), 1200);
+            }
+        }
+
+        // ================= IMPORT FROM GOOGLE DRIVE FOLDER =================
+        async function importFromDriveFolder() {
+            const activityId = document.getElementById('upload-activity-select').value;
+            const folderUrl = document.getElementById('drive-folder-url').value.trim();
+
+            if (!activityId) {
+                showToast('กรุณาเลือกกิจกรรมด้านบนก่อนดึงไฟล์', 'error');
+                return;
+            }
+            if (!folderUrl) {
+                showToast('กรุณาวางลิงก์โฟลเดอร์ Google Drive', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-import-drive');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            showLoading('กำลังดึงไฟล์จาก Google Drive ยกโฟลเดอร์ (อาจใช้เวลาสักครู่)...');
+
+            try {
+                const res = await apiPost({
+                    action: 'importDriveFolder',
+                    token: adminToken,
                     data: {
                         activityId,
                         folderUrl,
@@ -1436,7 +1632,140 @@
                         status: 'published'
                     }
                 });
-// ... existing code ... -->
+                if (!res.success) throw new Error(res.error || 'นำเข้าไม่สำเร็จ');
+                document.getElementById('drive-folder-url').value = '';
+                showToast(res.message || 'นำเข้าไฟล์จาก Google Drive สำเร็จ', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                hideLoading();
+            }
+        }
+
+        // ================= ADMIN CERTIFICATES MANAGEMENT =================
+        function renderAdminCertsTable() {
+            const q = document.getElementById('admin-cert-search').value.trim().toLowerCase();
+            const actFilter = document.getElementById('admin-cert-act-filter').value;
+            const statusFilter = document.getElementById('admin-cert-status-filter').value;
+            const tbody = document.getElementById('table-certs');
+
+            const actMap = new Map(adminActivities.map(a => [String(a.id), a]));
+            const filtered = adminCertificates.filter(c => {
+                if (actFilter && String(c.activityId) !== actFilter) return false;
+                if (statusFilter && String(c.status) !== statusFilter) return false;
+                if (!q) return true;
+                return `${c.recipientName} ${c.certNo} ${c.award}`.toLowerCase().includes(q);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 text-xs">ไม่พบรายการเกียรติบัตร</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.slice(0, 150).map(c => {
+                const act = actMap.get(String(c.activityId));
+                const statusBadge = c.status === 'published'
+                    ? `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">เผยแพร่</span>`
+                    : c.status === 'pending'
+                        ? `<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">รอตรวจ</span>`
+                        : `<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">ยกเลิก</span>`;
+                const isPdf = (c.mimeType || '').includes('pdf') || (c.fileName || '').toLowerCase().endsWith('.pdf');
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-mono text-xs font-bold text-[#d91b42] whitespace-nowrap">${escapeHtml(c.certNo)}</td>
+                        <td class="px-4 py-3">
+                            <p class="font-bold text-gray-900 text-xs">${escapeHtml(c.recipientName)}</p>
+                            ${c.award ? `<p class="text-[11px] text-gray-500">${escapeHtml(c.award)}</p>` : ''}
+                        </td>
+                        <td class="px-4 py-3 text-xs text-gray-600 max-w-[180px] truncate">${escapeHtml(act ? act.name : '-')}</td>
+                        <td class="px-4 py-3 text-xs">
+                            <button onclick="openCertPreview('${escapeHtml(c.id)}')" class="text-blue-600 hover:underline font-medium flex items-center gap-1">
+                                <i class="ph ${isPdf ? 'ph-file-pdf' : 'ph-image'}"></i> ดูไฟล์
+                            </button>
+                        </td>
+                        <td class="px-4 py-3">${statusBadge}</td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="openEditCertModal('${escapeHtml(c.id)}')" class="text-xs text-blue-600 hover:underline font-medium mr-3">แก้ไข</button>
+                            <button onclick="deleteCert('${escapeHtml(c.id)}')" class="text-xs text-red-600 hover:underline font-medium">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('admin-cert-search').addEventListener('input', renderAdminCertsTable);
+        document.getElementById('admin-cert-act-filter').addEventListener('change', renderAdminCertsTable);
+        document.getElementById('admin-cert-status-filter').addEventListener('change', renderAdminCertsTable);
+
+        function openEditCertModal(certId) {
+            const cert = adminCertificates.find(c => String(c.id) === String(certId));
+            if (!cert) return;
+            document.getElementById('form-edit-cert').reset();
+            document.getElementById('edit-cert-id').value = cert.id;
+            document.getElementById('edit-cert-no').value = cert.certNo;
+            document.getElementById('edit-cert-status').value = cert.status || 'published';
+            document.getElementById('edit-cert-name').value = cert.recipientName || '';
+            document.getElementById('edit-cert-sid').value = cert.studentId || '';
+            document.getElementById('edit-cert-grade').value = cert.grade || '';
+            document.getElementById('edit-cert-room').value = cert.room || '';
+            document.getElementById('edit-cert-award').value = cert.award || '';
+            document.getElementById('edit-cert-date').value = cert.issueDate || '';
+            document.getElementById('modal-edit-cert').classList.remove('hidden');
+        }
+
+        document.getElementById('form-edit-cert').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('กำลังบันทึกการแก้ไข...');
+            try {
+                const data = {
+                    id: document.getElementById('edit-cert-id').value,
+                    status: document.getElementById('edit-cert-status').value,
+                    recipientName: document.getElementById('edit-cert-name').value.trim(),
+                    studentId: document.getElementById('edit-cert-sid').value.trim(),
+                    grade: document.getElementById('edit-cert-grade').value.trim(),
+                    room: document.getElementById('edit-cert-room').value.trim(),
+                    award: document.getElementById('edit-cert-award').value.trim(),
+                    issueDate: document.getElementById('edit-cert-date').value.trim()
+                };
+                const fileInput = document.getElementById('edit-cert-file');
+                if (fileInput.files && fileInput.files[0]) {
+                    const f = fileInput.files[0];
+                    data.fileBase64 = await fileToBase64(f);
+                    data.fileName = f.name;
+                    data.mimeType = f.type || 'application/pdf';
+                }
+                const res = await apiPost({ action: 'updateCertificate', token: adminToken, data });
+                if (!res.success) throw new Error(res.error || 'บันทึกไม่สำเร็จ');
+                document.getElementById('modal-edit-cert').classList.add('hidden');
+                showToast(res.message || 'แก้ไขข้อมูลสำเร็จ', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        async function deleteCert(certId) {
+            const ok = await showConfirm('ยืนยันการลบเกียรติบัตรนี้? ไฟล์ใน Google Drive จะถูกย้ายไปถังขยะด้วย', 'ลบเกียรติบัตร');
+            if (!ok) return;
+            showLoading('กำลังลบเกียรติบัตร...');
+            try {
+                const res = await apiPost({ action: 'deleteCertificate', token: adminToken, id: certId });
+                if (!res.success) throw new Error(res.error || 'ลบไม่สำเร็จ');
+                showToast('ลบเกียรติบัตรเรียบร้อยแล้ว', 'success');
+                await refreshAdminData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
         // ================= INITIALIZE =================
         window.addEventListener('DOMContentLoaded', () => {
             updateHeaderButtons('public');
