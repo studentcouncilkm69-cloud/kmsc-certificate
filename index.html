@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคลังเกียรติบัตรออนไลน์ - สภานักเรียนโรงเรียนคำม่วง</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Noto Sans Thai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans Thai"', 'sans-serif'],
+                    },
+                    colors: {
+                        school: {
+                            red: '#D32F2F',
+                            darkred: '#B71C1C',
+                            light: '#FFF5F5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F9FA;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-active { border-bottom-color: #d91b42; color: #d91b42; font-weight: 700; }
+        .tab-inactive { border-bottom-color: transparent; color: #6B7280; }
+        .toast-enter { transform: translateY(100%); opacity: 0; }
+        .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s ease-out; }
+        .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s ease-in; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased font-sans flex flex-col min-h-screen relative pb-16">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[120] flex flex-col gap-2 w-[92%] max-w-md pointer-events-none"></div>
+
+    <!-- Global Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/75 backdrop-blur-sm z-[110] hidden flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-red-100 border-t-[#d91b42] rounded-full animate-spin mb-3"></div>
+        <p id="loading-text" class="text-sm font-semibold text-gray-700">กำลังโหลดข้อมูล...</p>
+    </div>
+
+    <!-- Header (คงดีไซน์เดิมตามภาพ Reference) -->
+    <header class="bg-white sticky top-0 z-30 px-4 py-3 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-3 cursor-pointer select-none" id="logo-container" title="สภานักเรียนโรงเรียนคำม่วง">
+            <img src="https://i.postimg.cc/wBN5btrp/rong-re-yn-kham-wng.png" alt="โลโก้โรงเรียนคำม่วง" class="w-10 h-10 rounded-full border border-red-100 shadow-sm object-cover bg-white">
+            <div>
+                <h1 class="text-sm font-bold text-gray-900 leading-tight">ระบบคลังเกียรติบัตรออนไลน์</h1>
+                <p class="text-[9px] text-gray-500 uppercase tracking-wide">CERTIFICATE ARCHIVE SYSTEM</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="nav-admin-btn" class="hidden text-xs bg-gray-900 text-white font-medium px-3 py-1.5 rounded-full hover:bg-black transition-colors flex items-center gap-1">
+                <i class="ph ph-gear"></i> จัดการระบบ
+            </button>
+            <button id="nav-home-btn" class="hidden text-xs text-gray-700 bg-gray-100 font-medium px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors flex items-center gap-1">
+                <i class="ph ph-house"></i> หน้าหลัก
+            </button>
+            <button id="admin-logout-btn" class="hidden text-xs text-red-600 font-medium px-3 py-1.5 rounded-full border border-red-200 hover:bg-red-50 transition-colors">
+                ออกจากระบบ
+            </button>
+        </div>
+    </header>
+
+    <!-- Demo Mode Notice (ซ่อนอัตโนมัติเมื่อใส่ลิงก์ Google Apps Script แล้ว) -->
+    <div id="demo-banner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-800">
+        <i class="ph-fill ph-warning-circle"></i> <b>โหมดตัวอย่าง (Demo Mode):</b> ยังไม่ได้เชื่อมต่อ Google Apps Script — กรุณานำ Web App URL มาวางที่ตัวแปร <code class="bg-amber-100 px-1 rounded">API_URL</code> ในไฟล์ <code>index.html</code>
+    </div>
+
+    <!-- ================= PUBLIC VIEW ================= -->
+    <main id="public-view" class="flex-1 w-full max-w-4xl mx-auto px-4 py-5">
+        
+        <!-- Hero Card (คงดีไซน์เดิมตามภาพ Reference) -->
+        <div class="bg-gradient-to-br from-[#d91b42] to-[#990f2b] rounded-[32px] p-7 md:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+            <i class="ph-fill ph-star absolute -right-8 -bottom-10 text-[200px] text-white opacity-10 rotate-12 pointer-events-none"></i>
+            <div class="inline-block bg-white/20 backdrop-blur-md rounded-full px-4 py-1.5 text-[11px] font-bold tracking-wider mb-4 border border-white/30 shadow-sm">
+                STUDENT COUNCIL
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-3 tracking-tight">คลังเกียรติบัตรออนไลน์</h2>
+            <p class="text-white/90 text-sm md:text-base leading-relaxed max-w-[92%] font-light">
+                ค้นหาและดาวน์โหลดไฟล์เกียรติบัตรต้นฉบับจากกิจกรรมต่างๆ ของสภานักเรียนได้อย่างง่ายดาย
+            </p>
+        </div>
+
+        <!-- Public Nav Tabs -->
+        <div class="flex border-b border-gray-200 mb-5 sticky top-[64px] bg-[#F8F9FA] z-20 pt-1">
+            <button id="tab-search" class="flex-1 sm:flex-none px-4 py-3 border-b-2 tab-active text-sm flex items-center justify-center gap-1.5 transition-colors">
+                <i class="ph ph-magnifying-glass text-base"></i> ค้นหาเกียรติบัตร
+            </button>
+            <button id="tab-activities" class="flex-1 sm:flex-none px-4 py-3 border-b-2 tab-inactive text-sm flex items-center justify-center gap-1.5 transition-colors">
+                <i class="ph ph-squares-four text-base"></i> กิจกรรมทั้งหมด
+            </button>
+            <button id="tab-verify" class="flex-1 sm:flex-none px-4 py-3 border-b-2 tab-inactive text-sm flex items-center justify-center gap-1.5 transition-colors">
+                <i class="ph ph-shield-check text-base"></i> ตรวจสอบเลขที่
+            </button>
+        </div>
+
+        <!-- TAB 1: ค้นหาเกียรติบัตร (ค้นหาง่ายด้วย ชื่อ + ปีการศึกษา) -->
+        <section id="section-search" class="block">
+            <div class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-5 mb-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-7 h-7 rounded-full bg-red-50 text-[#d91b42] flex items-center justify-center">
+                        <i class="ph-bold ph-magnifying-glass"></i>
+                    </span>
+                    <h3 class="font-bold text-base text-gray-900">ค้นหาเกียรติบัตร</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="relative md:col-span-2">
+                        <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                        <input type="text" id="global-search-input" placeholder="ชื่อ นามสกุล ชื่อกิจกรรม หรือเลขที่เกียรติบัตร..." 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#d91b42]/20 focus:border-[#d91b42] transition-all">
+                    </div>
+                    <div class="relative">
+                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none"></i>
+                        <select id="global-year-filter" class="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#d91b42]/20 focus:border-[#d91b42] appearance-none cursor-pointer">
+                            <option value="">ทุกปีการศึกษา</option>
+                        </select>
+                        <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="global-certs-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="global-certs-empty" class="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-gray-100 shadow-sm px-4">
+                <i class="ph ph-files text-5xl mb-3 text-gray-300"></i>
+                <p id="global-empty-title" class="font-bold text-gray-700 text-base">พิมพ์ชื่อ-นามสกุลเพื่อค้นหา</p>
+                <p id="global-empty-sub" class="text-xs text-gray-400 mt-1">หรือเลือกดูจากแท็บ "กิจกรรมทั้งหมด" ด้านบน</p>
+            </div>
+        </section>
+
+        <!-- TAB 2: กิจกรรมทั้งหมด -->
+        <section id="section-activities" class="hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h3 class="font-bold text-base text-gray-800 flex items-center gap-2">
+                    <i class="ph-fill ph-fire text-[#d91b42]"></i> กิจกรรมของสภานักเรียน
+                </h3>
+                <select id="activity-year-filter" class="bg-white border border-gray-200 rounded-xl py-1.5 px-3 text-xs font-medium text-gray-700 focus:outline-none focus:border-[#d91b42]">
+                    <option value="">ทุกปีการศึกษา</option>
+                </select>
+            </div>
+
+            <div id="public-activities-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+            <div id="public-activities-empty" class="hidden py-12 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-gray-100 shadow-sm">
+                <i class="ph ph-calendar-blank text-5xl mb-3 text-gray-300"></i>
+                <p class="font-medium text-gray-600 text-sm">ยังไม่มีกิจกรรมที่เผยแพร่ในขณะนี้</p>
+            </div>
+        </section>
+
+        <!-- SUB-VIEW: รายละเอียดกิจกรรม (เมื่อกดการ์ดกิจกรรม) -->
+        <section id="section-activity-detail" class="hidden">
+            <button id="btn-back-activities" class="mb-4 text-sm text-gray-600 hover:text-[#d91b42] flex items-center gap-1.5 font-medium transition-colors">
+                <i class="ph-bold ph-arrow-left"></i> กลับไปหน้ารายการกิจกรรม
+            </button>
+            
+            <div class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-5 mb-5 flex flex-col md:flex-row gap-5 items-start">
+                <div id="detail-cover" class="w-full md:w-1/3 aspect-[16/10] bg-gray-100 rounded-2xl overflow-hidden shrink-0 border border-gray-100"></div>
+                <div class="flex-1 w-full">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span id="detail-year" class="text-[11px] font-bold text-[#d91b42] bg-red-50 px-2.5 py-1 rounded-full">ปีการศึกษา -</span>
+                        <span id="detail-category" class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full hidden"></span>
+                        <span id="detail-count" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">0 เกียรติบัตร</span>
+                    </div>
+                    <h3 id="detail-name" class="font-bold text-xl text-gray-900 mb-1.5">ชื่อกิจกรรม</h3>
+                    <p id="detail-desc" class="text-xs md:text-sm text-gray-500 mb-4 leading-relaxed"></p>
+                    
+                    <div class="relative">
+                        <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="detail-search-input" placeholder="ค้นหาชื่อ-นามสกุล ในกิจกรรมนี้..." 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#d91b42]/20 focus:border-[#d91b42]">
+                    </div>
+                </div>
+            </div>
+
+            <div id="detail-certs-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="detail-certs-empty" class="hidden py-10 text-center text-sm text-gray-500 bg-white rounded-2xl border border-gray-100">
+                ไม่พบรายชื่อเกียรติบัตรในกิจกรรมนี้
+            </div>
+        </section>
+
+        <!-- TAB 3: ตรวจสอบเลขที่เกียรติบัตร -->
+        <section id="section-verify" class="hidden max-w-lg mx-auto">
+            <div class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-6 text-center">
+                <div class="w-14 h-14 bg-red-50 text-[#d91b42] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="ph-fill ph-shield-check text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-lg text-gray-900 mb-1">ตรวจสอบความถูกต้องของเกียรติบัตร</h3>
+                <p class="text-xs text-gray-500 mb-5">กรอกเลขที่เกียรติบัตรเพื่อตรวจสอบข้อมูลจากฐานข้อมูลสภานักเรียน</p>
+                
+                <form id="verify-form" class="space-y-3">
+                    <div class="relative">
+                        <i class="ph ph-hash absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="verify-input" placeholder="เช่น KM-SC-69-0001" required
+                            class="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#d91b42]/20 focus:border-[#d91b42] font-mono text-center uppercase">
+                    </div>
+                    <button type="submit" class="w-full bg-[#d91b42] text-white rounded-2xl py-3 text-sm font-bold hover:bg-[#b51435] transition-colors shadow-sm">
+                        ตรวจสอบข้อมูล
+                    </button>
+                </form>
+            </div>
+            <div id="verify-result" class="hidden mt-5 bg-white rounded-[24px] shadow-sm border border-gray-100 p-6"></div>
+        </section>
+    </main>
+
+    <!-- ================= ADMIN VIEW ================= -->
+    <main id="admin-view" class="hidden flex-1 w-full max-w-5xl mx-auto px-4 py-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3">
+            <div>
+                <h2 class="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                    <i class="ph-fill ph-crown text-[#d91b42]"></i> ระบบจัดการหลังบ้าน (Admin)
+                </h2>
+                <p id="admin-welcome-text" class="text-xs text-gray-500">เชื่อมต่อฐานข้อมูล Google Sheets & Google Drive</p>
+            </div>
+            <button onclick="refreshAdminData()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-1.5 font-medium shadow-sm">
+                <i class="ph ph-arrows-clockwise"></i> รีเฟรชข้อมูล
+            </button>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="flex overflow-x-auto border-b border-gray-200 mb-6 no-scrollbar">
+            <button id="admin-tab-dash" class="px-4 py-3 border-b-2 tab-active text-sm whitespace-nowrap flex items-center gap-1.5">
+                <i class="ph ph-chart-pie-slice"></i> ภาพรวม
+            </button>
+            <button id="admin-tab-activities" class="px-4 py-3 border-b-2 tab-inactive text-sm whitespace-nowrap flex items-center gap-1.5">
+                <i class="ph ph-calendar-star"></i> จัดการกิจกรรม
+            </button>
+            <button id="admin-tab-upload" class="px-4 py-3 border-b-2 tab-inactive text-sm whitespace-nowrap flex items-center gap-1.5">
+                <i class="ph ph-cloud-arrow-up"></i> อัปโหลดเกียรติบัตร (Canva)
+            </button>
+            <button id="admin-tab-certs" class="px-4 py-3 border-b-2 tab-inactive text-sm whitespace-nowrap flex items-center gap-1.5">
+                <i class="ph ph-files"></i> จัดการรายการเกียรติบัตร
+            </button>
+        </div>
+
+        <!-- ADMIN TAB 1: Dashboard -->
+        <section id="admin-sec-dash" class="block">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-1">กิจกรรมทั้งหมด</p>
+                    <h3 id="stat-activities" class="text-2xl font-extrabold text-gray-900">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-1">กิจกรรมที่เผยแพร่</p>
+                    <h3 id="stat-pub-activities" class="text-2xl font-extrabold text-emerald-600">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-1">เกียรติบัตรทั้งหมด</p>
+                    <h3 id="stat-certs" class="text-2xl font-extrabold text-[#d91b42]">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-1">ระงับ / รอตรวจสอบ</p>
+                    <h3 id="stat-other-certs" class="text-2xl font-extrabold text-amber-500">0</h3>
+                </div>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-900 leading-relaxed">
+                <p class="font-bold mb-1"><i class="ph-fill ph-info"></i> วิธีใช้งานระบบอัปโหลดจาก Canva แบบรวดเร็ว:</p>
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>ไปที่แท็บ <b>"จัดการกิจกรรม"</b> เพื่อสร้างกิจกรรมใหม่ (ระบบจะสร้างการ์ดบนหน้าเว็บอัตโนมัติ)</li>
+                    <li>ไปที่แท็บ <b>"อัปโหลดเกียรติบัตร (Canva)"</b> เลือกกิจกรรม แล้วลากไฟล์ PDF หรือรูปภาพ (PNG/JPG) ที่ทำเสร็จแล้วมาวางทีเดียวหลายไฟล์ได้เลย</li>
+                    <li>ระบบจะดึงชื่อไฟล์มาใส่เป็นชื่อผู้ได้รับให้อัตโนมัติ และอัปโหลดไฟล์ต้นฉบับไปเก็บใน Google Drive พร้อมสร้างเลขที่เกียรติบัตรให้ทันที</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ADMIN TAB 2: Activities -->
+        <section id="admin-sec-activities" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-800 text-sm">รายการกิจกรรมทั้งหมด</h3>
+                <button onclick="openActivityModal()" class="bg-[#d91b42] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-[#b51435] transition-colors flex items-center gap-1.5">
+                    <i class="ph-bold ph-plus"></i> เพิ่มกิจกรรมใหม่
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 bg-gray-50 uppercase border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3">ภาพปก</th>
+                                <th class="px-4 py-3">ชื่อกิจกรรม</th>
+                                <th class="px-4 py-3">ปีการศึกษา</th>
+                                <th class="px-4 py-3">สถานะ</th>
+                                <th class="px-4 py-3 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-activities" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN TAB 3: Upload Certificates (Single & Batch) -->
+        <section id="admin-sec-upload" class="hidden">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-5">
+                <h3 class="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
+                    <i class="ph-fill ph-cloud-arrow-up text-[#d91b42]"></i> อัปโหลดไฟล์เกียรติบัตรเข้า Google Drive
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">เลือกกิจกรรม <span class="text-red-500">*</span></label>
+                        <select id="upload-activity-select" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                            <option value="">-- กรุณาเลือกกิจกรรม --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">ประเภทเกียรติบัตร / รางวัล (ค่าเริ่มต้น)</label>
+                        <input type="text" id="upload-default-award" placeholder="เช่น เข้าร่วมกิจกรรม / รางวัลชนะเลิศ" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">วันที่ออกเกียรติบัตร (ค่าเริ่มต้น)</label>
+                        <input type="text" id="upload-default-date" placeholder="เช่น 15 สิงหาคม 2569" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                </div>
+
+                <!-- Dropzone -->
+                <label for="cert-file-input" class="block border-2 border-dashed border-gray-300 hover:border-[#d91b42] bg-gray-50 hover:bg-red-50/30 rounded-2xl p-8 text-center cursor-pointer transition-all">
+                    <i class="ph ph-file-arrow-up text-4xl text-[#d91b42] mb-2"></i>
+                    <p class="font-bold text-gray-800 text-sm">คลิกเพื่อเลือกไฟล์เกียรติบัตร (เลือกได้ทีละไฟล์ หรือหลายไฟล์พร้อมกัน)</p>
+                    <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ PDF, PNG, JPG, JPEG จาก Canva (แนะนำไม่เกิน 10MB ต่อไฟล์)</p>
+                    <p class="text-[11px] text-emerald-700 mt-2 font-medium">เคล็ดลับ: ตั้งชื่อไฟล์เป็นชื่อนักเรียน เช่น "ด.ช.สมชาย ใจดี.pdf" ระบบจะกรอกชื่อให้อัตโนมัติ</p>
+                    <input type="file" id="cert-file-input" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" class="hidden">
+                </label>
+            </div>
+
+            <!-- Queue List -->
+            <div id="upload-queue-container" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                    <div>
+                        <h4 class="font-bold text-gray-800 text-sm">รายการไฟล์ที่เตรียมอัปโหลด (<span id="queue-count">0</span> ไฟล์)</h4>
+                        <p class="text-xs text-gray-500">ตรวจสอบชื่อ-นามสกุลและดูตัวอย่างไฟล์ก่อนกดบันทึก</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="clearUploadQueue()" class="px-3 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">ล้างรายการ</button>
+                        <button id="btn-start-upload" onclick="startBatchUpload()" class="px-5 py-2 text-xs font-bold text-white bg-[#d91b42] rounded-xl hover:bg-[#b51435] shadow-sm flex items-center gap-1.5">
+                            <i class="ph-bold ph-cloud-arrow-up"></i> บันทึกและอัปโหลดทั้งหมด
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="upload-progress-wrap" class="hidden mb-4 bg-gray-100 rounded-xl p-3">
+                    <div class="flex justify-between text-xs font-bold text-gray-700 mb-1.5">
+                        <span id="upload-progress-label">กำลังอัปโหลด...</span>
+                        <span id="upload-progress-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="upload-progress-bar" class="bg-[#d91b42] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="upload-queue-list" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- ADMIN TAB 4: Manage Certificates -->
+        <section id="admin-sec-certs" class="hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row gap-3 justify-between">
+                    <div class="flex flex-1 gap-2">
+                        <input type="text" id="admin-cert-search" placeholder="ค้นหาชื่อ, เลขที่เกียรติบัตร..." class="flex-1 border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none focus:border-[#d91b42]">
+                        <select id="admin-cert-act-filter" class="border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none">
+                            <option value="">ทุกกิจกรรม</option>
+                        </select>
+                        <select id="admin-cert-status-filter" class="border border-gray-200 rounded-xl py-2 px-3 text-xs bg-white focus:outline-none">
+                            <option value="">ทุกสถานะ</option>
+                            <option value="published">เผยแพร่แล้ว</option>
+                            <option value="pending">รอตรวจสอบ</option>
+                            <option value="revoked">ยกเลิก</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 bg-white uppercase border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3">เลขที่</th>
+                                <th class="px-4 py-3">ผู้ได้รับ</th>
+                                <th class="px-4 py-3">กิจกรรม</th>
+                                <th class="px-4 py-3">ไฟล์</th>
+                                <th class="px-4 py-3">สถานะ</th>
+                                <th class="px-4 py-3 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-certs" class="divide-y divide-gray-100 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Preview Certificate Modal (ใช้ดูได้ทั้ง PDF และรูปภาพ) -->
+    <div id="preview-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-3 md:p-6">
+        <div class="bg-white rounded-3xl w-full max-w-4xl h-[88vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div class="min-w-0 pr-4">
+                    <h3 id="preview-title" class="font-bold text-sm md:text-base text-gray-900 truncate">ตัวอย่างเกียรติบัตร</h3>
+                    <p id="preview-subtitle" class="text-[11px] text-gray-500 truncate"></p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a id="preview-download-btn" href="#" target="_blank" class="bg-[#d91b42] text-white px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-[#b51435] flex items-center gap-1.5">
+                        <i class="ph-bold ph-download-simple"></i> ดาวน์โหลด
+                    </a>
+                    <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-800 bg-gray-200/70 rounded-full p-1.5">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="preview-body" class="flex-1 bg-gray-900 relative flex items-center justify-center overflow-hidden">
+                <!-- iframe หรือ img จะถูกใส่ตรงนี้ -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal (เข้าได้โดยคลิกโลโก้ 5 ครั้งใน 2 วินาที) -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <i class="ph-fill ph-lock-key text-[#d91b42] text-xl"></i> เข้าสู่ระบบผู้ดูแล (Admin)
+                </h3>
+                <button onclick="document.getElementById('admin-login-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1.5">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="admin-login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Username</label>
+                    <input type="text" id="admin-username" required autocomplete="username" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Password</label>
+                    <input type="password" id="admin-password" required autocomplete="current-password" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white rounded-xl py-2.5 text-sm font-bold hover:bg-black transition-colors">
+                    เข้าสู่ระบบ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activity Add/Edit Modal -->
+    <div id="modal-activity" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-gray-900 mb-4" id="modal-act-title">เพิ่มกิจกรรมใหม่</h3>
+            <form id="form-activity" class="space-y-4">
+                <input type="hidden" id="act-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อกิจกรรม <span class="text-red-500">*</span></label>
+                    <input type="text" id="act-name" required class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">ปีการศึกษา <span class="text-red-500">*</span></label>
+                        <input type="text" id="act-year" required placeholder="เช่น 2569" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">หมวดหมู่กิจกรรม</label>
+                        <input type="text" id="act-category" placeholder="เช่น จิตอาสา, อบรม, ประกวด" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">สถานะการแสดงผล</label>
+                    <select id="act-status" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                        <option value="published">เผยแพร่ (แสดงการ์ดบนหน้าเว็บ)</option>
+                        <option value="draft">ซ่อน / ฉบับร่าง</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">คำอธิบายกิจกรรมสั้นๆ</label>
+                    <textarea id="act-desc" rows="2" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-[#d91b42]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">อัปโหลดภาพปกกิจกรรม (PNG/JPG)</label>
+                    <input type="file" id="act-cover-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-red-50 file:text-[#d91b42] file:font-bold">
+                    <input type="hidden" id="act-cover-url">
+                    <p class="text-[11px] text-gray-400 mt-1">ระบบจะอัปโหลดภาพปกไปเก็บใน Google Drive อัตโนมัติ</p>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-activity').classList.add('hidden')" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#d91b42] text-white text-sm font-bold hover:bg-[#b51435]">บันทึกกิจกรรม</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Certificate Modal -->
+    <div id="modal-edit-cert" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">แก้ไขข้อมูลเกียรติบัตร</h3>
+            <form id="form-edit-cert" class="space-y-3">
+                <input type="hidden" id="edit-cert-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขที่เกียรติบัตร</label>
+                        <input type="text" id="edit-cert-no" disabled class="w-full bg-gray-100 border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono text-gray-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">สถานะ</label>
+                        <select id="edit-cert-status" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                            <option value="published">เผยแพร่แล้ว</option>
+                            <option value="pending">รอตรวจสอบ</option>
+                            <option value="revoked">ยกเลิก</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อ-นามสกุล ผู้ได้รับ</label>
+                    <input type="text" id="edit-cert-name" required class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขประจำตัว</label>
+                        <input type="text" id="edit-cert-sid" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ระดับชั้น</label>
+                        <input type="text" id="edit-cert-grade" placeholder="เช่น ม.5" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ห้อง</label>
+                        <input type="text" id="edit-cert-room" placeholder="เช่น 1" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">รางวัล / ประเภท</label>
+                        <input type="text" id="edit-cert-award" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">วันที่ออกเกียรติบัตร</label>
+                        <input type="text" id="edit-cert-date" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">เปลี่ยนไฟล์เกียรติบัตรใหม่ (ปล่อยว่างหากใช้ไฟล์เดิม)</label>
+                    <input type="file" id="edit-cert-file" accept=".pdf,.png,.jpg,.jpeg" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-50 file:text-[#d91b42] file:font-bold">
+                </div>
+                <div class="flex gap-2 pt-3">
+                    <button type="button" onclick="document.getElementById('modal-edit-cert').classList.add('hidden')" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#d91b42] text-white text-sm font-bold hover:bg-[#b51435]">บันทึกการแก้ไข</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ====================================================================
+         * การตั้งค่าเชื่อมต่อ Google Apps Script (สำคัญมาก!)
+         * ให้นำ Web App URL ที่ได้จากการ Deploy ไฟล์ Code.gs มาวางแทนข้อความด้านล่าง
+         * ====================================================================
+         */
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwFa0ZPgkEMxBBLBy1I-VUdSBnANQQ6zrWRXOGNDF5QGHh3aQCtPdg7F45K6X0oaxtzEA/exec';
+
+        const isDemoMode = !API_URL || API_URL.includes('YOUR_GOOGLE_APPS_SCRIPT');
+// ... existing code ... -->
