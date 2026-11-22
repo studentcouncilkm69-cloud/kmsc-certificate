@@ -2898,6 +2898,7 @@
 
             let successCount = 0;
             let failCount = 0;
+            let lastError = '';
 
             for (let i = 0; i < ids.length; i++) {
                 if (aiScanAborted) break;
@@ -2920,6 +2921,13 @@
                             await new Promise(r => setTimeout(r, 12000));
                             continue;
                         }
+                        if (res.needAuth || res.needApiKey) {
+                            lastError = res.error || 'กรุณาตรวจสอบสิทธิ์หรือ API Key';
+                            aiScanAborted = true;
+                            failCount++;
+                            done = true;
+                            break;
+                        }
                         if (res.success && !res.skipped) {
                             const target = adminCertificates.find(c => String(c.id) === String(certId));
                             if (target) {
@@ -2929,10 +2937,12 @@
                             successCount++;
                             renderAdminCertsTable();
                         } else {
+                            if (res.error || res.message) lastError = res.error || res.message;
                             failCount++;
                         }
                         done = true;
                     } catch (err) {
+                        lastError = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
                         failCount++;
                         done = true;
                     }
@@ -2950,12 +2960,16 @@
             scanBtn.disabled = false;
             saveBtn.disabled = false;
             progBox.classList.add('hidden');
-            showToast(
-                aiScanAborted
-                    ? `หยุดสแกนแล้ว (อ่านชื่อสำเร็จ ${successCount} ใบ)`
-                    : `AI อ่านชื่อเสร็จสิ้น! สำเร็จ ${successCount} ใบ${failCount > 0 ? ` (ข้าม/ไม่สำเร็จ ${failCount} ใบ)` : ''}`,
-                successCount > 0 ? 'success' : 'info'
-            );
+            if (successCount === 0 && lastError) {
+                showToast(lastError, 'error');
+            } else {
+                showToast(
+                    aiScanAborted
+                        ? `หยุดสแกนแล้ว (อ่านชื่อสำเร็จ ${successCount} ใบ)${lastError ? ' • ' + lastError : ''}`
+                        : `AI อ่านชื่อเสร็จสิ้น! สำเร็จ ${successCount} ใบ${failCount > 0 ? ` (ข้าม/ไม่สำเร็จ ${failCount} ใบ)` : ''}`,
+                    successCount > 0 ? 'success' : 'info'
+                );
+            }
         }
 
         function toggleSelectCert(id, isChecked) {
