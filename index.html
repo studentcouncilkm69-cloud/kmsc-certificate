@@ -283,7 +283,7 @@
             <!-- แถบสลับมุมมอง & คำแนะนำโหมดแกลเลอรี -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
                 <p id="detail-result-summary" class="text-xs font-bold text-gray-500"></p>
-                <div class="inline-flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+                <div id="detail-view-toggle" class="inline-flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
                     <button type="button" id="btn-view-list" onclick="setDetailViewMode('list')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
                         <i class="ph-bold ph-list-bullets"></i> รายชื่อ
                     </button>
@@ -885,6 +885,7 @@
         let adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
         let currentActivityDetail = null;
         let currentDetailViewMode = 'list';
+        let isCurrentActivityGalleryOnly = false;
         let detailVisibleCount = 24;
         let uploadQueue = [];
         let selectedCertIds = new Set();
@@ -1048,13 +1049,10 @@
             return /^\s*\d+(\s*\(\d+\))?\s*$/.test(String(name || ''));
         }
 
-        function formatGradeRoom(cert) {
-            const g = String(cert.grade || '').trim().replace(/^'+/, '');
-            const r = String(cert.room || '').trim().replace(/^'+/, '');
-            if (g && r) return g.includes('/') ? g : `${g}/${r}`;
-            if (g) return g;
-            if (r) return `ห้อง ${r}`;
-            return '';
+        function isNumericOnlyActivity(actCerts) {
+            if (!actCerts || actCerts.length === 0) return false;
+            const numericCount = actCerts.filter(c => isNumericOnlyName(c.recipientName)).length;
+            return (numericCount / actCerts.length) >= 0.5;
         }
 
         function getAwardRank(award) {
@@ -1519,8 +1517,11 @@
             const subfolderWrap = document.getElementById('detail-subfolder-wrap');
             const subfolderSel = document.getElementById('detail-subfolder-filter');
 
+            const numericOnly = isNumericOnlyActivity(actCerts);
+            isCurrentActivityGalleryOnly = (act.displayMode === 'gallery' || numericOnly);
+
             if (subfolderKeys.length > 0) {
-                const isGalleryAct = act.displayMode === 'gallery';
+                const isGalleryAct = isCurrentActivityGalleryOnly;
                 const defaultOption = isGalleryAct
                     ? `<option value="">-- กรุณาเลือกหมวดการแข่งขัน / ห้องเรียน --</option>`
                     : `<option value="">ทุกหมวด / ทุกห้อง (${count} รายการ)</option>`;
@@ -1538,7 +1539,7 @@
                 subfolderWrap.classList.add('hidden');
             }
 
-            currentDetailViewMode = act.displayMode === 'gallery' ? 'gallery' : 'list';
+            currentDetailViewMode = isCurrentActivityGalleryOnly ? 'gallery' : 'list';
             detailVisibleCount = 24;
             updateDetailViewModeUI();
 
@@ -1547,16 +1548,28 @@
         }
 
         function updateDetailViewModeUI() {
+            const toggleWrap = document.getElementById('detail-view-toggle');
+            const typeWrap = document.getElementById('detail-type-wrap');
+            const searchWrap = document.getElementById('detail-search-wrap');
             const btnList = document.getElementById('btn-view-list');
             const btnGallery = document.getElementById('btn-view-gallery');
             const hint = document.getElementById('detail-gallery-hint');
             const searchInput = document.getElementById('detail-search-input');
 
+            if (toggleWrap) toggleWrap.classList.toggle('hidden', isCurrentActivityGalleryOnly);
+            if (typeWrap) typeWrap.classList.toggle('hidden', isCurrentActivityGalleryOnly);
+            if (searchWrap) {
+                searchWrap.classList.toggle('sm:col-span-12', isCurrentActivityGalleryOnly);
+                searchWrap.classList.toggle('sm:col-span-8', !isCurrentActivityGalleryOnly);
+            }
+
             if (currentDetailViewMode === 'gallery') {
                 btnGallery.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors bg-[#d91b42] text-white';
                 btnList.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors text-gray-500 hover:text-gray-800';
                 hint.classList.remove('hidden');
-                searchInput.placeholder = 'ค้นหาชื่อหมวด หรือชื่อไฟล์ในกิจกรรมนี้...';
+                searchInput.placeholder = isCurrentActivityGalleryOnly
+                    ? 'ค้นหาชื่อหมวดการแข่งขัน...'
+                    : 'ค้นหาชื่อหมวด หรือชื่อไฟล์ในกิจกรรมนี้...';
             } else {
                 btnList.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors bg-[#d91b42] text-white';
                 btnGallery.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors text-gray-500 hover:text-gray-800';
@@ -1566,6 +1579,10 @@
         }
 
         function setDetailViewMode(mode) {
+            if (isCurrentActivityGalleryOnly) {
+                currentDetailViewMode = 'gallery';
+                return;
+            }
             currentDetailViewMode = mode === 'gallery' ? 'gallery' : 'list';
             detailVisibleCount = 24;
             updateDetailViewModeUI();
