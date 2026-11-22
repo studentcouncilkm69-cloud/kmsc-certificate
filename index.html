@@ -1476,6 +1476,67 @@
                 return;
             }
 
+            // จัดกลุ่มเกียรติบัตรตามกิจกรรมเพื่อตรวจจับกิจกรรมแบบแกลเลอรี / ไม่มีรายชื่อบุคคล
+            const certsByAct = {};
+            publicCertificates.forEach(c => {
+                if (!certsByAct[c.activityId]) certsByAct[c.activityId] = [];
+                certsByAct[c.activityId].push(c);
+            });
+
+            const galleryOnlyActIds = new Set();
+            const actDupNamesMap = {};
+            publicActivities.forEach(a => {
+                const list = certsByAct[a.id] || [];
+                const dupSet = getDuplicateNameSet(list);
+                actDupNamesMap[a.id] = dupSet;
+                if (a.displayMode === 'gallery' || isNonPersonActivity(list, dupSet)) {
+                    galleryOnlyActIds.add(a.id);
+                }
+            });
+
+            // ค้นหากิจกรรมที่ตรงกับคำค้นหา เพื่อแสดงในกล่อง "หรือคุณกำลังหมายถึง..."
+            const matchedActivities = [];
+            if (q || year) {
+                sortActivitiesList(publicActivities).forEach(act => {
+                    if (year && String(act.year) !== String(year)) return;
+                    const actCerts = certsByAct[act.id] || [];
+                    const isGalleryAct = galleryOnlyActIds.has(act.id);
+
+                    const actFieldMatch = q && (
+                        String(act.name || '').toLowerCase().includes(q) ||
+                        String(act.organizer || '').toLowerCase().includes(q) ||
+                        String(act.category || '').toLowerCase().includes(q) ||
+                        String(act.desc || '').toLowerCase().includes(q)
+                    );
+
+                    // หาหมวดย่อยที่ตรงกับคำค้นหา (เช่น พิมพ์ "จรวดขวดน้ำ" หรือ "FreeFire")
+                    const matchedSubfolders = [];
+                    if (q) {
+                        const subCounts = {};
+                        actCerts.forEach(c => {
+                            const gr = formatGradeRoom(c);
+                            if (gr && gr.toLowerCase().includes(q)) {
+                                subCounts[gr] = (subCounts[gr] || 0) + 1;
+                            }
+                        });
+                        Object.keys(subCounts)
+                            .sort((a, b) => a.localeCompare(b, 'th', { numeric: true }))
+                            .forEach(k => matchedSubfolders.push({ name: k, count: subCounts[k] }));
+                    }
+
+                    // แสดงในส่วนแนะนำเมื่อ: พิมพ์คำค้นแล้วตรงกับกิจกรรม/หมวดย่อย หรือเลือกเฉพาะปีการศึกษาแล้วเป็นกิจกรรมแบบแกลเลอรี
+                    if ((q && (actFieldMatch || matchedSubfolders.length > 0)) || (!q && year && isGalleryAct)) {
+                        matchedActivities.push({
+                            act,
+                            count: actCerts.length,
+                            isGalleryAct,
+                            matchedSubfolders: matchedSubfolders.slice(0, 6)
+                        });
+                    }
+                });
+            }
+
+            // กรองผลลัพธ์เกียรติบัตรรายบุคคล/ห้องเรียน (ซ่อนใบที่ไม่มีชื่อคนหรือเลข 1 ล้วนๆ ออกไป)
             const normQ = normalizeCertNo(q);
             const filtered = publicCertificates.filter(c => {
                 const act = actMap[c.activityId];
@@ -1483,19 +1544,26 @@
                 if (year && String(act.year) !== String(year)) return false;
                 if (typeFilter === 'classroom' && !isClassroomCert(c)) return false;
                 if (typeFilter === 'individual' && isClassroomCert(c)) return false;
+
+                // ไม่แสดงการ์ดเลข 1 / ชื่อไฟล์ซ้ำๆ ในหน้าค้นหารายบุคคล (ให้ไปแสดงเป็นการ์ดกิจกรรมแทน)
+                const gr = formatGradeRoom(c);
+                if (galleryOnlyActIds.has(c.activityId) || isNonPersonFileName(c.recipientName, gr, actDupNamesMap[c.activityId])) {
+                    return false;
+                }
+
                 if (!q) return true;
                 return (
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
                     (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
-                    formatGradeRoom(c).toLowerCase().includes(q) ||
+                    gr.toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q) ||
                     String(act.name || '').toLowerCase().includes(q) ||
                     String(act.organizer || '').toLowerCase().includes(q)
                 );
             });
 
-            if (filtered.length === 0) {
+            if (filtered.length === 0 && matchedActivities.length === 0) {
                 container.innerHTML = `
                     <div class="bg-white rounded-[24px] border border-gray-100 p-8 sm:p-10 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
@@ -1510,13 +1578,72 @@
                 return;
             }
 
-            const sorted = sortCertificates(filtered);
-            const showList = sorted.slice(0, 60);
-            container.innerHTML = `
-                <p class="text-xs font-bold text-gray-500 mb-3 px-1">พบ ${sorted.length} รายการ${sorted.length > 60 ? ' (แสดง 60 รายการแรก)' : ''}</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    ${showList.map(c => buildCertCardHTML(c, actMap)).join('')}
-                </div>`;
+            let html = '';
+
+            // กล่อง "หรือคุณกำลังหมายถึง..." แสดงกิจกรรมที่เกี่ยวข้องเพื่อให้กดเข้าไปเลือกหมวด/ดูรูปได้ทันที
+            if (matchedActivities.length > 0) {
+                html += `
+                    <div class="mb-5">
+                        <div class="flex items-center gap-1.5 mb-2.5 px-1">
+                            <i class="ph-fill ph-sparkle text-[#d91b42] text-sm"></i>
+                            <p class="text-xs sm:text-sm font-extrabold text-gray-800">หรือคุณกำลังหมายถึงกิจกรรมนี้?</p>
+                        </div>
+                        <div class="space-y-3">
+                            ${matchedActivities.map(({ act, count, isGalleryAct, matchedSubfolders }) => {
+                                const safeActId = escapeHtml(act.id).replace(/'/g, "\\'");
+                                const coverHtml = act.coverUrl
+                                    ? `<img src="${escapeHtml(act.coverUrl)}" alt="${escapeHtml(act.name)}" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=\\'ph-fill ph-certificate text-3xl text-white/40\\'></i>'">`
+                                    : `<i class="ph-fill ph-certificate text-3xl text-white/40"></i>`;
+                                return `
+                                    <div class="bg-white rounded-[22px] border border-red-100 shadow-sm hover:shadow-md hover:border-red-200 transition-all p-4">
+                                        <div onclick="openActivityDetail('${safeActId}', true)" class="flex items-center gap-3.5 cursor-pointer group">
+                                            <div class="w-20 h-14 sm:w-24 sm:h-16 rounded-xl hero-gradient overflow-hidden shrink-0 flex items-center justify-center">
+                                                ${coverHtml}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                                    <span class="px-2 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-bold">ปีการศึกษา ${escapeHtml(act.year)}</span>
+                                                    <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">${count} เกียรติบัตร</span>
+                                                    ${isGalleryAct ? `<span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold"><i class="ph-fill ph-images"></i> เลือกหมวด / ดูรูป</span>` : ''}
+                                                </div>
+                                                <h4 class="text-sm sm:text-base font-extrabold text-gray-900 group-hover:text-[#d91b42] transition-colors truncate">${escapeHtml(act.name)}</h4>
+                                                ${act.organizer ? `<p class="text-[11px] text-gray-500 truncate mt-0.5">ผู้ดูแล: ${escapeHtml(act.organizer)}</p>` : ''}
+                                            </div>
+                                            <div class="shrink-0 w-9 h-9 rounded-full bg-red-50 group-hover:bg-[#d91b42] text-[#d91b42] group-hover:text-white flex items-center justify-center transition-colors">
+                                                <i class="ph-bold ph-arrow-right text-base"></i>
+                                            </div>
+                                        </div>
+                                        ${matchedSubfolders.length > 0 ? `
+                                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                                <p class="text-[11px] font-bold text-gray-500 mb-2">หมวดหมู่ที่ตรงกับคำค้นหา (แตะเพื่อเปิดดูรูปทันที):</p>
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    ${matchedSubfolders.map(sf => `
+                                                        <button type="button" onclick="openActivityDetail('${safeActId}', true, '${escapeHtml(sf.name).replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-xl bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 text-gray-700 hover:text-[#d91b42] text-[11px] font-bold flex items-center gap-1.5 transition-colors">
+                                                            <i class="ph-fill ph-folder text-xs"></i>
+                                                            <span>${escapeHtml(sf.name)}</span>
+                                                            <span class="text-[10px] text-gray-400">(${sf.count})</span>
+                                                        </button>
+                                                    `).join('')}
+                                                </div>
+                                            </div>` : ''}
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+            }
+
+            // รายการเกียรติบัตรรายบุคคล / ห้องเรียนที่พบ
+            if (filtered.length > 0) {
+                const sorted = sortCertificates(filtered);
+                const showList = sorted.slice(0, 60);
+                html += `
+                    <p class="text-xs font-bold text-gray-500 mb-3 px-1">พบเกียรติบัตรรายชื่อ ${sorted.length} รายการ${sorted.length > 60 ? ' (แสดง 60 รายการแรก)' : ''}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${showList.map(c => buildCertCardHTML(c, actMap)).join('')}
+                    </div>`;
+            }
+
+            container.innerHTML = html;
         }
 
         // แสดงรายการกิจกรรมทั้งหมด (Tab 2)
@@ -1567,7 +1694,7 @@
         }
 
         // เปิดหน้ารายละเอียดกิจกรรม
-        function openActivityDetail(actId, shouldScroll = true) {
+        function openActivityDetail(actId, shouldScroll = true, initialSubfolder = '') {
             const act = publicActivities.find(a => a.id === actId);
             if (!act) return;
             currentActivityDetail = act;
@@ -1631,7 +1758,7 @@
                     defaultOption +
                     subfolderKeys.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)} (${subfolderCounts[k]})</option>`).join('') +
                     allOption;
-                subfolderSel.value = '';
+                subfolderSel.value = (initialSubfolder && subfolderKeys.includes(initialSubfolder)) ? initialSubfolder : '';
                 subfolderWrap.classList.remove('hidden');
             } else {
                 subfolderSel.innerHTML = `<option value="">ทุกหมวดหมู่ / ทุกห้อง</option>`;
