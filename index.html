@@ -735,6 +735,11 @@
                     </select>
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">ลิงก์เว็บเกียรติบัตรภายนอก (ไม่บังคับ)</label>
+                    <input type="url" id="act-external-url" placeholder="https://... (หากใส่ลิงก์ กดการ์ดแล้วจะเปิดเว็บนั้นทันที)" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
+                    <p class="text-[10px] text-gray-400 mt-1">เหมาะสำหรับกิจกรรมที่มีเว็บแอปดาวน์โหลดเกียรติบัตรแยกอยู่แล้ว</p>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">หมวดหมู่ (ไม่บังคับ)</label>
                     <input type="text" id="act-category" placeholder="เช่น ประกวดแข่งขัน / จิตอาสา / อบรม" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
                 </div>
@@ -1524,8 +1529,8 @@
                             .forEach(k => matchedSubfolders.push({ name: k, count: subCounts[k] }));
                     }
 
-                    // แสดงในส่วนแนะนำเมื่อ: พิมพ์คำค้นแล้วตรงกับกิจกรรม/หมวดย่อย หรือเลือกเฉพาะปีการศึกษาแล้วเป็นกิจกรรมแบบแกลเลอรี
-                    if ((q && (actFieldMatch || matchedSubfolders.length > 0)) || (!q && year && isGalleryAct)) {
+                    // แสดงในส่วนแนะนำเมื่อ: พิมพ์คำค้นแล้วตรงกับกิจกรรม/หมวดย่อย หรือเลือกเฉพาะปีการศึกษาแล้วเป็นกิจกรรมแบบแกลเลอรี/เว็บภายนอก
+                    if ((q && (actFieldMatch || matchedSubfolders.length > 0)) || (!q && year && (isGalleryAct || act.externalUrl))) {
                         matchedActivities.push({
                             act,
                             count: actCerts.length,
@@ -1591,26 +1596,30 @@
                         <div class="space-y-3">
                             ${matchedActivities.map(({ act, count, isGalleryAct, matchedSubfolders }) => {
                                 const safeActId = escapeHtml(act.id).replace(/'/g, "\\'");
+                                const isExternal = Boolean(act.externalUrl);
                                 const coverHtml = act.coverUrl
                                     ? `<img src="${escapeHtml(act.coverUrl)}" alt="${escapeHtml(act.name)}" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=\\'ph-fill ph-certificate text-3xl text-white/40\\'></i>'">`
                                     : `<i class="ph-fill ph-certificate text-3xl text-white/40"></i>`;
                                 return `
                                     <div class="bg-white rounded-[22px] border border-red-100 shadow-sm hover:shadow-md hover:border-red-200 transition-all p-4">
-                                        <div onclick="openActivityDetail('${safeActId}', true)" class="flex items-center gap-3.5 cursor-pointer group">
+                                        <div onclick="openExternalOrActivity('${safeActId}')" class="flex items-center gap-3.5 cursor-pointer group">
                                             <div class="w-20 h-14 sm:w-24 sm:h-16 rounded-xl hero-gradient overflow-hidden shrink-0 flex items-center justify-center">
                                                 ${coverHtml}
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex flex-wrap items-center gap-1.5 mb-1">
                                                     <span class="px-2 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-bold">ปีการศึกษา ${escapeHtml(act.year)}</span>
-                                                    <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">${count} เกียรติบัตร</span>
-                                                    ${isGalleryAct ? `<span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold"><i class="ph-fill ph-images"></i> เลือกหมวด / ดูรูป</span>` : ''}
+                                                    ${isExternal
+                                                        ? `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold"><i class="ph-bold ph-arrow-square-out"></i> เว็บภายนอก</span>`
+                                                        : `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">${count} เกียรติบัตร</span>`
+                                                    }
+                                                    ${!isExternal && isGalleryAct ? `<span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold"><i class="ph-fill ph-images"></i> เลือกหมวด / ดูรูป</span>` : ''}
                                                 </div>
                                                 <h4 class="text-sm sm:text-base font-extrabold text-gray-900 group-hover:text-[#d91b42] transition-colors truncate">${escapeHtml(act.name)}</h4>
                                                 ${act.organizer ? `<p class="text-[11px] text-gray-500 truncate mt-0.5">ผู้ดูแล: ${escapeHtml(act.organizer)}</p>` : ''}
                                             </div>
                                             <div class="shrink-0 w-9 h-9 rounded-full bg-red-50 group-hover:bg-[#d91b42] text-[#d91b42] group-hover:text-white flex items-center justify-center transition-colors">
-                                                <i class="ph-bold ph-arrow-right text-base"></i>
+                                                <i class="ph-bold ${isExternal ? 'ph-arrow-square-out' : 'ph-arrow-right'} text-base"></i>
                                             </div>
                                         </div>
                                         ${matchedSubfolders.length > 0 ? `
@@ -1662,16 +1671,20 @@
 
             grid.innerHTML = list.map(act => {
                 const count = publicCertificates.filter(c => c.activityId === act.id).length;
+                const isExternal = Boolean(act.externalUrl);
                 const cover = act.coverUrl
                     ? `<img src="${escapeHtml(act.coverUrl)}" alt="${escapeHtml(act.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'">`
                     : `<i class="ph-fill ph-certificate text-5xl text-white/30"></i>`;
                 return `
-                    <div onclick="openActivityDetail('${escapeHtml(act.id)}', true)" class="group bg-white rounded-[24px] border ${act.isPinned ? 'border-amber-200 ring-1 ring-amber-100' : 'border-gray-100'} shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer flex flex-col">
+                    <div onclick="openExternalOrActivity('${escapeHtml(act.id)}')" class="group bg-white rounded-[24px] border ${act.isPinned ? 'border-amber-200 ring-1 ring-amber-100' : 'border-gray-100'} shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer flex flex-col">
                         <div class="h-36 hero-gradient relative flex items-center justify-center overflow-hidden">
                             ${cover}
                             <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
                                 ${act.isPinned ? `<span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-extrabold shadow-sm flex items-center gap-1"><i class="ph-fill ph-push-pin"></i> ปักหมุด</span>` : ''}
-                                ${act.displayMode === 'gallery' ? `<span class="px-2.5 py-0.5 rounded-full bg-black/55 backdrop-blur-sm text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-fill ph-images"></i> แกลเลอรี</span>` : ''}
+                                ${isExternal
+                                    ? `<span class="px-2.5 py-0.5 rounded-full bg-blue-600/90 backdrop-blur-sm text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-arrow-square-out"></i> เว็บภายนอก</span>`
+                                    : (act.displayMode === 'gallery' ? `<span class="px-2.5 py-0.5 rounded-full bg-black/55 backdrop-blur-sm text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-fill ph-images"></i> แกลเลอรี</span>` : '')
+                                }
                             </div>
                             <span class="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-[#d91b42] text-[11px] font-extrabold shadow-sm">ปี ${escapeHtml(act.year)}</span>
                         </div>
@@ -1685,12 +1698,27 @@
                                 ${act.desc ? `<p class="text-xs text-gray-500 line-clamp-2 mb-3">${escapeHtml(act.desc)}</p>` : ''}
                             </div>
                             <div class="flex items-center justify-between pt-3 border-t border-gray-50 text-xs">
-                                <span class="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">${count} เกียรติบัตร</span>
-                                <span class="font-bold text-[#d91b42] flex items-center gap-1">ดูเกียรติบัตร <i class="ph-bold ph-arrow-right"></i></span>
+                                ${isExternal
+                                    ? `<span class="font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full flex items-center gap-1"><i class="ph-bold ph-globe"></i> ระบบภายนอก</span>
+                                       <span class="font-bold text-[#d91b42] flex items-center gap-1">เปิดเว็บไซต์ <i class="ph-bold ph-arrow-square-out"></i></span>`
+                                    : `<span class="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">${count} เกียรติบัตร</span>
+                                       <span class="font-bold text-[#d91b42] flex items-center gap-1">ดูเกียรติบัตร <i class="ph-bold ph-arrow-right"></i></span>`
+                                }
                             </div>
                         </div>
                     </div>`;
             }).join('');
+        }
+
+        // เปิดลิงก์ภายนอก (หากกิจกรรมตั้งค่า externalUrl ไว้) หรือเปิดหน้ารายละเอียดกิจกรรม
+        function openExternalOrActivity(actId) {
+            const act = publicActivities.find(a => String(a.id) === String(actId));
+            if (!act) return;
+            if (act.externalUrl) {
+                window.open(act.externalUrl, '_blank', 'noopener');
+                return;
+            }
+            openActivityDetail(act.id, true);
         }
 
         // เปิดหน้ารายละเอียดกิจกรรม
@@ -2272,8 +2300,11 @@
                                     ${act.isPinned ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold"><i class="ph-fill ph-push-pin"></i> ปักหมุด</span>` : ''}
                                     <span class="px-2 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-bold">ปี ${escapeHtml(act.year)}</span>
                                     <span class="px-2 py-0.5 rounded-full ${act.status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'} text-[10px] font-bold">${act.status === 'published' ? 'เผยแพร่' : 'ซ่อนอยู่'}</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">${certCount} ใบ</span>
-                                    ${act.displayMode === 'gallery' ? `<span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold">แกลเลอรี</span>` : ''}
+                                    ${act.externalUrl
+                                        ? `<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-arrow-square-out"></i> ลิงก์ภายนอก</span>`
+                                        : `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">${certCount} ใบ</span>`
+                                    }
+                                    ${!act.externalUrl && act.displayMode === 'gallery' ? `<span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold">แกลเลอรี</span>` : ''}
                                 </div>
                                 <h4 class="text-sm font-extrabold text-gray-900 truncate">${escapeHtml(act.name)}</h4>
                                 <p class="text-[11px] text-gray-500 mt-0.5">${act.organizer ? `ผู้ดูแล: ${escapeHtml(act.organizer)}` : 'ไม่ระบุผู้ดูแล'}${act.category ? ` • ${escapeHtml(act.category)}` : ''}</p>
@@ -2352,6 +2383,7 @@
                 document.getElementById('act-status').value = act.status || 'published';
                 document.getElementById('act-organizer').value = act.organizer || '';
                 document.getElementById('act-display-mode').value = act.displayMode === 'gallery' ? 'gallery' : 'list';
+                document.getElementById('act-external-url').value = act.externalUrl || '';
                 document.getElementById('act-category').value = act.category || '';
                 document.getElementById('act-desc').value = act.desc || '';
                 document.getElementById('act-cover-url').value = act.coverUrl || '';
@@ -2362,6 +2394,7 @@
                 document.getElementById('act-year').value = String(new Date().getFullYear() + 543);
                 document.getElementById('act-organizer').value = 'สภานักเรียน';
                 document.getElementById('act-display-mode').value = 'list';
+                document.getElementById('act-external-url').value = '';
                 document.getElementById('act-cover-url').value = '';
                 document.getElementById('act-cover-fileid').value = '';
             }
@@ -2382,6 +2415,7 @@
                     status: document.getElementById('act-status').value,
                     organizer: document.getElementById('act-organizer').value.trim(),
                     displayMode: document.getElementById('act-display-mode').value,
+                    externalUrl: document.getElementById('act-external-url').value.trim(),
                     category: document.getElementById('act-category').value.trim(),
                     desc: document.getElementById('act-desc').value.trim(),
                     coverUrl: document.getElementById('act-cover-url').value,
