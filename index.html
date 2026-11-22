@@ -69,73 +69,71 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col overflow-x-hidden">
 
     <!-- ==================== HEADER ==================== -->
     <header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3 select-none">
+        <div class="max-w-4xl mx-auto px-3.5 sm:px-4 h-15 sm:h-16 py-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 select-none min-w-0">
                 <!-- โลโก้โรงเรียน (แตะ 5 ครั้งภายใน 2 วินาที เพื่อเข้าสู่หน้า Admin Login) -->
-                <button type="button" id="secret-logo-btn" class="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 focus:outline-none active:scale-95 transition-transform" style="touch-action: manipulation;" title="สภานักเรียนโรงเรียนคำม่วง">
+                <button type="button" id="secret-logo-btn" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 focus:outline-none active:scale-95 transition-transform" style="touch-action: manipulation;" title="สภานักเรียนโรงเรียนคำม่วง">
                     <img src="https://i.postimg.cc/wBN5btrp/rong-re-yn-kham-wng.png" alt="โลโก้โรงเรียนคำม่วง" class="w-full h-full object-contain pointer-events-none">
                 </button>
-                <div class="leading-tight">
-                    <h1 class="text-[15px] sm:text-base font-extrabold text-gray-900 tracking-tight">ระบบคลังเกียรติบัตรออนไลน์</h1>
-                    <p class="text-[10px] sm:text-[11px] font-semibold text-gray-400 tracking-wider uppercase">CERTIFICATE ARCHIVE SYSTEM</p>
+                <div class="leading-tight min-w-0">
+                    <h1 class="text-[14px] sm:text-base font-extrabold text-gray-900 tracking-tight truncate">ระบบคลังเกียรติบัตรออนไลน์</h1>
+                    <p class="text-[9px] sm:text-[11px] font-semibold text-gray-400 tracking-wider uppercase truncate">CERTIFICATE ARCHIVE SYSTEM</p>
                 </div>
             </div>
 
             <!-- ปุ่มควบคุมเมื่ออยู่ในโหมด Admin -->
-            <div id="header-admin-controls" class="hidden items-center gap-2">
-                <button type="button" onclick="exitAdminView()" class="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center gap-1 transition-colors">
+            <div id="header-admin-controls" class="hidden items-center gap-1.5 sm:gap-2 shrink-0">
+                <button type="button" onclick="exitAdminView()" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center gap-1 transition-colors">
                     <i class="ph-bold ph-house"></i> <span class="hidden sm:inline">หน้าหลัก</span>
                 </button>
-                <button type="button" onclick="logoutAdmin()" class="px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1 transition-colors">
-                    <i class="ph-bold ph-sign-out"></i> ออกจากระบบ
+                <button type="button" onclick="logoutAdmin()" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1 transition-colors">
+                    <i class="ph-bold ph-sign-out"></i> <span class="hidden xs:inline">ออกจากระบบ</span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- ==================== PUBLIC VIEW ==================== -->
-    <main id="public-view" class="flex-1 max-w-4xl w-full mx-auto px-4 py-5">
+    <main id="public-view" class="flex-1 max-w-4xl w-full mx-auto px-3.5 sm:px-4 py-4 sm:py-5">
 
         <!-- Hero Banner -->
-        <section class="hero-gradient rounded-[26px] p-6 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-red-900/10 mb-6">
-            <svg class="absolute -right-8 -bottom-10 w-52 h-52 text-white/10 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
+        <section class="hero-gradient rounded-[22px] sm:rounded-[26px] p-5 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-red-900/10 mb-5 sm:mb-6">
+            <i class="ph-fill ph-certificate absolute -right-4 -bottom-8 text-[150px] sm:text-[195px] text-white/15 -rotate-12 pointer-events-none select-none leading-none"></i>
 
             <div class="relative z-10 max-w-xl">
-                <span class="inline-block bg-white/20 backdrop-blur-sm border border-white/25 text-white text-[11px] font-bold tracking-widest px-3.5 py-1 rounded-full uppercase mb-3">
+                <span class="inline-block bg-white/20 backdrop-blur-sm border border-white/25 text-white text-[10px] sm:text-[11px] font-bold tracking-widest px-3 sm:px-3.5 py-1 rounded-full uppercase mb-2.5 sm:mb-3">
                     STUDENT COUNCIL
                 </span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-                    คลังเกียรติบัตรออนไลน์
+                <h2 class="text-[22px] sm:text-3xl font-extrabold tracking-tight leading-snug mb-1.5 sm:mb-2">
+                    กำลังหาเกียรติบัตรอยู่หรอ?
                 </h2>
-                <p class="text-sm sm:text-[15px] text-white/90 font-normal leading-relaxed">
-                    ค้นหาและดาวน์โหลดไฟล์เกียรติบัตรต้นฉบับจากกิจกรรมต่างๆ ของโรงเรียนคำม่วงได้อย่างง่ายดาย
+                <p class="text-xs sm:text-[15px] text-white/90 font-normal leading-relaxed">
+                    สภานักเรียนโรงเรียนคำม่วงรวบรวมไว้ให้ครบจบในที่เดียวแล้ว! ค้นหาและดาวน์โหลดเกียรติบัตรจากทุกกิจกรรมได้ง่ายๆ แค่ปลายนิ้ว
                 </p>
             </div>
         </section>
 
         <!-- Navigation Tabs -->
-        <nav class="flex items-center gap-5 border-b border-gray-200 mb-5 overflow-x-auto no-scrollbar">
-            <button type="button" id="tab-search" onclick="switchPublicTab('search')" class="tab-active pb-3 text-sm flex items-center gap-1.5 whitespace-nowrap transition-colors">
+        <nav class="flex items-center justify-between sm:justify-start gap-2 sm:gap-5 border-b border-gray-200 mb-4 sm:mb-5 overflow-x-auto no-scrollbar">
+            <button type="button" id="tab-search" onclick="switchPublicTab('search')" class="tab-active pb-2.5 sm:pb-3 text-[13px] sm:text-sm flex items-center gap-1 sm:gap-1.5 whitespace-nowrap transition-colors">
                 <i class="ph-bold ph-magnifying-glass"></i> ค้นหาเกียรติบัตร
             </button>
-            <button type="button" id="tab-activities" onclick="switchPublicTab('activities')" class="tab-inactive pb-3 text-sm flex items-center gap-1.5 whitespace-nowrap transition-colors">
+            <button type="button" id="tab-activities" onclick="switchPublicTab('activities')" class="tab-inactive pb-2.5 sm:pb-3 text-[13px] sm:text-sm flex items-center gap-1 sm:gap-1.5 whitespace-nowrap transition-colors">
                 <i class="ph-bold ph-squares-four"></i> กิจกรรมทั้งหมด
             </button>
-            <button type="button" id="tab-verify" onclick="switchPublicTab('verify')" class="tab-inactive pb-3 text-sm flex items-center gap-1.5 whitespace-nowrap transition-colors">
+            <button type="button" id="tab-verify" onclick="switchPublicTab('verify')" class="tab-inactive pb-2.5 sm:pb-3 text-[13px] sm:text-sm flex items-center gap-1 sm:gap-1.5 whitespace-nowrap transition-colors">
                 <i class="ph-bold ph-shield-check"></i> ตรวจสอบเลขที่
             </button>
         </nav>
 
         <!-- TAB 1: ค้นหาเกียรติบัตร -->
         <section id="section-search" class="animate-fade-in">
-            <div class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-5 mb-5">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="bg-white rounded-[22px] sm:rounded-[24px] shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-5">
+                <div class="flex items-center gap-2 mb-3.5 sm:mb-4">
                     <div class="w-7 h-7 rounded-full bg-red-50 text-[#d91b42] flex items-center justify-center">
                         <i class="ph-bold ph-magnifying-glass text-base"></i>
                     </div>
@@ -265,7 +263,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                         <div id="detail-type-wrap" class="sm:col-span-4 relative">
                             <i class="ph ph-users absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none"></i>
-                            <select id="detail-type-filter" onchange="onDetailTypeChange()" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-9 pr-7 text-xs text-gray-700 font-medium focus:outline-none focus:border-[#d91b42] appearance-none">
+                            <select id="detail-type-filter" onchange="onDetailTypeChange()" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-9 pr-7 text-sm sm:text-xs text-gray-700 font-medium focus:outline-none focus:border-[#d91b42] appearance-none">
                                 <option value="all">ทุกประเภท</option>
                                 <option value="individual">รายบุคคล</option>
                                 <option value="classroom">ห้องเรียน</option>
@@ -274,7 +272,7 @@
                         </div>
                         <div id="detail-search-wrap" class="sm:col-span-8 relative">
                             <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none"></i>
-                            <input type="text" id="detail-search-input" oninput="onDetailSearchInput()" placeholder="ค้นหาชื่อ-นามสกุล ในกิจกรรมนี้..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-xs sm:text-sm text-gray-800 focus:outline-none focus:border-[#d91b42] focus:bg-white">
+                            <input type="text" id="detail-search-input" oninput="onDetailSearchInput()" placeholder="ค้นหาชื่อ-นามสกุล ในกิจกรรมนี้..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm text-gray-800 focus:outline-none focus:border-[#d91b42] focus:bg-white">
                         </div>
                     </div>
                 </div>
@@ -341,22 +339,30 @@
 
         <!-- ADMIN TAB 1: DASHBOARD -->
         <section id="admin-sec-dashboard">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <p class="text-xs text-gray-500 font-medium mb-1">กิจกรรมทั้งหมด</p>
                     <p id="stat-total-act" class="text-2xl font-extrabold text-gray-900">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <p class="text-xs text-gray-500 font-medium mb-1">กิจกรรมที่เผยแพร่</p>
                     <p id="stat-pub-act" class="text-2xl font-extrabold text-emerald-600">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <p class="text-xs text-gray-500 font-medium mb-1">เกียรติบัตรทั้งหมด</p>
                     <p id="stat-total-cert" class="text-2xl font-extrabold text-[#d91b42]">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <p class="text-xs text-gray-500 font-medium mb-1">เผยแพร่แล้ว</p>
                     <p id="stat-pub-cert" class="text-2xl font-extrabold text-blue-600">0</p>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 font-medium mb-1">ผู้เข้าชมทั้งหมด</p>
+                    <p id="stat-total-visits" class="text-2xl font-extrabold text-purple-600">0</p>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-500 font-medium mb-1">ผู้เข้าชมวันนี้</p>
+                    <p id="stat-today-visits" class="text-2xl font-extrabold text-amber-600">0</p>
                 </div>
             </div>
         </section>
@@ -597,9 +603,27 @@
     </main>
 
     <!-- ==================== FOOTER ==================== -->
-    <footer class="bg-white border-t border-gray-100 mt-10 py-6 text-center px-4">
-        <p class="text-xs font-bold text-gray-600">สภานักเรียนโรงเรียนคำม่วง (Student Council Of Khammuang School)</p>
-        <p class="text-[11px] text-gray-400 mt-1">ระบบคลังเกียรติบัตรออนไลน์ • Certificate Archive System</p>
+    <footer class="bg-white border-t border-gray-100 mt-8 sm:mt-10 py-5 text-center px-4">
+        <div class="max-w-xl mx-auto space-y-2">
+            <!-- แถบสถิติการเข้าชม -->
+            <div id="footer-visit-stats" class="hidden inline-flex items-center justify-center gap-2 bg-gray-50 border border-gray-100 rounded-full px-3.5 py-1 text-[11px] text-gray-500">
+                <span class="inline-flex items-center gap-1">
+                    <i class="ph-fill ph-eye text-[#d91b42]"></i>
+                    เข้าชมทั้งหมด <strong id="footer-total-visits" class="text-gray-800 font-bold">0</strong> ครั้ง
+                </span>
+                <span class="text-gray-300">•</span>
+                <span>
+                    วันนี้ <strong id="footer-today-visits" class="text-emerald-600 font-bold">0</strong> ครั้ง
+                </span>
+            </div>
+
+            <div class="space-y-1">
+                <p class="text-[11px] sm:text-xs font-bold text-gray-700 leading-relaxed">
+                    พัฒนาโดย นายภูธนากร หงษ์ทอง <span class="font-normal text-gray-500">• เลขานุการสภานักเรียนโรงเรียนคำม่วง</span>
+                </p>
+                <p class="text-[10px] font-semibold tracking-wide text-gray-400">© 2026 Student Council Of Khammuang School</p>
+            </div>
+        </div>
     </footer>
 
     <!-- ==================== MODALS ==================== -->
@@ -1193,13 +1217,21 @@
         // ================= PUBLIC DATA & NAVIGATION =================
         async function loadPublicData() {
             try {
-                const res = await apiGet({ action: 'publicData' });
+                const hasCounted = sessionStorage.getItem('kmsc_visit_counted');
+                const res = await apiGet({ action: 'publicData', countVisit: hasCounted ? '0' : '1' });
                 if (!res.success) {
                     showToast(res.error || 'ไม่สามารถโหลดข้อมูลได้', 'error');
                     return;
                 }
                 publicActivities = res.activities || [];
                 publicCertificates = res.certificates || [];
+
+                if (res.stats) {
+                    if (!hasCounted) sessionStorage.setItem('kmsc_visit_counted', '1');
+                    document.getElementById('footer-total-visits').textContent = Number(res.stats.totalVisits || 0).toLocaleString('th-TH');
+                    document.getElementById('footer-today-visits').textContent = Number(res.stats.todayVisits || 0).toLocaleString('th-TH');
+                    document.getElementById('footer-visit-stats').classList.remove('hidden');
+                }
 
                 populateYearFilters();
                 renderPublicActivities();
@@ -1429,12 +1461,17 @@
 
             if (!q && !year && typeFilter === 'all') {
                 container.innerHTML = `
-                    <div class="bg-white rounded-[24px] border border-gray-100 p-10 text-center">
+                    <div class="bg-white rounded-[24px] border border-gray-100 p-8 sm:p-10 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3">
                             <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
                         </div>
                         <p class="text-sm font-bold text-gray-800">พิมพ์ชื่อ-นามสกุล, ห้องเรียน หรือ ชื่อกิจกรรมเพื่อค้นหา</p>
                         <p class="text-xs text-gray-400 mt-1">มีเกียรติบัตรพร้อมดาวน์โหลดในระบบทั้งหมด ${publicCertificates.length} รายการ</p>
+                        <p class="text-xs text-gray-500 mt-3 leading-relaxed">
+                            หากค้นหาไม่เจอ ลองกดเลือกดูที่
+                            <button type="button" onclick="switchPublicTab('activities')" class="text-[#d91b42] font-bold underline underline-offset-2 hover:text-[#b51435]">กิจกรรมทั้งหมด</button>
+                            ดูนะ
+                        </p>
                     </div>`;
                 return;
             }
@@ -1460,12 +1497,15 @@
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-white rounded-[24px] border border-gray-100 p-10 text-center">
+                    <div class="bg-white rounded-[24px] border border-gray-100 p-8 sm:p-10 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
                             <i class="ph-duotone ph-file-x text-3xl"></i>
                         </div>
                         <p class="text-sm font-bold text-gray-700">ไม่พบเกียรติบัตรที่ตรงกับคำค้นหา</p>
-                        <p class="text-xs text-gray-400 mt-1">ลองพิมพ์เฉพาะชื่อจริง (ไม่ต้องใส่คำนำหน้า) หรือเลือกดูจากแท็บ "กิจกรรมทั้งหมด"</p>
+                        <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                            ลองพิมพ์เฉพาะชื่อจริง (ไม่ต้องใส่คำนำหน้า) หรือหากหาไม่เจอลองกดดูที่
+                            <button type="button" onclick="switchPublicTab('activities')" class="text-[#d91b42] font-bold underline underline-offset-2 hover:text-[#b51435]">กิจกรรมทั้งหมด</button>
+                        </p>
                     </div>`;
                 return;
             }
@@ -2051,6 +2091,10 @@
                 document.getElementById('stat-pub-act').textContent = adminActivities.filter(a => a.status === 'published').length;
                 document.getElementById('stat-total-cert').textContent = adminCertificates.length;
                 document.getElementById('stat-pub-cert').textContent = adminCertificates.filter(c => c.status === 'published').length;
+                if (res.stats) {
+                    document.getElementById('stat-total-visits').textContent = Number(res.stats.totalVisits || 0).toLocaleString('th-TH');
+                    document.getElementById('stat-today-visits').textContent = Number(res.stats.todayVisits || 0).toLocaleString('th-TH');
+                }
 
                 populateAdminActivityDropdowns();
                 renderAdminActivitiesList();
