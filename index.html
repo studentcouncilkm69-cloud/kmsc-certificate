@@ -324,8 +324,11 @@
 
         <!-- ADMIN TAB 2: MANAGE ACTIVITIES -->
         <section id="admin-sec-activities" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold text-gray-900">รายการกิจกรรมทั้งหมด</h3>
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900">รายการกิจกรรมทั้งหมด</h3>
+                    <p id="act-order-status" class="text-[11px] text-gray-400">กดปุ่มปักหมุด หรือลูกศรขึ้น-ลง เพื่อจัดลำดับการแสดงผลหน้าเว็บ</p>
+                </div>
                 <button type="button" onclick="openActivityModal()" class="bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm">
                     <i class="ph-bold ph-plus"></i> เพิ่มกิจกรรมใหม่
                 </button>
@@ -382,8 +385,8 @@
                             <i class="ph-bold ph-google-drive-logo text-lg"></i>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-emerald-900">นำเข้ายกโฟลเดอร์จาก Google Drive (แนะนำสำหรับไฟล์จำนวนมาก)</h4>
-                            <p class="text-[11px] text-emerald-700">วางลิงก์โฟลเดอร์ที่มีไฟล์เกียรติบัตร (.png, .jpg, .pdf) ระบบจะตัดเลขนำหน้าชื่อไฟล์และดึงเข้าเว็บให้ทั้งหมดอัตโนมัติ</p>
+                            <h4 class="text-sm font-bold text-emerald-900">นำเข้ายกโฟลเดอร์จาก Google Drive (รองรับโฟลเดอร์ย่อยแยกห้อง)</h4>
+                            <p class="text-[11px] text-emerald-700">วางลิงก์โฟลเดอร์หลักที่มีไฟล์เกียรติบัตรหรือโฟลเดอร์ย่อยแยกห้อง (เช่น ม.1/1, ม.1/2) ระบบจะกวาดเข้าทั้งหมดพร้อมติดป้ายห้องให้อัตโนมัติ</p>
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2">
@@ -392,6 +395,10 @@
                             <i class="ph-bold ph-download-simple"></i> ดึงไฟล์ยกโฟลเดอร์
                         </button>
                     </div>
+                    <label class="inline-flex items-center gap-2 mt-2.5 text-xs font-bold text-emerald-900 cursor-pointer select-none">
+                        <input type="checkbox" id="drive-skip-certno" class="w-4 h-4 rounded accent-emerald-600">
+                        <span>ไม่ระบุเลขที่เกียรติบัตร (ซ่อนป้ายเลขที่บนการ์ด — เหมาะกับไฟล์ที่มีเลขที่ในรูปอยู่แล้ว)</span>
+                    </label>
                 </div>
 
                 <!-- กล่องเส้นประ: อัปโหลดไฟล์จากเครื่อง -->
@@ -512,10 +519,16 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <label class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 cursor-pointer select-none">
-                            <input type="checkbox" id="bulk-strip-before-dash" class="w-4 h-4 rounded accent-[#d91b42]">
-                            <span>ตัดคำหน้าขีด "-" อัตโนมัติ (เช่น ลบชื่อกิจกรรมหน้าชื่อคน)</span>
-                        </label>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <label class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 cursor-pointer select-none">
+                                <input type="checkbox" id="bulk-strip-before-dash" class="w-4 h-4 rounded accent-[#d91b42]">
+                                <span>ตัดคำหน้าขีด "-" อัตโนมัติ</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 text-xs font-bold text-[#d91b42] cursor-pointer select-none">
+                                <input type="checkbox" id="bulk-clear-certno" class="w-4 h-4 rounded accent-[#d91b42]">
+                                <span>ล้างเลขที่เกียรติบัตร (ซ่อนป้ายเลขที่)</span>
+                            </label>
+                        </div>
                         <button type="button" id="btn-bulk-save" onclick="handleBulkUpdateCerts()" class="bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-colors">
                             <i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก
                         </button>
@@ -620,8 +633,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">ปีการศึกษา *</label>
-                        <input type="text" id="act-year" required placeholder="เช่น 2569" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">เลขที่เกียรติบัตร (ปล่อยว่าง=ซ่อนป้าย)</label>
+                        <input type="text" id="edit-cert-no" placeholder="เช่น 1612/2569 หรือปล่อยว่าง" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">สถานะ</label>
@@ -808,6 +821,7 @@
         let uploadQueue = [];
         let selectedCertIds = new Set();
         let lastRenderedAdminCerts = [];
+        let saveActOrderTimer = null;
 
         const THAI_MONTHS = [
             'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -888,10 +902,10 @@
             return s;
         }
 
-        // แสดงเลขที่เกียรติบัตรแบบสวยงาม (เติม KM นำหน้าให้อัตโนมัติ แต่ตอนกรอกไม่ต้องพิมพ์ KM ก็ได้)
+        // แสดงเลขที่เกียรติบัตรแบบสวยงาม (เติม KM นำหน้าให้อัตโนมัติ แต่ถ้าไม่ระบุจะคืนค่าว่างเพื่อซ่อนป้าย)
         function formatCertNoDisplay(certNo) {
             const clean = String(certNo || '').trim().replace(/^'+/, '');
-            if (!clean) return '-';
+            if (!clean) return '';
             if (/^KM[\s\-_]/i.test(clean) || /^KM$/i.test(clean)) return clean;
             return 'KM ' + clean;
         }
@@ -947,37 +961,49 @@
             return /^(ชั้น|ห้อง|ม\.\s*\d|ป\.\s*\d|\d+\/\d+)/.test(name);
         }
 
-        // ลำดับความสำคัญของรางวัล (เลขน้อยอยู่บนสุด)
-        function getAwardRank(award) {
-            const a = String(award || '').trim();
-            if (!a) return 99;
-            if (a.includes('ชนะเลิศ') && !a.includes('รอง')) return 1;
-            if (a.includes('รองชนะเลิศ') && (a.includes('1') || a.includes('๑'))) return 2;
-            if (a.includes('รองชนะเลิศ') && (a.includes('2') || a.includes('๒'))) return 3;
-            if (a.includes('รองชนะเลิศ')) return 4;
-            if (a.includes('ชมเชย')) return 5;
-            if (a.includes('ดีเด่น') || a.includes('เหรียญทอง')) return 6;
-            if (a.includes('เหรียญเงิน')) return 7;
-            if (a.includes('เหรียญทองแดง')) return 8;
-            if (a.includes('คณะกรรมการ') || a.includes('จิตอาสา') || a.includes('สภา')) return 15;
-            if (a.includes('เข้าร่วม')) return 50;
-            return 30;
+        // แสดงระดับชั้น/ห้อง (เช่น ม.1/1) จากข้อมูลเกียรติบัตร
+        function formatGradeRoom(cert) {
+            const g = String(cert.grade || '').trim().replace(/^'+/, '');
+            const r = String(cert.room || '').trim().replace(/^'+/, '');
+            if (g && r) return g.includes('/') ? g : `${g}/${r}`;
+            if (g) return g;
+            if (r) return `ห้อง ${r}`;
+            return '';
         }
 
-        // ตัดคำนำหน้าออกเพื่อเรียงลำดับชื่อจริง ก-ฮ
+        // จัดลำดับความสำคัญของรางวัล (รางวัลสูงอยู่บน -> เข้าร่วมอยู่ล่าง)
+        function getAwardRank(award) {
+            const a = String(award || '').trim();
+            if (!a) return 90;
+            if (a.includes('ชนะเลิศ') && !a.includes('รอง')) return 10;
+            if (a.includes('รองชนะเลิศ') && (a.includes('1') || a.includes('๑'))) return 20;
+            if (a.includes('รองชนะเลิศ') && (a.includes('2') || a.includes('๒'))) return 30;
+            if (a.includes('รองชนะเลิศ')) return 40;
+            if (a.includes('ชมเชย')) return 50;
+            if (a.includes('คณะกรรมการ') || a.includes('จิตอาสา') || a.includes('ผู้ช่วย')) return 60;
+            if (a.includes('เข้าร่วม')) return 80;
+            return 55;
+        }
+
+        // ตัดคำนำหน้าชื่อเพื่อใช้เรียงลำดับภาษาไทย ก-ฮ ให้ตรงตามชื่อจริง
         function stripThaiPrefix(name) {
             return String(name || '')
                 .trim()
-                .replace(/^(นางสาว|เด็กชาย|เด็กหญิง|นาย|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.|ว่าที่ร้อยตรี|ครู|อาจารย์)\s*/i, '')
-                .trim();
+                .replace(/^(?:ว่าที่ร้อยตรีหญิง|ว่าที่ร้อยตรี|เด็กชาย|เด็กหญิง|นางสาว|นาย|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.)\s*/, '');
         }
 
-        // เรียงลำดับเกียรติบัตร: รางวัลสูงอยู่บน -> เข้าร่วมอยู่ล่าง -> เรียงชื่อ ก-ฮ
+        // เรียงลำดับเกียรติบัตร: รางวัลสูงอยู่บน -> เข้าร่วมอยู่ล่าง -> เรียงตามชื่อ ก-ฮ
         function sortCertificates(list) {
             return [...list].sort((a, b) => {
                 const rankDiff = getAwardRank(a.award) - getAwardRank(b.award);
                 if (rankDiff !== 0) return rankDiff;
-                return stripThaiPrefix(a.recipientName).localeCompare(stripThaiPrefix(b.recipientName), 'th', { numeric: true });
+
+                const nameA = stripThaiPrefix(a.recipientName);
+                const nameB = stripThaiPrefix(b.recipientName);
+                const nameDiff = nameA.localeCompare(nameB, 'th', { numeric: true });
+                if (nameDiff !== 0) return nameDiff;
+
+                return String(a.certNo || '').localeCompare(String(b.certNo || ''), 'th', { numeric: true });
             });
         }
 
@@ -1143,16 +1169,19 @@
             const downloadUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
             const thaiDate = formatThaiDate(cert.issueDate);
             const isRoom = isClassroomCert(cert);
+            const gradeRoom = formatGradeRoom(cert);
+            const certNoLabel = formatCertNoDisplay(cert.certNo);
 
             return `
                 <div class="bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2.5">
-                            <span class="px-2.5 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[11px] font-mono font-bold">${escapeHtml(formatCertNoDisplay(cert.certNo))}</span>
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                ${certNoLabel ? `<span class="px-2.5 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[11px] font-mono font-bold">${escapeHtml(certNoLabel)}</span>` : ''}
+                                ${gradeRoom ? `<span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold">${escapeHtml(gradeRoom)}</span>` : ''}
                                 ${isRoom ? `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">ห้องเรียน</span>` : ''}
-                                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">${fileBadge}</span>
                             </div>
+                            <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold shrink-0">${fileBadge}</span>
                         </div>
 
                         <h4 class="text-base font-extrabold text-gray-900 leading-snug mb-1">${escapeHtml(cert.recipientName)}</h4>
@@ -1208,6 +1237,7 @@
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
                     (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
+                    formatGradeRoom(c).toLowerCase().includes(q) ||
                     String(act.name || '').toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
@@ -1236,7 +1266,7 @@
         function renderPublicActivities() {
             const year = document.getElementById('activities-year-filter').value;
             const grid = document.getElementById('public-activities-grid');
-            const filtered = publicActivities.filter(a => !year || String(a.year) === String(year));
+            const filtered = sortActivitiesList(publicActivities.filter(a => !year || String(a.year) === String(year)));
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
@@ -1251,12 +1281,16 @@
                 const coverHTML = act.coverUrl
                     ? `<img src="${escapeHtml(act.coverUrl)}" alt="${escapeHtml(act.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
                     : `<div class="w-full h-full hero-gradient flex items-center justify-center text-white/35"><i class="ph-fill ph-certificate text-5xl"></i></div>`;
+                const pinBadge = act.isPinned
+                    ? `<span class="absolute top-3 right-3 bg-amber-400 text-amber-950 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1"><i class="ph-fill ph-push-pin"></i> ปักหมุด</span>`
+                    : '';
 
                 return `
-                    <div onclick="openActivityDetail('${escapeHtml(act.id)}')" class="group bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-md overflow-hidden cursor-pointer transition-all flex flex-col">
+                    <div onclick="openActivityDetail('${escapeHtml(act.id)}')" class="group bg-white rounded-[24px] border ${act.isPinned ? 'border-amber-200 ring-1 ring-amber-100' : 'border-gray-100'} shadow-sm hover:shadow-md overflow-hidden cursor-pointer transition-all flex flex-col">
                         <div class="h-40 w-full overflow-hidden relative bg-gray-100">
                             ${coverHTML}
                             <span class="absolute top-3 left-3 bg-black/55 backdrop-blur-sm text-white text-[11px] font-bold px-2.5 py-1 rounded-full">ปีการศึกษา ${escapeHtml(act.year)}</span>
+                            ${pinBadge}
                         </div>
                         <div class="p-4 flex-1 flex flex-col justify-between">
                             <div>
@@ -1329,6 +1363,7 @@
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
                     (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
+                    formatGradeRoom(c).toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
             });
@@ -1353,7 +1388,15 @@
 
             document.getElementById('preview-title').textContent = cert.recipientName;
             document.getElementById('preview-subtitle').textContent = act ? act.name : '';
-            document.getElementById('preview-certno').textContent = formatCertNoDisplay(cert.certNo);
+            const previewCertNoEl = document.getElementById('preview-certno');
+            const previewCertNoText = formatCertNoDisplay(cert.certNo);
+            if (previewCertNoText) {
+                previewCertNoEl.textContent = previewCertNoText;
+                previewCertNoEl.classList.remove('hidden');
+            } else {
+                previewCertNoEl.textContent = '';
+                previewCertNoEl.classList.add('hidden');
+            }
             document.getElementById('preview-download-btn').href = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
 
             const isPdf = String(cert.mimeType || '').includes('pdf') || /\.pdf$/i.test(cert.fileName || '');
@@ -1671,27 +1714,110 @@
                 list.innerHTML = `<div class="bg-white rounded-2xl border border-gray-100 p-8 text-center text-xs text-gray-500">ยังไม่มีกิจกรรม กดปุ่ม "เพิ่มกิจกรรมใหม่" ด้านบน</div>`;
                 return;
             }
-            list.innerHTML = adminActivities.map(a => {
+            adminActivities = sortActivitiesList(adminActivities);
+
+            list.innerHTML = adminActivities.map((a, idx) => {
                 const count = adminCertificates.filter(c => String(c.activityId) === String(a.id)).length;
                 const badge = a.status === 'published'
                     ? `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">เผยแพร่แล้ว</span>`
                     : `<span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold">ซ่อนอยู่</span>`;
+                const pinBtnClass = a.isPinned
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800';
+                const canMoveUp = idx > 0 && Boolean(adminActivities[idx - 1].isPinned) === Boolean(a.isPinned);
+                const canMoveDown = idx < adminActivities.length - 1 && Boolean(adminActivities[idx + 1].isPinned) === Boolean(a.isPinned);
+
                 return `
-                    <div class="bg-white rounded-2xl border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[11px] font-bold text-[#d91b42] bg-red-50 px-2 py-0.5 rounded-full">ปี ${escapeHtml(a.year)}</span>
-                                ${badge}
-                                <span class="text-[11px] text-gray-400">${count} เกียรติบัตร</span>
+                    <div class="bg-white rounded-2xl border ${a.isPinned ? 'border-amber-200 bg-amber-50/20' : 'border-gray-100'} p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div class="flex flex-col gap-1 shrink-0 pt-0.5">
+                                <button type="button" onclick="moveActivityOrder('${escapeHtml(a.id)}', -1)" ${canMoveUp ? '' : 'disabled'} title="เลื่อนขึ้น" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed text-gray-700 flex items-center justify-center transition-colors">
+                                    <i class="ph-bold ph-arrow-up text-xs"></i>
+                                </button>
+                                <button type="button" onclick="moveActivityOrder('${escapeHtml(a.id)}', 1)" ${canMoveDown ? '' : 'disabled'} title="เลื่อนลง" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed text-gray-700 flex items-center justify-center transition-colors">
+                                    <i class="ph-bold ph-arrow-down text-xs"></i>
+                                </button>
                             </div>
-                            <h4 class="text-sm font-bold text-gray-900">${escapeHtml(a.name)}</h4>
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    ${a.isPinned ? `<span class="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1"><i class="ph-fill ph-push-pin"></i> ปักหมุด</span>` : ''}
+                                    <span class="text-[11px] font-bold text-[#d91b42] bg-red-50 px-2 py-0.5 rounded-full">ปี ${escapeHtml(a.year)}</span>
+                                    ${badge}
+                                    <span class="text-[11px] text-gray-400">${count} เกียรติบัตร</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-gray-900">${escapeHtml(a.name)}</h4>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="togglePinActivity('${escapeHtml(a.id)}')" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors ${pinBtnClass}">
+                                <i class="${a.isPinned ? 'ph-fill' : 'ph-bold'} ph-push-pin"></i> ${a.isPinned ? 'ปักหมุดอยู่' : 'ปักหมุด'}
+                            </button>
                             <button type="button" onclick="openActivityModal('${escapeHtml(a.id)}')" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold">แก้ไข</button>
                             <button type="button" onclick="deleteAdminActivity('${escapeHtml(a.id)}')" class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold">ลบ</button>
                         </div>
                     </div>`;
             }).join('');
+        }
+
+        function normalizeAdminActivityOrders() {
+            adminActivities.forEach((a, idx) => {
+                a.sortOrder = idx + 1;
+            });
+        }
+
+        function togglePinActivity(actId) {
+            const target = adminActivities.find(a => String(a.id) === String(actId));
+            if (!target) return;
+            target.isPinned = !target.isPinned;
+            adminActivities = sortActivitiesList(adminActivities);
+            normalizeAdminActivityOrders();
+            renderAdminActivities();
+            scheduleSaveActivitiesOrder();
+        }
+
+        function moveActivityOrder(actId, direction) {
+            const idx = adminActivities.findIndex(a => String(a.id) === String(actId));
+            const targetIdx = idx + direction;
+            if (idx === -1 || targetIdx < 0 || targetIdx >= adminActivities.length) return;
+            if (Boolean(adminActivities[idx].isPinned) !== Boolean(adminActivities[targetIdx].isPinned)) return;
+
+            const temp = adminActivities[idx];
+            adminActivities[idx] = adminActivities[targetIdx];
+            adminActivities[targetIdx] = temp;
+            normalizeAdminActivityOrders();
+            renderAdminActivities();
+            scheduleSaveActivitiesOrder();
+        }
+
+        function scheduleSaveActivitiesOrder() {
+            const statusEl = document.getElementById('act-order-status');
+            if (statusEl) statusEl.textContent = 'กำลังบันทึกลำดับและการปักหมุด...';
+            if (saveActOrderTimer) clearTimeout(saveActOrderTimer);
+
+            saveActOrderTimer = setTimeout(async () => {
+                try {
+                    const items = adminActivities.map((a, idx) => ({
+                        id: a.id,
+                        isPinned: Boolean(a.isPinned),
+                        sortOrder: idx + 1
+                    }));
+                    const res = await apiPost({
+                        action: 'updateActivitiesOrder',
+                        token: adminToken,
+                        data: { items }
+                    });
+                    if (res.success) {
+                        if (statusEl) statusEl.textContent = 'บันทึกลำดับและการปักหมุดเรียบร้อยแล้ว ✓';
+                        showToast('บันทึกลำดับกิจกรรมแล้ว', 'success');
+                    } else {
+                        if (statusEl) statusEl.textContent = 'บันทึกลำดับไม่สำเร็จ กรุณาลองใหม่';
+                        showToast(res.error || 'บันทึกลำดับไม่สำเร็จ', 'error');
+                    }
+                } catch (err) {
+                    if (statusEl) statusEl.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                    showToast('เกิดข้อผิดพลาดในการบันทึกลำดับ', 'error');
+                }
+            }, 550);
         }
 
         function openActivityModal(actId = '') {
@@ -1813,6 +1939,7 @@
             try {
                 const rawDate = document.getElementById('upload-default-date').value;
                 const thaiDate = formatThaiDate(rawDate);
+                const skipCertNo = document.getElementById('drive-skip-certno').checked;
                 const res = await apiPost({
                     action: 'importDriveFolder',
                     token: adminToken,
@@ -1822,6 +1949,7 @@
                         certType: document.getElementById('upload-default-certtype').value,
                         award: getSelectedDefaultAward(),
                         issueDate: thaiDate,
+                        skipCertNo: skipCertNo,
                         status: 'published'
                     }
                 });
@@ -1995,6 +2123,7 @@
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
                     (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
+                    formatGradeRoom(c).toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
             });
@@ -2019,14 +2148,15 @@
             tbody.innerHTML = sorted.map(c => {
                 const act = actMap[c.activityId] || { name: '-' };
                 const checked = selectedCertIds.has(String(c.id)) ? 'checked' : '';
+                const certNoDisplay = formatCertNoDisplay(c.certNo);
                 return `
                     <tr class="hover:bg-gray-50/70 ${checked ? 'bg-red-50/30' : ''}">
                         <td class="py-3 px-2 text-center">
                             <input type="checkbox" ${checked} onchange="toggleSelectCert('${escapeHtml(c.id)}', this.checked)" class="w-4 h-4 rounded accent-[#d91b42] cursor-pointer">
                         </td>
-                        <td class="py-3 px-2 font-mono font-bold text-[#d91b42] whitespace-nowrap">${escapeHtml(formatCertNoDisplay(c.certNo))}</td>
-                        <td class="py-3 px-2 font-bold text-gray-900">
+                        <td class="py-3 px-2 font-mono font-bold text-[#d91b42] whitespace-nowrap">${certNoDisplay ? escapeHtml(certNoDisplay) : '<span class="text-gray-300 font-sans font-normal">ไม่ระบุ</span>'}</td>
                             ${escapeHtml(c.recipientName)}
+                            ${formatGradeRoom(c) ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px]">${escapeHtml(formatGradeRoom(c))}</span>` : ''}
                             ${isClassroomCert(c) ? '<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[9px]">ห้อง</span>' : ''}
                         </td>
                         <td class="py-3 px-2 text-gray-500 max-w-[180px] truncate">${escapeHtml(act.name)}</td>
@@ -2092,20 +2222,21 @@
             const bulkYear = document.getElementById('bulk-year').value.trim() || String(new Date().getFullYear() + 543);
             const bulkStripText = document.getElementById('bulk-strip-text').value;
             const bulkStripBeforeDash = document.getElementById('bulk-strip-before-dash').checked;
+            const bulkClearCertNo = document.getElementById('bulk-clear-certno').checked;
             const bulkAwardSel = document.getElementById('bulk-award').value;
             const bulkAwardCustom = document.getElementById('bulk-award-custom').value.trim();
             const bulkCertType = document.getElementById('bulk-certtype').value;
             const bulkDateRaw = document.getElementById('bulk-date').value;
             const bulkStatus = document.getElementById('bulk-status').value;
 
-            const hasStartNo = startNoStr !== '' && !isNaN(parseInt(startNoStr, 10));
+            const hasStartNo = !bulkClearCertNo && startNoStr !== '' && !isNaN(parseInt(startNoStr, 10));
             const hasStripText = bulkStripText.length > 0 || bulkStripBeforeDash;
             const hasAward = bulkAwardSel !== '__keep__';
             const hasCertType = bulkCertType !== '__keep__';
             const hasDate = bulkDateRaw !== '';
             const hasStatus = bulkStatus !== '__keep__';
 
-            if (!hasStartNo && !hasStripText && !hasAward && !hasCertType && !hasDate && !hasStatus) {
+            if (!bulkClearCertNo && !hasStartNo && !hasStripText && !hasAward && !hasCertType && !hasDate && !hasStatus) {
                 showToast('กรุณาเลือกอย่างน้อย 1 ค่าที่ต้องการแก้ไขพร้อมกัน', 'info');
                 return;
             }
@@ -2118,7 +2249,9 @@
 
             const items = orderedSelected.map(c => {
                 const payload = { id: c.id };
-                if (hasStartNo) {
+                if (bulkClearCertNo) {
+                    payload.clearCertNo = true;
+                } else if (hasStartNo) {
                     payload.certNo = `${currentSeq}/${bulkYear}`;
                     currentSeq++;
                 }
@@ -2160,6 +2293,7 @@
                     document.getElementById('bulk-start-no').value = '';
                     document.getElementById('bulk-strip-text').value = '';
                     document.getElementById('bulk-strip-before-dash').checked = false;
+                    document.getElementById('bulk-clear-certno').checked = false;
                     document.getElementById('bulk-award').value = '__keep__';
                     document.getElementById('bulk-award-custom').classList.add('hidden');
                     document.getElementById('bulk-certtype').value = '__keep__';
