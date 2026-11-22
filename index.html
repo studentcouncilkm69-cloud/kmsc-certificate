@@ -259,7 +259,7 @@
                 </div>
 
                 <form id="verify-form" onsubmit="handleVerifySubmit(event)" class="flex gap-2 mb-5">
-                    <input type="text" id="verify-input" required placeholder="เช่น KM-SC-69-0001" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-mono uppercase focus:outline-none focus:border-[#d91b42] focus:bg-white">
+                    <input type="text" id="verify-input" required placeholder="เช่น 1612/2569 หรือ KM 1612/2569" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-mono uppercase focus:outline-none focus:border-[#d91b42] focus:bg-white">
                     <button type="submit" id="btn-verify-submit" class="bg-[#d91b42] hover:bg-[#b51435] text-white font-bold text-sm px-5 rounded-xl transition-colors shrink-0">
                         ตรวจสอบ
                     </button>
@@ -402,7 +402,7 @@
                     </div>
                     <p class="text-sm font-bold text-gray-800">คลิกเพื่อเลือกไฟล์เกียรติบัตรจากเครื่อง (เลือกได้ทีละไฟล์ หรือหลายไฟล์พร้อมกัน)</p>
                     <p class="text-xs text-gray-500 mt-1">รองรับไฟล์ PDF, PNG, JPG, JPEG จาก Canva (แนะนำไม่เกิน 10MB ต่อไฟล์)</p>
-                    <p class="text-[11px] text-emerald-600 font-medium mt-1">เคล็ดลับ: ตั้งชื่อไฟล์เป็นชื่อนักเรียน เช่น "นายสมชาย ใจดี.png" ระบบจะกรอกชื่อให้อัตโนมัติ</p>
+                    <p class="text-[11px] text-emerald-600 font-medium mt-1">เคล็ดลับ: ตั้งชื่อไฟล์มีเลขที่ เช่น "นายสมหมาย ใจดี 1608-2569.png" หรือ "นายสมหมาย ใจดี 1608.png" ระบบจะแยกชื่อกับเลขที่ให้อัตโนมัติ</p>
                 </label>
 
                 <!-- คิวไฟล์ที่รออัปโหลด -->
@@ -451,10 +451,78 @@
                     </div>
                 </div>
 
+                <!-- แถบตั้งค่าพร้อมกันหลายคน (แสดงเมื่อติ๊กเลือกรายการ) -->
+                <div id="bulk-action-bar" class="hidden mb-4 bg-red-50/70 border border-red-200 rounded-2xl p-4 animate-fade-in">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-[#d91b42] text-white text-xs font-extrabold flex items-center justify-center" id="bulk-selected-count">0</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-gray-900">ตั้งค่าพร้อมกันสำหรับรายการที่เลือก</span>
+                        </div>
+                        <button type="button" onclick="clearCertSelection()" class="text-xs font-bold text-gray-500 hover:text-gray-800 underline">ล้างการเลือก</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 mb-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">รันเลขที่เริ่มจาก (เว้นว่าง=ไม่เปลี่ยน)</label>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="bulk-start-no" placeholder="เช่น 1608" class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs font-mono focus:outline-none focus:border-[#d91b42]">
+                                <span class="text-gray-400 font-bold text-xs">/</span>
+                                <input type="text" id="bulk-year" placeholder="2569" class="w-20 bg-white border border-gray-200 rounded-xl py-2 px-2 text-xs font-mono text-center focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">รางวัล / ประเภท</label>
+                            <select id="bulk-award" onchange="toggleCustomAward('bulk')" class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs focus:outline-none focus:border-[#d91b42]">
+                                <option value="__keep__">-- ไม่เปลี่ยนแปลง --</option>
+                                <option value="">(ล้างค่ารางวัล)</option>
+                                <option value="เข้าร่วมกิจกรรม">เข้าร่วมกิจกรรม</option>
+                                <option value="รางวัลชนะเลิศ">รางวัลชนะเลิศ</option>
+                                <option value="รางวัลรองชนะเลิศ อันดับ 1">รางวัลรองชนะเลิศ อันดับ 1</option>
+                                <option value="รางวัลรองชนะเลิศ อันดับ 2">รางวัลรองชนะเลิศ อันดับ 2</option>
+                                <option value="รางวัลชมเชย">รางวัลชมเชย</option>
+                                <option value="คณะกรรมการ / จิตอาสา">คณะกรรมการ / จิตอาสา</option>
+                                <option value="__custom__">พิมพ์เอง...</option>
+                            </select>
+                            <input type="text" id="bulk-award-custom" placeholder="ระบุรางวัล..." class="hidden mt-1.5 w-full bg-white border border-gray-200 rounded-xl py-1.5 px-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">ประเภทผู้รับ</label>
+                            <select id="bulk-certtype" class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs focus:outline-none focus:border-[#d91b42]">
+                                <option value="__keep__">-- ไม่เปลี่ยนแปลง --</option>
+                                <option value="รายบุคคล">รายบุคคล</option>
+                                <option value="ห้องเรียน">ห้องเรียน</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">วันที่ออกเกียรติบัตร</label>
+                            <input type="date" id="bulk-date" class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs focus:outline-none focus:border-[#d91b42]">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">สถานะ</label>
+                            <select id="bulk-status" class="w-full bg-white border border-gray-200 rounded-xl py-2 px-2.5 text-xs focus:outline-none focus:border-[#d91b42]">
+                                <option value="__keep__">-- ไม่เปลี่ยนแปลง --</option>
+                                <option value="published">เผยแพร่แล้ว</option>
+                                <option value="draft">ฉบับร่าง</option>
+                                <option value="suspended">ถูกระงับ</option>
+                                <option value="cancelled">ยกเลิก</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="button" id="btn-bulk-save" onclick="handleBulkUpdateCerts()" class="bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-colors">
+                            <i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก
+                        </button>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase">
+                                <th class="py-3 px-2 w-8 text-center">
+                                    <input type="checkbox" id="admin-select-all" onchange="toggleSelectAllCerts(this.checked)" class="w-4 h-4 rounded accent-[#d91b42] cursor-pointer">
+                                </th>
                                 <th class="py-3 px-2">เลขที่</th>
                                 <th class="py-3 px-2">ผู้ได้รับ</th>
                                 <th class="py-3 px-2">กิจกรรม</th>
@@ -730,6 +798,8 @@
         let adminCertificates = [];
         let currentActivityDetail = null;
         let uploadQueue = [];
+        let selectedCertIds = new Set();
+        let lastRenderedAdminCerts = [];
 
         let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
         let adminUser = null;
@@ -816,6 +886,51 @@
                 }
             }
             return s;
+        }
+
+        // แสดงเลขที่เกียรติบัตรแบบสวยงาม (เติม KM นำหน้าให้อัตโนมัติ แต่ตอนกรอกไม่ต้องพิมพ์ KM ก็ได้)
+        function formatCertNoDisplay(certNo) {
+            const clean = String(certNo || '').trim().replace(/^'+/, '');
+            if (!clean) return '-';
+            if (/^KM[\s\-_]/i.test(clean) || /^KM$/i.test(clean)) return clean;
+            return 'KM ' + clean;
+        }
+
+        // ปรับรูปแบบเลขที่สำหรับการค้นหา (ตัด KM ออก เพื่อให้พิมพ์ 1612/2569 หรือ KM 1612/2569 ก็เจอ)
+        function normalizeCertNo(val) {
+            return String(val || '')
+                .trim()
+                .toUpperCase()
+                .replace(/^เลขที่\s*/i, '')
+                .replace(/^KM[\s\-_]*/i, '')
+                .replace(/\s+/g, '');
+        }
+
+        // แยกชื่อผู้ได้รับและเลขที่เกียรติบัตรจากชื่อไฟล์อัตโนมัติ
+        function parseNameAndCertNoClient(rawFileName, actYear) {
+            let base = String(rawFileName || '').replace(/\.[^/.]+$/, '').trim();
+            const yearStr = String(actYear || (new Date().getFullYear() + 543)).trim();
+            let extractedCertNo = '';
+
+            const fullMatch = base.match(/(?:^|[\s\-_\(\[])(?:KM[\s\-_]*)?(\d{1,6})[\-_\/](25\d{2})(?:[\)\]]|$|[\s\-_])/i);
+            if (fullMatch) {
+                extractedCertNo = `${fullMatch[1]}/${fullMatch[2]}`;
+                base = base.replace(fullMatch[0], ' ');
+            } else {
+                const tailMatch = base.match(/[\s\-_\(\[]+(\d{1,6})[\)\]]*$/);
+                if (tailMatch) {
+                    extractedCertNo = `${tailMatch[1]}/${yearStr}`;
+                    base = base.slice(0, base.length - tailMatch[0].length);
+                }
+            }
+
+            const cleanName = base
+                .replace(/^\s*\d+[\.\-\)\s_]+/, '')
+                .replace(/_/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim() || rawFileName;
+
+            return { recipientName: cleanName, certNo: extractedCertNo };
         }
 
         // ตรวจสอบว่าเกียรติบัตรเป็นประเภท "ห้องเรียน" หรือไม่
@@ -1028,7 +1143,7 @@
                 <div class="bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2.5">
-                            <span class="px-2.5 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[11px] font-mono font-bold">${escapeHtml(cert.certNo)}</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[11px] font-mono font-bold">${escapeHtml(formatCertNoDisplay(cert.certNo))}</span>
                             <div class="flex items-center gap-1.5">
                                 ${isRoom ? `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">ห้องเรียน</span>` : ''}
                                 <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">${fileBadge}</span>
@@ -1083,9 +1198,11 @@
                 if (typeFilter === 'classroom' && !isClassroomCert(c)) return false;
                 if (typeFilter === 'individual' && isClassroomCert(c)) return false;
                 if (!q) return true;
+                const normQ = normalizeCertNo(q);
                 return (
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
+                    (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
                     String(act.name || '').toLowerCase().includes(q) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
@@ -1202,9 +1319,11 @@
                 if (typeFilter === 'classroom' && !isClassroomCert(c)) return false;
                 if (typeFilter === 'individual' && isClassroomCert(c)) return false;
                 if (!q) return true;
+                const normQ = normalizeCertNo(q);
                 return (
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
+                    (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
             });
@@ -1229,7 +1348,7 @@
 
             document.getElementById('preview-title').textContent = cert.recipientName;
             document.getElementById('preview-subtitle').textContent = act ? act.name : '';
-            document.getElementById('preview-certno').textContent = cert.certNo;
+            document.getElementById('preview-certno').textContent = formatCertNoDisplay(cert.certNo);
             document.getElementById('preview-download-btn').href = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(cert.fileId)}`;
 
             const isPdf = String(cert.mimeType || '').includes('pdf') || /\.pdf$/i.test(cert.fileName || '');
@@ -1278,7 +1397,7 @@
                         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
                             <i class="ph-fill ph-warning-circle text-4xl text-amber-500 mb-2"></i>
                             <h4 class="text-sm font-extrabold text-amber-900">${label}</h4>
-                            <p class="text-xs text-amber-700 mt-1">เลขที่ ${escapeHtml(res.certificate.certNo)} • ${escapeHtml(res.certificate.recipientName)}</p>
+                            <p class="text-xs text-amber-700 mt-1">เลขที่ ${escapeHtml(formatCertNoDisplay(res.certificate.certNo))} • ${escapeHtml(res.certificate.recipientName)}</p>
                         </div>`;
                 } else {
                     const c = res.certificate;
@@ -1289,7 +1408,7 @@
                                 <i class="ph-fill ph-seal-check text-2xl"></i> เกียรติบัตรถูกต้องและมีผลใช้งาน
                             </div>
                             <div class="space-y-1.5 text-xs text-gray-700 bg-white rounded-xl p-4 border border-emerald-100">
-                                <p><span class="font-bold text-gray-500">เลขที่:</span> <span class="font-mono font-bold text-[#d91b42]">${escapeHtml(c.certNo)}</span></p>
+                                <p><span class="font-bold text-gray-500">เลขที่:</span> <span class="font-mono font-bold text-[#d91b42]">${escapeHtml(formatCertNoDisplay(c.certNo))}</span></p>
                                 <p><span class="font-bold text-gray-500">ผู้ได้รับ:</span> <span class="font-bold text-gray-900">${escapeHtml(c.recipientName)}</span></p>
                                 <p><span class="font-bold text-gray-500">กิจกรรม:</span> ${escapeHtml(c.activityName)}</p>
                                 ${c.award ? `<p><span class="font-bold text-gray-500">รางวัล/ประเภท:</span> ${escapeHtml(c.award)}</p>` : ''}
@@ -1652,8 +1771,10 @@
 
         // ================= ADMIN: UPLOAD & DRIVE IMPORT =================
         function toggleCustomAward(prefix) {
-            const sel = document.getElementById(prefix === 'upload' ? 'upload-default-award' : 'edit-cert-award-select');
-            const customInput = document.getElementById(prefix === 'upload' ? 'upload-custom-award' : 'edit-cert-award-custom');
+            const selId = prefix === 'upload' ? 'upload-default-award' : prefix === 'bulk' ? 'bulk-award' : 'edit-cert-award-select';
+            const inputId = prefix === 'upload' ? 'upload-custom-award' : prefix === 'bulk' ? 'bulk-award-custom' : 'edit-cert-award-custom';
+            const sel = document.getElementById(selId);
+            const customInput = document.getElementById(inputId);
             if (sel.value === '__custom__') {
                 customInput.classList.remove('hidden');
                 customInput.focus();
@@ -1693,6 +1814,7 @@
                     data: {
                         folderUrl,
                         activityId,
+                        certType: document.getElementById('upload-default-certtype').value,
                         award: getSelectedDefaultAward(),
                         issueDate: thaiDate,
                         status: 'published'
@@ -1717,18 +1839,18 @@
             const files = Array.from(e.target.files || []);
             if (files.length === 0) return;
 
+            const activityId = document.getElementById('upload-activity-select').value;
+            const act = adminActivities.find(a => String(a.id) === String(activityId));
+            const actYear = act ? act.year : String(new Date().getFullYear() + 543);
             const defaultType = document.getElementById('upload-default-certtype').value;
             const defaultAward = getSelectedDefaultAward();
 
             files.forEach(file => {
-                const cleanName = file.name
-                    .replace(/\.[^/.]+$/, '')
-                    .replace(/^\s*\d+[\.\-\)\s_]+/, '')
-                    .replace(/_/g, ' ')
-                    .trim();
+                const parsed = parseNameAndCertNoClient(file.name, actYear);
                 uploadQueue.push({
                     file,
-                    recipientName: cleanName,
+                    recipientName: parsed.recipientName,
+                    certNo: parsed.certNo,
                     certType: defaultType,
                     award: defaultAward,
                     grade: '',
@@ -1755,17 +1877,20 @@
             list.innerHTML = uploadQueue.map((item, idx) => `
                 <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-12 gap-2">
-                        <div class="sm:col-span-5">
+                        <div class="sm:col-span-4">
                             <input type="text" value="${escapeHtml(item.recipientName)}" onchange="uploadQueue[${idx}].recipientName = this.value" placeholder="ชื่อ-นามสกุล หรือ ห้องเรียน" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-3 text-xs font-bold">
                         </div>
                         <div class="sm:col-span-3">
-                            <select onchange="uploadQueue[${idx}].certType = this.value" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-2.5 text-xs">
+                            <input type="text" value="${escapeHtml(item.certNo || '')}" onchange="uploadQueue[${idx}].certNo = this.value" placeholder="เลขที่ (เว้น=รันเอง)" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-2.5 text-xs font-mono text-[#d91b42]">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <select onchange="uploadQueue[${idx}].certType = this.value" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-2 text-xs">
                                 <option value="รายบุคคล" ${item.certType === 'รายบุคคล' ? 'selected' : ''}>รายบุคคล</option>
                                 <option value="ห้องเรียน" ${item.certType === 'ห้องเรียน' ? 'selected' : ''}>ห้องเรียน</option>
                             </select>
                         </div>
-                        <div class="sm:col-span-4">
-                            <input type="text" value="${escapeHtml(item.award)}" onchange="uploadQueue[${idx}].award = this.value" placeholder="รางวัล / ประเภท" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-3 text-xs">
+                        <div class="sm:col-span-3">
+                            <input type="text" value="${escapeHtml(item.award)}" onchange="uploadQueue[${idx}].award = this.value" placeholder="รางวัล / ประเภท" class="w-full bg-white border border-gray-200 rounded-xl py-1.5 px-2.5 text-xs">
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
@@ -1817,6 +1942,7 @@
                         token: adminToken,
                         data: {
                             activityId,
+                            certNo: String(item.certNo || '').trim(),
                             recipientName: item.recipientName.trim() || item.file.name,
                             certType: item.certType,
                             award: item.award.trim(),
@@ -1859,19 +1985,25 @@
                 if (actId && String(c.activityId) !== String(actId)) return false;
                 if (status && String(c.status) !== String(status)) return false;
                 if (!q) return true;
+                const normQ = normalizeCertNo(q);
                 return (
                     String(c.recipientName || '').toLowerCase().includes(q) ||
                     String(c.certNo || '').toLowerCase().includes(q) ||
+                    (normQ && normalizeCertNo(c.certNo).includes(normQ)) ||
                     String(c.award || '').toLowerCase().includes(q)
                 );
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ไม่พบรายการเกียรติบัตร</td></tr>`;
+                lastRenderedAdminCerts = [];
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-400">ไม่พบรายการเกียรติบัตร</td></tr>`;
+                updateBulkActionBar();
                 return;
             }
 
             const sorted = sortCertificates(filtered);
+            lastRenderedAdminCerts = sorted;
+
             const statusLabels = {
                 published: '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px]">เผยแพร่</span>',
                 draft: '<span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold text-[10px]">ฉบับร่าง</span>',
@@ -1881,9 +2013,13 @@
 
             tbody.innerHTML = sorted.map(c => {
                 const act = actMap[c.activityId] || { name: '-' };
+                const checked = selectedCertIds.has(String(c.id)) ? 'checked' : '';
                 return `
-                    <tr class="hover:bg-gray-50/70">
-                        <td class="py-3 px-2 font-mono font-bold text-[#d91b42] whitespace-nowrap">${escapeHtml(c.certNo)}</td>
+                    <tr class="hover:bg-gray-50/70 ${checked ? 'bg-red-50/30' : ''}">
+                        <td class="py-3 px-2 text-center">
+                            <input type="checkbox" ${checked} onchange="toggleSelectCert('${escapeHtml(c.id)}', this.checked)" class="w-4 h-4 rounded accent-[#d91b42] cursor-pointer">
+                        </td>
+                        <td class="py-3 px-2 font-mono font-bold text-[#d91b42] whitespace-nowrap">${escapeHtml(formatCertNoDisplay(c.certNo))}</td>
                         <td class="py-3 px-2 font-bold text-gray-900">
                             ${escapeHtml(c.recipientName)}
                             ${isClassroomCert(c) ? '<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[9px]">ห้อง</span>' : ''}
@@ -1898,6 +2034,122 @@
                         </td>
                     </tr>`;
             }).join('');
+
+            updateBulkActionBar();
+        }
+
+        function toggleSelectCert(certId, isChecked) {
+            if (isChecked) selectedCertIds.add(String(certId));
+            else selectedCertIds.delete(String(certId));
+            updateBulkActionBar();
+        }
+
+        function toggleSelectAllCerts(isChecked) {
+            lastRenderedAdminCerts.forEach(c => {
+                if (isChecked) selectedCertIds.add(String(c.id));
+                else selectedCertIds.delete(String(c.id));
+            });
+            renderAdminCertsTable();
+        }
+
+        function clearCertSelection() {
+            selectedCertIds.clear();
+            const selectAll = document.getElementById('admin-select-all');
+            if (selectAll) selectAll.checked = false;
+            renderAdminCertsTable();
+        }
+
+        function updateBulkActionBar() {
+            const bar = document.getElementById('bulk-action-bar');
+            const countEl = document.getElementById('bulk-selected-count');
+            const selectAll = document.getElementById('admin-select-all');
+
+            if (selectedCertIds.size > 0) {
+                bar.classList.remove('hidden');
+                countEl.textContent = selectedCertIds.size;
+                const yearInput = document.getElementById('bulk-year');
+                if (!yearInput.value) {
+                    yearInput.value = String(new Date().getFullYear() + 543);
+                }
+            } else {
+                bar.classList.add('hidden');
+            }
+
+            if (selectAll) {
+                selectAll.checked = lastRenderedAdminCerts.length > 0 && lastRenderedAdminCerts.every(c => selectedCertIds.has(String(c.id)));
+            }
+        }
+
+        async function handleBulkUpdateCerts() {
+            if (selectedCertIds.size === 0) return;
+
+            const startNoStr = document.getElementById('bulk-start-no').value.trim();
+            const bulkYear = document.getElementById('bulk-year').value.trim() || String(new Date().getFullYear() + 543);
+            const bulkAwardSel = document.getElementById('bulk-award').value;
+            const bulkAwardCustom = document.getElementById('bulk-award-custom').value.trim();
+            const bulkCertType = document.getElementById('bulk-certtype').value;
+            const bulkDateRaw = document.getElementById('bulk-date').value;
+            const bulkStatus = document.getElementById('bulk-status').value;
+
+            const hasStartNo = startNoStr !== '' && !isNaN(parseInt(startNoStr, 10));
+            const hasAward = bulkAwardSel !== '__keep__';
+            const hasCertType = bulkCertType !== '__keep__';
+            const hasDate = bulkDateRaw !== '';
+            const hasStatus = bulkStatus !== '__keep__';
+
+            if (!hasStartNo && !hasAward && !hasCertType && !hasDate && !hasStatus) {
+                showToast('กรุณาเลือกอย่างน้อย 1 ค่าที่ต้องการแก้ไขพร้อมกัน', 'info');
+                return;
+            }
+
+            // เรียงรายการที่เลือกตามลำดับที่แสดงในตาราง เพื่อให้เลขที่รันต่อกันเป๊ะ
+            const orderedSelected = lastRenderedAdminCerts.filter(c => selectedCertIds.has(String(c.id)));
+            let currentSeq = hasStartNo ? parseInt(startNoStr, 10) : 0;
+            const awardValue = bulkAwardSel === '__custom__' ? bulkAwardCustom : bulkAwardSel;
+            const thaiDate = hasDate ? formatThaiDate(bulkDateRaw) : '';
+
+            const items = orderedSelected.map(c => {
+                const payload = { id: c.id };
+                if (hasStartNo) {
+                    payload.certNo = `${currentSeq}/${bulkYear}`;
+                    currentSeq++;
+                }
+                if (hasAward) payload.award = awardValue;
+                if (hasCertType) payload.certType = bulkCertType;
+                if (hasDate) payload.issueDate = thaiDate;
+                if (hasStatus) payload.status = bulkStatus;
+                return payload;
+            });
+
+            const btn = document.getElementById('btn-bulk-save');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก ${items.length} รายการ...`;
+
+            try {
+                const res = await apiPost({
+                    action: 'bulkUpdateCertificates',
+                    token: adminToken,
+                    data: { items }
+                });
+                if (res.success) {
+                    showToast(res.message || `อัปเดตสำเร็จ ${items.length} รายการ`, 'success');
+                    document.getElementById('bulk-start-no').value = '';
+                    document.getElementById('bulk-award').value = '__keep__';
+                    document.getElementById('bulk-award-custom').classList.add('hidden');
+                    document.getElementById('bulk-certtype').value = '__keep__';
+                    document.getElementById('bulk-date').value = '';
+                    document.getElementById('bulk-status').value = '__keep__';
+                    selectedCertIds.clear();
+                    loadAdminData();
+                } else {
+                    showToast(res.error || 'อัปเดตไม่สำเร็จ', 'error');
+                }
+            } catch (err) {
+                showToast('เกิดข้อผิดพลาดในการบันทึกพร้อมกัน', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk"></i> บันทึกทั้งหมดที่เลือก`;
+            }
         }
 
         function openEditCertModal(certId) {
