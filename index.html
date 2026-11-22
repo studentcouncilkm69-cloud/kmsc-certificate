@@ -810,18 +810,18 @@
         let lastRenderedAdminCerts = [];
 
         const THAI_MONTHS = [
-            let cleanName = base
-                .replace(/^\s*\d+[\.\-\)\s_]+/, '')
-                .replace(/_/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
+            'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+            'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+        ];
 
-            const dashSplit = cleanName.match(/^.+?[\s]+[-–—][\s]+((?:นางสาว|เด็กชาย|เด็กหญิง|นาย|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.|ว่าที่ร้อยตรี|ครู|อาจารย์|ชั้น|ห้อง|ม\.\s*\d|ป\.\s*\d).*)$/i);
-            if (dashSplit && dashSplit[1]) {
-                cleanName = dashSplit[1].trim();
-            }
-
-            return { recipientName: cleanName || rawFileName, certNo: extractedCertNo };
+        // ================= UTILITIES =================
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function showToast(message, type = 'info') {
@@ -924,13 +924,18 @@
                 }
             }
 
-            const cleanName = base
+            let cleanName = base
                 .replace(/^\s*\d+[\.\-\)\s_]+/, '')
                 .replace(/_/g, ' ')
                 .replace(/\s+/g, ' ')
-                .trim() || rawFileName;
+                .trim();
 
-            return { recipientName: cleanName, certNo: extractedCertNo };
+            const dashSplit = cleanName.match(/^.+?[\s]+[-–—][\s]+((?:นางสาว|เด็กชาย|เด็กหญิง|นาย|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.|ว่าที่ร้อยตรี|ครู|อาจารย์|ชั้น|ห้อง|ม\.\s*\d|ป\.\s*\d).*)$/i);
+            if (dashSplit && dashSplit[1]) {
+                cleanName = dashSplit[1].trim();
+            }
+
+            return { recipientName: cleanName || rawFileName, certNo: extractedCertNo };
         }
 
         // ตรวจสอบว่าเกียรติบัตรเป็นประเภท "ห้องเรียน" หรือไม่
