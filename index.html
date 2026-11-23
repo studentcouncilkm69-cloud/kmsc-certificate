@@ -75,12 +75,12 @@
     <header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
         <div class="max-w-4xl mx-auto px-3.5 sm:px-4 h-15 sm:h-16 py-2 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 sm:gap-3 select-none min-w-0">
-                <!-- โลโก้โรงเรียน (แตะ 5 ครั้งภายใน 2 วินาที เพื่อเข้าสู่หน้า Admin Login) -->
-                <button type="button" id="secret-logo-btn" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 focus:outline-none active:scale-95 transition-transform" style="touch-action: manipulation;" title="สภานักเรียนโรงเรียนคำม่วง">
+                <!-- โลโก้โรงเรียน (แตะ 1 ครั้งกลับหน้าแรก / แตะ 5 ครั้งภายใน 2 วินาที เพื่อเข้าสู่หน้า Admin Login) -->
+                <button type="button" id="secret-logo-btn" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 focus:outline-none active:scale-95 transition-transform cursor-pointer" style="touch-action: manipulation;" title="หน้าแรก (สภานักเรียนโรงเรียนคำม่วง)">
                     <img src="https://i.postimg.cc/wBN5btrp/rong-re-yn-kham-wng.png" alt="โลโก้โรงเรียนคำม่วง" class="w-full h-full object-contain pointer-events-none">
                 </button>
-                <div class="leading-tight min-w-0">
-                    <h1 class="text-[14px] sm:text-base font-extrabold text-gray-900 tracking-tight truncate">ระบบคลังเกียรติบัตรออนไลน์</h1>
+                <div onclick="goHomePage()" class="leading-tight min-w-0 cursor-pointer group" title="กลับหน้าแรก">
+                    <h1 class="text-[14px] sm:text-base font-extrabold text-gray-900 group-hover:text-[#d91b42] transition-colors tracking-tight truncate">ระบบคลังเกียรติบัตรออนไลน์</h1>
                     <p class="text-[9px] sm:text-[11px] font-semibold text-gray-400 tracking-wider uppercase truncate">CERTIFICATE ARCHIVE SYSTEM</p>
                 </div>
             </div>
@@ -372,7 +372,7 @@
             <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
                 <div>
                     <h3 class="text-base font-bold text-gray-900">รายการกิจกรรมทั้งหมด</h3>
-                    <p id="act-order-status" class="text-[11px] text-gray-500 mt-0.5">กดปักหมุดหรือลูกศรขึ้น-ลงเพื่อจัดลำดับการแสดงผลหน้าเว็บ</p>
+                    <p id="act-order-status" class="text-[11px] text-gray-500 mt-0.5">กดปักหมุด หรือปุ่มลูกศร (บนสุด / ขึ้น / ลง / ล่างสุด) เพื่อจัดลำดับการแสดงผลหน้าเว็บ</p>
                 </div>
                 <button type="button" onclick="openActivityModal()" class="px-4 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <i class="ph-bold ph-plus"></i> เพิ่มกิจกรรมใหม่
@@ -736,11 +736,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">ปีการศึกษา (พ.ศ.) *</label>
-                        <input type="text" id="act-year" required placeholder="2569" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
+                        <select id="act-year-select" onchange="toggleCustomActField('year')" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-white focus:outline-none focus:border-[#d91b42]"></select>
+                        <input type="text" id="act-year-custom" placeholder="พิมพ์ปี พ.ศ. เช่น 2571" class="hidden mt-1.5 w-full border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">สถานะ</label>
-                        <select id="act-status" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-white">
+                        <select id="act-status" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-white focus:outline-none focus:border-[#d91b42]">
                             <option value="published">เผยแพร่</option>
                             <option value="draft">ซ่อนไว้ก่อน</option>
                         </select>
@@ -748,20 +749,8 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">ผู้ดูแลกิจกรรม</label>
-                    <input type="text" id="act-organizer" list="organizer-suggestions" placeholder="เช่น สภานักเรียน / งานกิจการนักเรียน" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm">
-                    <datalist id="organizer-suggestions">
-                        <option value="สภานักเรียน">
-                        <option value="งานกิจการนักเรียน">
-                        <option value="กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี">
-                        <option value="กลุ่มสาระฯ คณิตศาสตร์">
-                        <option value="กลุ่มสาระฯ ภาษาไทย">
-                        <option value="กลุ่มสาระฯ ภาษาต่างประเทศ">
-                        <option value="กลุ่มสาระฯ สังคมศึกษาฯ">
-                        <option value="กลุ่มสาระฯ ศิลปะ">
-                        <option value="กลุ่มสาระฯ สุขศึกษาและพลศึกษา">
-                        <option value="กลุ่มสาระฯ การงานอาชีพ">
-                        <option value="โรงเรียนคำม่วง">
-                    </datalist>
+                    <select id="act-organizer-select" onchange="toggleCustomActField('organizer')" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-white focus:outline-none focus:border-[#d91b42]"></select>
+                    <input type="text" id="act-organizer-custom" placeholder="พิมพ์ชื่อผู้ดูแล / กลุ่มสาระฯ / หน่วยงานใหม่..." class="hidden mt-1.5 w-full border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-[#d91b42]">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">รูปแบบการแสดงผลหน้ากิจกรรม</label>
@@ -994,6 +983,22 @@
         const THAI_MONTHS = [
             'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
             'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+        ];
+
+        const DEFAULT_ORGANIZERS = [
+            'สภานักเรียน',
+            'งานกิจการนักเรียน',
+            'โรงเรียนคำม่วง',
+            'กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี',
+            'กลุ่มสาระฯ คณิตศาสตร์',
+            'กลุ่มสาระฯ ภาษาไทย',
+            'กลุ่มสาระฯ ภาษาต่างประเทศ',
+            'กลุ่มสาระฯ สังคมศึกษาฯ',
+            'กลุ่มสาระฯ ศิลปะ',
+            'กลุ่มสาระฯ สุขศึกษาและพลศึกษา',
+            'กลุ่มสาระฯ การงานอาชีพ',
+            'งานห้องสมุด',
+            'สพม.กาฬสินธุ์'
         ];
 
         // ================= UTILITIES =================
@@ -1271,7 +1276,16 @@
             return data;
         }
 
-        // ================= SECRET LOGO CLICK (5 TAPS IN 2 SECONDS) =================
+        // ================= LOGO HOME NAVIGATION + SECRET 5-TAP ADMIN LOGIN =================
+        function goHomePage() {
+            const isAdminVisible = !document.getElementById('admin-view').classList.contains('hidden');
+            if (isAdminVisible) {
+                exitAdminView();
+            }
+            switchPublicTab('search');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         (function setupSecretLogoTrigger() {
             const logoBtn = document.getElementById('secret-logo-btn');
             let tapCount = 0;
@@ -1280,6 +1294,7 @@
             logoBtn.addEventListener('click', () => {
                 tapCount++;
                 if (tapTimer) clearTimeout(tapTimer);
+
                 if (tapCount >= 5) {
                     tapCount = 0;
                     if (adminToken) {
@@ -1288,9 +1303,15 @@
                         document.getElementById('modal-login').classList.remove('hidden');
                         setTimeout(() => document.getElementById('login-username').focus(), 100);
                     }
-                } else {
-                    tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+                    return;
                 }
+
+                // แตะครั้งแรกให้กลับไปหน้าแรกทันที
+                if (tapCount === 1) {
+                    goHomePage();
+                }
+
+                tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
             });
         })();
 
@@ -2362,16 +2383,28 @@
 
             container.innerHTML = adminActivities.map((act, idx) => {
                 const certCount = adminCertificates.filter(c => String(c.activityId) === String(act.id)).length;
-                const isFirst = idx === 0;
-                const isLast = idx === adminActivities.length - 1;
+                const isPinned = Boolean(act.isPinned);
+                const sameGroupIndices = adminActivities
+                    .map((a, i) => Boolean(a.isPinned) === isPinned ? i : -1)
+                    .filter(i => i !== -1);
+                const isFirstInGroup = idx === sameGroupIndices[0];
+                const isLastInGroup = idx === sameGroupIndices[sameGroupIndices.length - 1];
+                const safeId = escapeHtml(act.id);
+
                 return `
                     <div class="bg-white rounded-2xl border ${act.isPinned ? 'border-amber-200 bg-amber-50/20' : 'border-gray-100'} shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
-                            <div class="flex flex-col gap-1 shrink-0 pt-0.5">
-                                <button type="button" onclick="moveActivity('${escapeHtml(act.id)}', -1)" ${isFirst ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-30 flex items-center justify-center text-gray-600" title="เลื่อนขึ้น">
+                            <div class="grid grid-cols-2 gap-1 shrink-0 pt-0.5">
+                                <button type="button" onclick="moveActivityToEdge('${safeId}', 'top')" ${isFirstInGroup ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 hover:bg-red-50 hover:text-[#d91b42] hover:border-red-200 disabled:opacity-30 flex items-center justify-center text-gray-600 transition-colors" title="ย้ายไปบนสุด">
+                                    <i class="ph-bold ph-arrow-line-up text-xs"></i>
+                                </button>
+                                <button type="button" onclick="moveActivity('${safeId}', -1)" ${isFirstInGroup ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-30 flex items-center justify-center text-gray-600 transition-colors" title="เลื่อนขึ้น 1 ขั้น">
                                     <i class="ph-bold ph-arrow-up text-xs"></i>
                                 </button>
-                                <button type="button" onclick="moveActivity('${escapeHtml(act.id)}', 1)" ${isLast ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-30 flex items-center justify-center text-gray-600" title="เลื่อนลง">
+                                <button type="button" onclick="moveActivityToEdge('${safeId}', 'bottom')" ${isLastInGroup ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 hover:bg-red-50 hover:text-[#d91b42] hover:border-red-200 disabled:opacity-30 flex items-center justify-center text-gray-600 transition-colors" title="ย้ายไปล่างสุด">
+                                    <i class="ph-bold ph-arrow-line-down text-xs"></i>
+                                </button>
+                                <button type="button" onclick="moveActivity('${safeId}', 1)" ${isLastInGroup ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-30 flex items-center justify-center text-gray-600 transition-colors" title="เลื่อนลง 1 ขั้น">
                                     <i class="ph-bold ph-arrow-down text-xs"></i>
                                 </button>
                             </div>
@@ -2391,11 +2424,11 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-                            <button type="button" onclick="togglePinActivity('${escapeHtml(act.id)}')" class="px-3 py-1.5 rounded-xl border ${act.isPinned ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'} text-xs font-bold flex items-center gap-1">
+                            <button type="button" onclick="togglePinActivity('${safeId}')" class="px-3 py-1.5 rounded-xl border ${act.isPinned ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'} text-xs font-bold flex items-center gap-1">
                                 <i class="ph-fill ph-push-pin"></i> ${act.isPinned ? 'เลิกปักหมุด' : 'ปักหมุด'}
                             </button>
-                            <button type="button" onclick="openActivityModal('${escapeHtml(act.id)}')" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold">แก้ไข</button>
-                            <button type="button" onclick="deleteActivity('${escapeHtml(act.id)}')" class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold">ลบ</button>
+                            <button type="button" onclick="openActivityModal('${safeId}')" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold">แก้ไข</button>
+                            <button type="button" onclick="deleteActivity('${safeId}')" class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold">ลบ</button>
                         </div>
                     </div>`;
             }).join('');
@@ -2428,6 +2461,27 @@
             scheduleSaveActivitiesOrder();
         }
 
+        function moveActivityToEdge(actId, edge) {
+            const idx = adminActivities.findIndex(a => String(a.id) === String(actId));
+            if (idx < 0) return;
+
+            const current = adminActivities[idx];
+            const isPinned = Boolean(current.isPinned);
+            const sameGroupIndices = adminActivities
+                .map((a, i) => Boolean(a.isPinned) === isPinned ? i : -1)
+                .filter(i => i !== -1);
+            if (sameGroupIndices.length <= 1) return;
+
+            const targetIdx = edge === 'top' ? sameGroupIndices[0] : sameGroupIndices[sameGroupIndices.length - 1];
+            if (idx === targetIdx) return;
+
+            const [moved] = adminActivities.splice(idx, 1);
+            adminActivities.splice(targetIdx, 0, moved);
+            adminActivities.forEach((a, i) => { a.sortOrder = i + 1; });
+            renderAdminActivitiesList();
+            scheduleSaveActivitiesOrder();
+        }
+
         function scheduleSaveActivitiesOrder() {
             const statusEl = document.getElementById('act-order-status');
             statusEl.textContent = 'กำลังบันทึกลำดับ...';
@@ -2451,6 +2505,64 @@
             }, 600);
         }
 
+        // สร้างตัวเลือก Dropdown ปีการศึกษา & ผู้ดูแลกิจกรรม (รวมค่าที่เคยเพิ่มไว้แล้ว + พิมพ์เพิ่มเองได้)
+        function populateActivityFormDropdowns(selectedYear, selectedOrganizer) {
+            const currentBeYear = new Date().getFullYear() + 543;
+            const yearSet = new Set([
+                String(currentBeYear + 1),
+                String(currentBeYear),
+                String(currentBeYear - 1),
+                String(currentBeYear - 2),
+                String(currentBeYear - 3)
+            ]);
+            adminActivities.forEach(a => {
+                if (a.year && String(a.year).trim()) yearSet.add(String(a.year).trim());
+            });
+            if (selectedYear && String(selectedYear).trim()) {
+                yearSet.add(String(selectedYear).trim());
+            }
+            const sortedYears = Array.from(yearSet).sort((a, b) => b.localeCompare(a, 'th', { numeric: true }));
+            const yearSel = document.getElementById('act-year-select');
+            const yearCustom = document.getElementById('act-year-custom');
+            yearSel.innerHTML =
+                sortedYears.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('') +
+                `<option value="__custom__">+ เพิ่มปีอื่นเอง...</option>`;
+            yearSel.value = selectedYear ? String(selectedYear).trim() : String(currentBeYear);
+            yearCustom.value = '';
+            yearCustom.classList.add('hidden');
+
+            const orgSet = new Set(DEFAULT_ORGANIZERS);
+            adminActivities.forEach(a => {
+                if (a.organizer && String(a.organizer).trim()) orgSet.add(String(a.organizer).trim());
+            });
+            if (selectedOrganizer && String(selectedOrganizer).trim()) {
+                orgSet.add(String(selectedOrganizer).trim());
+            }
+            const orgSel = document.getElementById('act-organizer-select');
+            const orgCustom = document.getElementById('act-organizer-custom');
+            orgSel.innerHTML =
+                `<option value="">-- ไม่ระบุ --</option>` +
+                Array.from(orgSet).map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('') +
+                `<option value="__custom__">+ พิมพ์เพิ่มผู้ดูแลใหม่...</option>`;
+            orgSel.value = selectedOrganizer !== undefined ? String(selectedOrganizer).trim() : 'สภานักเรียน';
+            orgCustom.value = '';
+            orgCustom.classList.add('hidden');
+        }
+
+        function toggleCustomActField(field) {
+            if (field === 'year') {
+                const isCustom = document.getElementById('act-year-select').value === '__custom__';
+                const inp = document.getElementById('act-year-custom');
+                inp.classList.toggle('hidden', !isCustom);
+                if (isCustom) setTimeout(() => inp.focus(), 50);
+            } else if (field === 'organizer') {
+                const isCustom = document.getElementById('act-organizer-select').value === '__custom__';
+                const inp = document.getElementById('act-organizer-custom');
+                inp.classList.toggle('hidden', !isCustom);
+                if (isCustom) setTimeout(() => inp.focus(), 50);
+            }
+        }
+
         function openActivityModal(actId = '') {
             document.getElementById('activity-form').reset();
             if (actId) {
@@ -2459,9 +2571,8 @@
                 document.getElementById('modal-act-title').textContent = 'แก้ไขกิจกรรม';
                 document.getElementById('act-id').value = act.id;
                 document.getElementById('act-name').value = act.name || '';
-                document.getElementById('act-year').value = act.year || '';
+                populateActivityFormDropdowns(act.year || '', act.organizer || '');
                 document.getElementById('act-status').value = act.status || 'published';
-                document.getElementById('act-organizer').value = act.organizer || '';
                 document.getElementById('act-display-mode').value = act.displayMode === 'gallery' ? 'gallery' : 'list';
                 document.getElementById('act-external-url').value = act.externalUrl || '';
                 document.getElementById('act-category').value = act.category || '';
@@ -2471,8 +2582,7 @@
             } else {
                 document.getElementById('modal-act-title').textContent = 'เพิ่มกิจกรรมใหม่';
                 document.getElementById('act-id').value = '';
-                document.getElementById('act-year').value = String(new Date().getFullYear() + 543);
-                document.getElementById('act-organizer').value = 'สภานักเรียน';
+                populateActivityFormDropdowns(String(new Date().getFullYear() + 543), 'สภานักเรียน');
                 document.getElementById('act-display-mode').value = 'list';
                 document.getElementById('act-external-url').value = '';
                 document.getElementById('act-cover-url').value = '';
@@ -2483,6 +2593,21 @@
 
         async function handleSaveActivity(e) {
             e.preventDefault();
+            const yearSelVal = document.getElementById('act-year-select').value;
+            const yearVal = yearSelVal === '__custom__'
+                ? document.getElementById('act-year-custom').value.trim()
+                : yearSelVal.trim();
+            if (!yearVal) {
+                showToast('กรุณาระบุปีการศึกษา (พ.ศ.)', 'error');
+                document.getElementById('act-year-custom').focus();
+                return;
+            }
+
+            const orgSelVal = document.getElementById('act-organizer-select').value;
+            const orgVal = orgSelVal === '__custom__'
+                ? document.getElementById('act-organizer-custom').value.trim()
+                : orgSelVal.trim();
+
             const btn = document.getElementById('btn-save-act');
             btn.disabled = true;
             btn.textContent = 'กำลังบันทึก...';
@@ -2491,9 +2616,9 @@
                 const payload = {
                     id: document.getElementById('act-id').value,
                     name: document.getElementById('act-name').value.trim(),
-                    year: document.getElementById('act-year').value.trim(),
+                    year: yearVal,
                     status: document.getElementById('act-status').value,
-                    organizer: document.getElementById('act-organizer').value.trim(),
+                    organizer: orgVal,
                     displayMode: document.getElementById('act-display-mode').value,
                     externalUrl: document.getElementById('act-external-url').value.trim(),
                     category: document.getElementById('act-category').value.trim(),
