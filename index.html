@@ -283,7 +283,7 @@
 
             <!-- แถบสลับมุมมอง & คำแนะนำโหมดแกลเลอรี -->
             <div id="detail-summary-bar" class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
-                <p id="detail-result-summary" class="text-xs font-bold text-gray-500"></p>
+                <div id="detail-result-summary" class="text-xs font-bold text-gray-500 flex flex-wrap items-center gap-2"></div>
                 <div id="detail-view-toggle" class="inline-flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
                     <button type="button" id="btn-view-list" onclick="setDetailViewMode('list')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
                         <i class="ph-bold ph-list-bullets"></i> รายชื่อ
@@ -978,6 +978,8 @@
         let currentActivityDetail = null;
         let currentDetailViewMode = 'list';
         let isCurrentActivityGalleryOnly = false;
+        let currentActivitySubfolders = [];
+        let currentActivityTotalCerts = 0;
         let currentActivityDuplicateNames = new Set();
         let detailVisibleCount = 24;
         let uploadQueue = [];
@@ -1523,7 +1525,6 @@
                 if (year && String(act.year) !== String(year)) return false;
                 if (!matchesCertTypeFilter(c, typeVal)) return false;
 
-                // สำหรับกิจกรรมแบบแกลเลอรี หากชื่อไฟล์เป็นรหัสสุ่ม จะไม่โชว์ในการ์ดค้นหารายชื่อทั่วไป
                 if (galleryOnlyActIds.has(c.activityId) && isRandomFileName(c.recipientName)) {
                     return false;
                 }
@@ -1552,7 +1553,6 @@
 
             let html = '';
 
-            // แสดงกิจกรรมที่ตรงกับคำค้นหา (กดเปิดหน้ากิจกรรมหรือลิงก์ได้ทันที)
             if (matchedActivities.length > 0) {
                 html += `
                     <div class="mb-5">
@@ -1594,7 +1594,6 @@
                     </div>`;
             }
 
-            // แสดงรายการเกียรติบัตรที่พบ
             if (matchedCerts.length > 0) {
                 const limit = 60;
                 const shown = matchedCerts.slice(0, limit);
@@ -1705,6 +1704,7 @@
                 : `<i class="ph-fill ph-certificate text-5xl"></i>`;
 
             const actCerts = publicCertificates.filter(c => String(c.activityId) === String(act.id));
+            currentActivityTotalCerts = actCerts.length;
             isCurrentActivityGalleryOnly = act.displayMode === 'gallery';
             currentDetailViewMode = isCurrentActivityGalleryOnly ? 'gallery' : 'list';
             currentActivityDuplicateNames = getDuplicateNameSet(actCerts);
@@ -1776,22 +1776,29 @@
             document.getElementById('detail-load-more-wrap').classList.add('hidden');
 
             if (onlyExternal) {
+                currentActivitySubfolders = [];
                 document.getElementById('detail-subfolder-wrap').classList.add('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
 
-            // สร้างตัวเลือกโฟลเดอร์ย่อย / ห้องเรียน จาก grade & room
-            const subfolders = Array.from(new Set(actCerts.map(c => formatGradeRoom(c)).filter(Boolean)))
-                .sort((a, b) => a.localeCompare(b, 'th', { numeric: true }));
+            // สร้างรายการหมวดย่อย / โฟลเดอร์ / ห้องเรียน จาก grade & room
+            const subCounts = {};
+            actCerts.forEach(c => {
+                const gr = formatGradeRoom(c);
+                if (gr) subCounts[gr] = (subCounts[gr] || 0) + 1;
+            });
+            const subfolderNames = Object.keys(subCounts).sort((a, b) => a.localeCompare(b, 'th', { numeric: true }));
+            currentActivitySubfolders = subfolderNames.map(name => ({ name, count: subCounts[name] }));
+
             const subWrap = document.getElementById('detail-subfolder-wrap');
             const subSelect = document.getElementById('detail-subfolder-filter');
-            if (subfolders.length > 1) {
-                subSelect.innerHTML = `<option value="">ทุกหมวดหมู่ / ทุกห้อง (${actCerts.length})</option>` +
-                    subfolders.map(sf => {
-                        const cCount = actCerts.filter(c => formatGradeRoom(c) === sf).length;
-                        return `<option value="${escapeHtml(sf)}">${escapeHtml(sf)} (${cCount})</option>`;
-                    }).join('');
+            if (currentActivitySubfolders.length > 1) {
+                const defaultLabel = isCurrentActivityGalleryOnly
+                    ? '-- กรุณาเลือกหมวดหมู่ / กิจกรรมย่อย / ห้องเรียน --'
+                    : `ทุกหมวดหมู่ / ทุกห้อง (${actCerts.length})`;
+                subSelect.innerHTML = `<option value="">${defaultLabel}</option>` +
+                    currentActivitySubfolders.map(sf => `<option value="${escapeHtml(sf.name)}">${escapeHtml(sf.name)} (${sf.count} ใบ)</option>`).join('');
                 subSelect.value = '';
                 subWrap.classList.remove('hidden');
             } else {
@@ -1822,6 +1829,7 @@
 
         function closeActivityDetail() {
             currentActivityDetail = null;
+            currentActivitySubfolders = [];
             updateActivityUrlParam('');
             switchPublicTab('activities');
         }
@@ -1845,6 +1853,18 @@
                 btnList.className = activeCls;
                 btnGal.className = inactiveCls;
             }
+        }
+
+        function selectDetailSubfolder(sfName) {
+            const sel = document.getElementById('detail-subfolder-filter');
+            if (sel) sel.value = sfName;
+            if (sfName) {
+                const searchInp = document.getElementById('detail-search-input');
+                if (searchInp) searchInp.value = '';
+            }
+            detailVisibleCount = 24;
+            renderActivityDetailCerts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function onDetailSubfolderChange() {
@@ -1874,6 +1894,50 @@
             const typeVal = document.getElementById('detail-type-filter').value;
             const subVal = document.getElementById('detail-subfolder-filter').value;
 
+            const isGallery = currentDetailViewMode === 'gallery';
+            document.getElementById('detail-gallery-hint').classList.toggle('hidden', !isGallery);
+
+            const grid = document.getElementById('detail-certs-grid');
+            const summary = document.getElementById('detail-result-summary');
+            const loadMoreWrap = document.getElementById('detail-load-more-wrap');
+
+            // โหมดแกลเลอรีที่มีหลายหมวดย่อยและยังไม่ได้เลือกหมวด: แสดงการ์ดเลือกหมวดหมู่ย่อยก่อน
+            if (isGallery && currentActivitySubfolders.length > 1 && !subVal) {
+                const matchedFolders = q
+                    ? currentActivitySubfolders.filter(sf => sf.name.toLowerCase().includes(q))
+                    : currentActivitySubfolders;
+
+                if (!q || matchedFolders.length > 0) {
+                    summary.innerHTML = q
+                        ? `พบ ${matchedFolders.length.toLocaleString('th-TH')} หมวดหมู่ที่ตรงกัน`
+                        : `มีทั้งหมด ${currentActivitySubfolders.length.toLocaleString('th-TH')} หมวด (${currentActivityTotalCerts.toLocaleString('th-TH')} เกียรติบัตร)`;
+                    loadMoreWrap.classList.add('hidden');
+                    grid.className = 'grid grid-cols-1 gap-4';
+                    grid.innerHTML = `
+                        <div class="bg-white rounded-[24px] border border-gray-100 shadow-sm p-5 sm:p-7 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3">
+                                <i class="ph-bold ph-folder-open text-2xl"></i>
+                            </div>
+                            <h3 class="text-sm sm:text-base font-extrabold text-gray-900 mb-1">กรุณาเลือกหมวดหมู่ / กิจกรรมย่อยก่อน</h3>
+                            <p class="text-xs text-gray-400 mb-5">แตะเลือกหมวดหมู่หรือห้องเรียนที่ต้องการด้านล่าง เพื่อเปิดดูตัวอย่างและดาวน์โหลดเกียรติบัตร</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                ${matchedFolders.map(sf => {
+                                    const safeSf = escapeHtml(sf.name).replace(/'/g, "\\'");
+                                    return `
+                                        <button type="button" onclick="selectDetailSubfolder('${safeSf}')" class="group bg-white hover:bg-red-50/40 border border-gray-200 hover:border-[#d91b42] rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3 transition-all shadow-sm hover:shadow">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <i class="ph-fill ph-folder text-gray-400 group-hover:text-[#d91b42] text-lg shrink-0 transition-colors"></i>
+                                                <span class="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-[#d91b42] truncate transition-colors">${escapeHtml(sf.name)}</span>
+                                            </div>
+                                            <span class="px-2.5 py-1 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-600 group-hover:text-[#d91b42] text-[11px] font-bold shrink-0 transition-colors">${sf.count.toLocaleString('th-TH')} ใบ</span>
+                                        </button>`;
+                                }).join('')}
+                            </div>
+                        </div>`;
+                    return;
+                }
+            }
+
             const filtered = publicCertificates.filter(c => {
                 if (String(c.activityId) !== String(act.id)) return false;
                 if (!isCurrentActivityGalleryOnly && !matchesCertTypeFilter(c, typeVal)) return false;
@@ -1884,15 +1948,8 @@
                 return hay.includes(q);
             });
 
-            const isGallery = currentDetailViewMode === 'gallery';
-            document.getElementById('detail-gallery-hint').classList.toggle('hidden', !isGallery);
-
-            const grid = document.getElementById('detail-certs-grid');
-            const summary = document.getElementById('detail-result-summary');
-            const loadMoreWrap = document.getElementById('detail-load-more-wrap');
-
             if (filtered.length === 0) {
-                summary.textContent = 'ไม่พบรายการที่ตรงกัน';
+                summary.innerHTML = 'ไม่พบรายการที่ตรงกัน';
                 loadMoreWrap.classList.add('hidden');
                 grid.className = 'grid grid-cols-1 gap-4';
                 grid.innerHTML = `
@@ -1904,7 +1961,10 @@
             }
 
             const shown = filtered.slice(0, detailVisibleCount);
-            summary.textContent = `กำลังแสดง ${shown.length.toLocaleString('th-TH')} จาก ${filtered.length.toLocaleString('th-TH')} รายการ`;
+            const backToFoldersBtn = (isGallery && currentActivitySubfolders.length > 1 && subVal)
+                ? `<button type="button" onclick="selectDetailSubfolder('')" class="px-2.5 py-1 rounded-full bg-red-50 hover:bg-red-100 text-[#d91b42] text-[11px] font-bold inline-flex items-center gap-1 transition-colors"><i class="ph-bold ph-folders"></i> เลือกหมวดหมู่อื่น</button>`
+                : '';
+            summary.innerHTML = `<span>กำลังแสดง ${shown.length.toLocaleString('th-TH')} จาก ${filtered.length.toLocaleString('th-TH')} รายการ</span> ${backToFoldersBtn}`;
 
             if (filtered.length > shown.length) {
                 loadMoreWrap.classList.remove('hidden');
