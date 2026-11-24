@@ -778,7 +778,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">คำอธิบายสั้นๆ</label>
-                    <textarea id="act-desc" rows="2" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm"></textarea>
+                    <textarea id="act-desc" rows="2" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">ภาพปกกิจกรรม (ไม่บังคับ)</label>
@@ -960,6 +960,60 @@
         </div>
     </div>
 
+    <!-- 8. AI Uncertain Review & Teach Modal -->
+    <div id="modal-ai-review" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[125] hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2 bg-amber-50/70">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-question text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-sm font-extrabold text-gray-900 truncate">AI ไม่มั่นใจ — ช่วยตรวจสอบใบนี้หน่อย</h3>
+                        <p id="ai-review-reason" class="text-[11px] text-amber-800 font-semibold truncate">ฟอนต์หรือภาพบางจุดไม่ชัดเจน</p>
+                    </div>
+                </div>
+                <button type="button" id="ai-review-close-btn" class="text-gray-400 hover:text-gray-700 bg-white rounded-full p-1.5 shrink-0">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5">
+                <div id="ai-review-preview" class="bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center min-h-[180px] max-h-[260px] border border-gray-200"></div>
+
+                <div class="space-y-2.5">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อ-นามสกุลผู้ได้รับ (AI เดาไว้ให้แล้ว แก้ไขได้เลย)</label>
+                        <input type="text" id="ai-review-name-input" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-bold text-gray-900 focus:outline-none focus:border-violet-600">
+                    </div>
+
+                    <div id="ai-review-certno-wrap" class="hidden">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">เลขที่เกียรติบัตร (เลขอารบิก)</label>
+                        <input type="text" id="ai-review-certno-input" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono text-gray-900 focus:outline-none focus:border-violet-600">
+                    </div>
+
+                    <div class="bg-violet-50/70 border border-violet-100 rounded-2xl p-3 space-y-2">
+                        <label class="block text-[11px] font-extrabold text-violet-900 flex items-center gap-1">
+                            <i class="ph-fill ph-sparkle text-violet-600"></i> สอน AI สำหรับใบถัดๆ ไปในชุดนี้ (ไม่บังคับ)
+                        </label>
+                        <input type="text" id="ai-review-hint-input" placeholder="เช่น ตัวที่คล้าย น คือ ณ, หรือ คำว่า ด.ญ. ให้เขียนเต็มว่า เด็กหญิง" class="w-full bg-white border border-violet-200 rounded-xl py-2 px-3 text-xs text-gray-800 focus:outline-none focus:border-violet-600">
+                        <label class="inline-flex items-center gap-2 text-[11px] text-violet-800 font-medium cursor-pointer select-none">
+                            <input type="checkbox" id="ai-review-remember-cb" checked class="w-3.5 h-3.5 rounded accent-violet-600">
+                            <span>จำชื่อที่แก้ใบนี้เป็นตัวอย่างให้ AI ใช้กับใบที่คล้ายกัน</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3.5 border-t border-gray-100 flex items-center gap-2 bg-white">
+                <button type="button" id="ai-review-skip-btn" class="px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold text-gray-600">ข้ามใบนี้</button>
+                <button type="button" id="ai-review-save-btn" class="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="ph-bold ph-check-circle"></i> ยืนยันบันทึกและไปต่อ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[130] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
@@ -989,6 +1043,7 @@
         let hasGeminiKey = false;
         let isAiScanning = false;
         let aiScanAborted = false;
+        let aiSessionHints = [];
 
         const THAI_MONTHS = [
             'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -1104,6 +1159,29 @@
             if (isNaN(y) || isNaN(m) || isNaN(d) || m < 1 || m > 12) return isoDate;
             const beYear = y > 2400 ? y : y + 543;
             return `${d} ${THAI_MONTHS[m - 1]} ${beYear}`;
+        }
+
+        // แปลงวันที่จากชีต (รองรับทั้ง ISO เช่น 2569-06-25T12:00:00.000Z และข้อความภาษาไทย)
+        function formatThaiDateDisplay(val) {
+            const s = String(val || '').trim();
+            if (!s) return '';
+            const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+            if (isoMatch) {
+                const rawY = parseInt(isoMatch[1], 10);
+                if (rawY > 2400) {
+                    const m = parseInt(isoMatch[2], 10);
+                    const d = parseInt(isoMatch[3], 10);
+                    if (m >= 1 && m <= 12) return `${d} ${THAI_MONTHS[m - 1]} ${rawY}`;
+                } else {
+                    const dt = new Date(s);
+                    if (!isNaN(dt.getTime())) {
+                        const th = new Date(dt.getTime() + (7 * 60 * 60 * 1000));
+                        return `${th.getUTCDate()} ${THAI_MONTHS[th.getUTCMonth()]} ${th.getUTCFullYear() + 543}`;
+                    }
+                }
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return formatThaiDateFromInput(s);
+            return s;
         }
 
         function sortActivitiesList(list) {
@@ -1435,6 +1513,7 @@
             const hasCertNo = Boolean(String(c.certNo || '').trim());
             const isClass = String(c.certType || '').trim() === 'ห้องเรียน';
             const displayName = isRandomFileName(c.recipientName) ? (gradeRoom || 'เกียรติบัตร') : c.recipientName;
+            const displayDate = formatThaiDateDisplay(c.issueDate);
 
             return `
                 <div class="bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md hover:border-red-100 transition-all p-4 flex flex-col justify-between gap-3">
@@ -1458,7 +1537,7 @@
 
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500">
                             ${c.award ? `<span class="inline-flex items-center gap-1 text-amber-700 font-bold"><i class="ph-fill ph-medal"></i> ${escapeHtml(c.award)}</span>` : ''}
-                            ${c.issueDate ? `<span class="inline-flex items-center gap-1"><i class="ph ph-calendar"></i> ${escapeHtml(c.issueDate)}</span>` : ''}
+                            ${displayDate ? `<span class="inline-flex items-center gap-1"><i class="ph ph-calendar"></i> ${escapeHtml(displayDate)}</span>` : ''}
                         </div>
                     </div>
 
@@ -1494,17 +1573,19 @@
 
             if (!q && !year && typeVal === 'all') {
                 box.innerHTML = `
-                    <div class="bg-white rounded-[24px] border border-gray-100 p-8 sm:p-10 text-center">
-                        <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3.5">
-                            <i class="ph-bold ph-magnifying-glass text-2xl"></i>
+                    <div class="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-9 sm:py-11 text-center">
+                            <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3.5">
+                                <i class="ph-bold ph-magnifying-glass text-2xl"></i>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-gray-900 mb-1.5">พิมพ์ชื่อ-นามสกุล, ห้องเรียน หรือ ชื่อกิจกรรมเพื่อค้นหา</h4>
+                            <p class="text-xs sm:text-sm text-gray-400">มีเกียรติบัตรพร้อมดาวน์โหลดในระบบทั้งหมด <span class="font-bold text-gray-600">${publicCertificates.length.toLocaleString('th-TH')}</span> รายการ</p>
                         </div>
-                        <h4 class="text-sm sm:text-base font-extrabold text-gray-900 mb-1.5">พิมพ์ชื่อ-นามสกุล, ห้องเรียน หรือ ชื่อกิจกรรมเพื่อค้นหา</h4>
-                        <p class="text-xs sm:text-sm text-gray-400 mb-3.5">มีเกียรติบัตรพร้อมดาวน์โหลดในระบบทั้งหมด ${publicCertificates.length.toLocaleString('th-TH')} รายการ</p>
-                        <p class="text-xs sm:text-sm text-gray-600">
-                            หากค้นหาไม่เจอ ลองกดเลือกดูที่
-                            <button type="button" onclick="switchPublicTab('activities')" class="text-[#d91b42] font-extrabold underline underline-offset-4 hover:text-[#a51130] transition-colors cursor-pointer">กิจกรรมทั้งหมด</button>
-                            ดูนะ
-                        </p>
+                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/65 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 text-center transition-colors flex items-center justify-center gap-1.5 group cursor-pointer">
+                            <span class="text-xs sm:text-sm text-gray-600">หาไม่เจอใช่ไหม? เลือกดูจาก</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-[#d91b42] group-hover:underline underline-offset-4">"กิจกรรมทั้งหมด"</span>
+                            <i class="ph-bold ph-arrow-right text-[#d91b42] text-sm group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
                     </div>`;
                 return;
             }
@@ -1537,16 +1618,19 @@
 
             if (matchedActivities.length === 0 && matchedCerts.length === 0) {
                 box.innerHTML = `
-                    <div class="bg-white rounded-[24px] border border-gray-100 p-10 text-center">
-                        <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
-                            <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
+                    <div class="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-9 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
+                                <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
+                            </div>
+                            <p class="text-sm font-extrabold text-gray-800 mb-1">ไม่พบเกียรติบัตรที่ตรงกับคำค้นหา</p>
+                            <p class="text-xs text-gray-400">ลองตรวจสอบการสะกดชื่อ หรือค้นหาด้วยชื่อกิจกรรมดูอีกครั้ง</p>
                         </div>
-                        <p class="text-sm font-bold text-gray-800 mb-1.5">ไม่พบเกียรติบัตรที่ตรงกับคำค้นหา</p>
-                        <p class="text-xs text-gray-500">
-                            หากค้นหาไม่เจอ ลองกดเลือกดูที่
-                            <button type="button" onclick="switchPublicTab('activities')" class="text-[#d91b42] font-extrabold underline underline-offset-4 hover:text-[#a51130] transition-colors cursor-pointer">กิจกรรมทั้งหมด</button>
-                            ดูนะ
-                        </p>
+                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/65 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 text-center transition-colors flex items-center justify-center gap-1.5 group cursor-pointer">
+                            <span class="text-xs sm:text-sm text-gray-600">หาไม่เจอใช่ไหม? เลือกดูจาก</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-[#d91b42] group-hover:underline underline-offset-4">"กิจกรรมทั้งหมด"</span>
+                            <i class="ph-bold ph-arrow-right text-[#d91b42] text-sm group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
                     </div>`;
                 return;
             }
@@ -2094,7 +2178,7 @@
             }
         }
 
-        // ================= TAB 3: VERIFY CERTIFICATE =================
+        // ================= TAB 3: VERIFY CERTIFICATE (แถบเขียว + รายละเอียดซ้าย-ขวา) =================
 
         async function handleVerifyCert(e) {
             e.preventDefault();
@@ -2125,41 +2209,76 @@
                 } else {
                     const c = res.certificate || {};
                     const isValid = res.status === 'published';
-                    const badgeCls = isValid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200';
-                    const statusLabel = isValid ? 'ยืนยันความถูกต้อง (ออกโดยระบบจริง)' : (res.status === 'suspended' ? 'เกียรติบัตรถูกระงับชั่วคราว' : 'เกียรติบัตรถูกยกเลิก');
+                    const isSuspended = res.status === 'suspended';
+                    const headerBg = isValid
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : (isSuspended ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
+                    const iconWrap = isValid
+                        ? 'bg-emerald-500 text-white'
+                        : (isSuspended ? 'bg-amber-500 text-white' : 'bg-red-500 text-white');
+                    const statusTitle = isValid
+                        ? 'เกียรติบัตรฉบับนี้มีผลใช้งาน'
+                        : (isSuspended ? 'เกียรติบัตรฉบับนี้ถูกระงับชั่วคราว' : 'เกียรติบัตรฉบับนี้ถูกยกเลิก');
+                    const statusSub = isValid
+                        ? 'ยืนยันความถูกต้อง ออกโดยระบบคลังเกียรติบัตรสภานักเรียนโรงเรียนคำม่วง'
+                        : 'กรุณาติดต่อสภานักเรียนโรงเรียนคำม่วงเพื่อสอบถามรายละเอียดเพิ่มเติม';
+
+                    const gradeRoom = formatGradeRoom(c);
+                    const formattedDate = formatThaiDateDisplay(c.issueDate);
 
                     box.innerHTML = `
-                        <div class="bg-white rounded-[24px] border ${isValid ? 'border-emerald-200' : 'border-amber-200'} shadow-sm p-6 animate-fade-in">
-                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
-                                <span class="px-3 py-1 rounded-full border ${badgeCls} text-xs font-extrabold inline-flex items-center gap-1.5">
-                                    <i class="ph-fill ${isValid ? 'ph-seal-check' : 'ph-warning-circle'} text-base"></i> ${statusLabel}
-                                </span>
-                                <span class="font-mono text-xs font-extrabold text-gray-700">เลขที่ ${escapeHtml(c.certNo)}</span>
+                        <div class="bg-white rounded-[24px] border ${isValid ? 'border-emerald-200' : (isSuspended ? 'border-amber-200' : 'border-red-200')} shadow-sm overflow-hidden animate-fade-in">
+                            <div class="${headerBg} border-b px-5 py-4 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl ${iconWrap} flex items-center justify-center shrink-0 shadow-sm">
+                                    <i class="ph-fill ${isValid ? 'ph-seal-check' : 'ph-warning-circle'} text-2xl"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-sm sm:text-base font-extrabold leading-snug">${statusTitle}</h4>
+                                    <p class="text-[11px] opacity-85">${statusSub}</p>
+                                </div>
                             </div>
-                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-4">
-                                <div class="bg-gray-50 rounded-xl p-3">
-                                    <dt class="text-gray-400 font-bold mb-0.5">ผู้ได้รับเกียรติบัตร</dt>
-                                    <dd class="text-sm font-extrabold text-gray-900">${escapeHtml(c.recipientName || '-')}</dd>
+
+                            <div class="p-5 sm:p-6">
+                                <div class="divide-y divide-gray-100 text-xs sm:text-sm">
+                                    <div class="py-2.5 flex items-start justify-between gap-4">
+                                        <span class="text-gray-500 font-medium shrink-0">เลขที่เกียรติบัตร</span>
+                                        <span class="font-mono font-extrabold text-[#d91b42] text-right">${escapeHtml(c.certNo || '-')}</span>
+                                    </div>
+                                    <div class="py-2.5 flex items-start justify-between gap-4">
+                                        <span class="text-gray-500 font-medium shrink-0">ผู้ได้รับเกียรติบัตร</span>
+                                        <span class="font-extrabold text-gray-900 text-right">${escapeHtml(c.recipientName || '-')}</span>
+                                    </div>
+                                    ${gradeRoom ? `
+                                        <div class="py-2.5 flex items-start justify-between gap-4">
+                                            <span class="text-gray-500 font-medium shrink-0">ระดับชั้น / ห้อง / หมวด</span>
+                                            <span class="font-bold text-gray-800 text-right">${escapeHtml(gradeRoom)}</span>
+                                        </div>` : ''}
+                                    <div class="py-2.5 flex items-start justify-between gap-4">
+                                        <span class="text-gray-500 font-medium shrink-0">กิจกรรม</span>
+                                        <span class="font-bold text-gray-900 text-right">${escapeHtml(c.activityName || '-')}</span>
+                                    </div>
+                                    <div class="py-2.5 flex items-start justify-between gap-4">
+                                        <span class="text-gray-500 font-medium shrink-0">รางวัล / ประเภท</span>
+                                        <span class="font-bold text-amber-700 text-right">${escapeHtml(c.award || '-')}</span>
+                                    </div>
+                                    <div class="py-2.5 flex items-start justify-between gap-4">
+                                        <span class="text-gray-500 font-medium shrink-0">ปีการศึกษา</span>
+                                        <span class="font-bold text-gray-800 text-right">ปีการศึกษา ${escapeHtml(c.year || '-')}</span>
+                                    </div>
+                                    ${formattedDate ? `
+                                        <div class="py-2.5 flex items-start justify-between gap-4">
+                                            <span class="text-gray-500 font-medium shrink-0">วันที่ออกเกียรติบัตร</span>
+                                            <span class="font-bold text-gray-800 text-right">${escapeHtml(formattedDate)}</span>
+                                        </div>` : ''}
                                 </div>
-                                <div class="bg-gray-50 rounded-xl p-3">
-                                    <dt class="text-gray-400 font-bold mb-0.5">กิจกรรม</dt>
-                                    <dd class="text-sm font-bold text-gray-900">${escapeHtml(c.activityName || '-')}</dd>
-                                </div>
-                                <div class="bg-gray-50 rounded-xl p-3">
-                                    <dt class="text-gray-400 font-bold mb-0.5">รางวัล / ประเภท</dt>
-                                    <dd class="font-bold text-gray-800">${escapeHtml(c.award || '-')}</dd>
-                                </div>
-                                <div class="bg-gray-50 rounded-xl p-3">
-                                    <dt class="text-gray-400 font-bold mb-0.5">ปีการศึกษา / วันที่ออก</dt>
-                                    <dd class="font-bold text-gray-800">ปี ${escapeHtml(c.year || '-')} ${c.issueDate ? `• ${escapeHtml(c.issueDate)}` : ''}</dd>
-                                </div>
-                            </dl>
-                            ${c.fileId ? `
-                                <div class="flex justify-end">
-                                    <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
-                                        <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดเกียรติบัตรฉบับนี้
-                                    </a>
-                                </div>` : ''}
+
+                                ${c.fileId ? `
+                                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-end">
+                                        <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm transition-colors">
+                                            <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดเกียรติบัตรฉบับนี้
+                                        </a>
+                                    </div>` : ''}
+                            </div>
                         </div>`;
                 }
             } catch (err) {
@@ -2962,7 +3081,7 @@
             document.getElementById('edit-cert-sid').value = cert.studentId || '';
             document.getElementById('edit-cert-grade').value = cert.grade || '';
             document.getElementById('edit-cert-room').value = cert.room || '';
-            document.getElementById('edit-cert-date').value = cert.issueDate || '';
+            document.getElementById('edit-cert-date').value = formatThaiDateDisplay(cert.issueDate);
             document.getElementById('edit-cert-file').value = '';
 
             const awardSel = document.getElementById('edit-cert-award-select');
@@ -3041,15 +3160,110 @@
             }
         }
 
-        // ================= ADMIN: GEMINI AI SCAN =================
+        // ================= ADMIN: GEMINI AI SCAN (ถามก่อนเมื่อไม่มั่นใจ + จำไปใช้ใบถัดไป) =================
 
         function updateGeminiKeyStatusUI() {
             const el = document.getElementById('gemini-key-status');
             if (!el) return;
+            const hintNote = aiSessionHints.length > 0
+                ? ` • <span class="text-violet-900 font-bold">จำคำแนะนำไว้แล้ว ${aiSessionHints.length} ข้อ</span> <button type="button" onclick="clearAiSessionHints()" class="underline text-red-600 ml-1">ล้างความจำ</button>`
+                : '';
             if (hasGeminiKey) {
-                el.innerHTML = `<span class="text-emerald-700 font-bold">ตั้งค่า API Key พร้อมใช้งานแล้ว ✓</span> • กดปุ่มประกายดาวท้ายแถว หรือติ๊กเลือกหลายใบเพื่อสแกนพร้อมกัน`;
+                el.innerHTML = `<span class="text-emerald-700 font-bold">ตั้งค่า API Key พร้อมใช้งานแล้ว ✓</span> • หาก AI ไม่มั่นใจจะถามก่อนบันทึก${hintNote}`;
             } else {
                 el.textContent = 'ยังไม่ได้ตั้งค่า API Key — กดปุ่มขวาเพื่อตั้งค่าฟรี';
+            }
+        }
+
+        function clearAiSessionHints() {
+            aiSessionHints = [];
+            updateGeminiKeyStatusUI();
+            showToast('ล้างคำแนะนำที่ AI จำไว้แล้ว', 'info');
+        }
+
+        function addAiSessionHint(hintText) {
+            const clean = String(hintText || '').trim();
+            if (!clean) return;
+            if (!aiSessionHints.includes(clean)) {
+                aiSessionHints.push(clean);
+                if (aiSessionHints.length > 8) aiSessionHints.shift();
+                updateGeminiKeyStatusUI();
+            }
+        }
+
+        function openAiReviewModal(reviewData, includeCertNo) {
+            return new Promise(resolve => {
+                const modal = document.getElementById('modal-ai-review');
+                const previewEl = document.getElementById('ai-review-preview');
+                const reasonEl = document.getElementById('ai-review-reason');
+                const nameInp = document.getElementById('ai-review-name-input');
+                const certNoWrap = document.getElementById('ai-review-certno-wrap');
+                const certNoInp = document.getElementById('ai-review-certno-input');
+                const hintInp = document.getElementById('ai-review-hint-input');
+                const rememberCb = document.getElementById('ai-review-remember-cb');
+
+                reasonEl.textContent = reviewData.uncertainReason || 'ฟอนต์หรือภาพบางจุดไม่ชัดเจน กรุณาช่วยตรวจสอบ';
+                nameInp.value = reviewData.recipientName || '';
+                certNoInp.value = reviewData.certNo || '';
+                certNoWrap.classList.toggle('hidden', !includeCertNo);
+                hintInp.value = '';
+                rememberCb.checked = true;
+
+                if (reviewData.fileId) {
+                    const thumb = getDriveThumbUrl(reviewData.fileId, 'w1000');
+                    previewEl.innerHTML = `<img src="${escapeHtml(thumb)}" alt="ตัวอย่างเกียรติบัตร" class="max-w-full max-h-[250px] object-contain" onerror="this.onerror=null;this.src='${escapeHtml(getDriveImageUrl(reviewData.fileId))}'">`;
+                } else {
+                    previewEl.innerHTML = `<p class="text-xs text-gray-400">ไม่สามารถแสดงภาพตัวอย่างได้</p>`;
+                }
+
+                modal.classList.remove('hidden');
+                setTimeout(() => nameInp.focus(), 120);
+
+                const saveBtn = document.getElementById('ai-review-save-btn');
+                const skipBtn = document.getElementById('ai-review-skip-btn');
+                const closeBtn = document.getElementById('ai-review-close-btn');
+
+                function cleanup(result) {
+                    modal.classList.add('hidden');
+                    saveBtn.onclick = null;
+                    skipBtn.onclick = null;
+                    closeBtn.onclick = null;
+                    resolve(result);
+                }
+
+                saveBtn.onclick = () => cleanup({
+                    action: 'save',
+                    recipientName: nameInp.value.trim(),
+                    certNo: certNoInp.value.trim(),
+                    customHint: hintInp.value.trim(),
+                    rememberExample: rememberCb.checked
+                });
+                skipBtn.onclick = () => cleanup({ action: 'skip' });
+                closeBtn.onclick = () => cleanup({ action: 'skip' });
+            });
+        }
+
+        async function saveReviewedAiCert(certId, reviewRes, includeCertNo, origGuess) {
+            const patch = { id: certId };
+            if (reviewRes.recipientName) patch.recipientName = reviewRes.recipientName;
+            if (includeCertNo && reviewRes.certNo) patch.certNo = reviewRes.certNo;
+
+            const saveApi = await apiPost({
+                action: 'bulkUpdateCertificates',
+                token: adminToken,
+                data: { items: [patch] }
+            });
+            if (!saveApi || !saveApi.success) {
+                throw new Error((saveApi && saveApi.error) || 'บันทึกชื่อที่ตรวจสอบแล้วไม่สำเร็จ');
+            }
+
+            if (reviewRes.customHint) addAiSessionHint(reviewRes.customHint);
+            if (reviewRes.rememberExample && reviewRes.recipientName) {
+                if (origGuess && origGuess !== reviewRes.recipientName) {
+                    addAiSessionHint(`ตัวอย่างการแก้: ที่อ่านว่า "${origGuess}" จริงๆ คือ "${reviewRes.recipientName}"`);
+                } else {
+                    addAiSessionHint(`ตัวอย่างรูปแบบชื่อที่ถูกต้องในชุดนี้: "${reviewRes.recipientName}"`);
+                }
             }
         }
 
@@ -3096,13 +3310,23 @@
                 const res = await apiPost({
                     action: 'aiExtractCertName',
                     token: adminToken,
-                    data: { id: certId, includeCertNo }
+                    data: { id: certId, includeCertNo, confirmUncertain: true, hints: aiSessionHints }
                 });
                 if (!res || !res.success) {
                     if (res && res.needApiKey) openGeminiKeyModal();
                     throw new Error((res && res.error) || 'AI อ่านชื่อไม่สำเร็จ');
                 }
-                showToast(res.message || 'อ่านชื่อสำเร็จ', res.skipped ? 'info' : 'success');
+                if (res.needsReview) {
+                    const decision = await openAiReviewModal(res, includeCertNo);
+                    if (decision.action === 'save' && decision.recipientName) {
+                        await saveReviewedAiCert(certId, decision, includeCertNo, res.recipientName);
+                        showToast(`บันทึกชื่อแล้ว: ${decision.recipientName}`, 'success');
+                    } else {
+                        showToast('ข้ามการบันทึกใบนี้แล้ว', 'info');
+                    }
+                } else {
+                    showToast(res.message || 'อ่านชื่อสำเร็จ', res.skipped ? 'info' : 'success');
+                }
                 await loadAdminData();
             } catch (err) {
                 showToast(err.message || 'AI อ่านชื่อไม่สำเร็จ', 'error');
@@ -3151,7 +3375,7 @@
                     const res = await apiPost({
                         action: 'aiExtractCertName',
                         token: adminToken,
-                        data: { id: ids[i], includeCertNo }
+                        data: { id: ids[i], includeCertNo, confirmUncertain: true, hints: aiSessionHints }
                     });
                     if (!res || !res.success) {
                         failCount++;
@@ -3165,6 +3389,13 @@
                             break;
                         }
                         showToast(res && res.error ? res.error : 'สแกนไม่สำเร็จ', 'error');
+                    } else if (res.needsReview) {
+                        progText.textContent = `รอการยืนยันใบที่ ${i + 1} / ${ids.length}...`;
+                        const decision = await openAiReviewModal(res, includeCertNo);
+                        if (decision.action === 'save' && decision.recipientName) {
+                            await saveReviewedAiCert(ids[i], decision, includeCertNo, res.recipientName);
+                            okCount++;
+                        }
                     } else if (!res.skipped) {
                         okCount++;
                     }
