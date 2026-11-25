@@ -368,6 +368,43 @@
                     <p id="stat-today-visits" class="text-2xl font-extrabold text-amber-600">0</p>
                 </div>
             </div>
+
+            <!-- ตั้งค่าช่องทางติดต่อส่งเกียรติบัตรลงระบบ -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center gap-2.5 mb-3.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-chat-circle-dots text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-gray-900">ตั้งค่าช่องทางติดต่อ (ส่งเกียรติบัตรลงระบบ)</h3>
+                        <p class="text-[11px] text-gray-500">กรอก LINE ID หรือลิงก์เพจที่นี่ได้เลย ระบบจะอัปเดตปุ่มติดต่อหน้าเว็บให้อัตโนมัติ</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handleSaveContactSettings(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">LINE ID หรือ ลิงก์ LINE</label>
+                            <input type="text" id="setting-contact-line" placeholder="เช่น @kmsc69, lineid หรือ https://line.me/..." class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            <p class="text-[10px] text-gray-400 mt-1">ใส่แค่ไอดีไลน์ตรงๆ ได้เลย ระบบจะสร้างลิงก์กดทักแชตให้อัตโนมัติ</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">ลิงก์เพจ Facebook / Messenger (ไม่บังคับ)</label>
+                            <input type="url" id="setting-contact-fb" placeholder="https://m.me/... หรือ https://facebook.com/..." class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            <p class="text-[10px] text-gray-400 mt-1">ปล่อยว่างไว้หากต้องการแสดงเฉพาะปุ่ม LINE</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ข้อความหมายเหตุเพิ่มเติม (ไม่บังคับ)</label>
+                        <input type="text" id="setting-contact-note" placeholder="เช่น ติดต่อสอบถามเพิ่มเติมได้ที่สภานักเรียน หรือตอบกลับภายใน 1-2 วันทำการ" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                    <div class="flex justify-end pt-1">
+                        <button type="submit" id="btn-save-contact-settings" class="px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                            <i class="ph-bold ph-floppy-disk"></i> บันทึกช่องทางติดต่อ
+                        </button>
+                    </div>
+                </form>
+            </div>
         </section>
 
         <!-- ADMIN TAB 2: MANAGE ACTIVITIES -->
@@ -643,17 +680,24 @@
 
     <!-- ==================== FOOTER ==================== -->
     <footer class="bg-white border-t border-gray-100 mt-8 sm:mt-10 py-5 text-center px-4">
-        <div class="max-w-xl mx-auto space-y-2">
-            <!-- แถบสถิติการเข้าชม -->
-            <div id="footer-visit-stats" class="hidden inline-flex items-center justify-center gap-2 bg-gray-50 border border-gray-100 rounded-full px-3.5 py-1 text-[11px] text-gray-500">
-                <span class="inline-flex items-center gap-1">
-                    <i class="ph-fill ph-eye text-[#d91b42]"></i>
-                    เข้าชมทั้งหมด <strong id="footer-total-visits" class="text-gray-800 font-bold">0</strong> ครั้ง
-                </span>
-                <span class="text-gray-300">•</span>
-                <span>
-                    วันนี้ <strong id="footer-today-visits" class="text-emerald-600 font-bold">0</strong> ครั้ง
-                </span>
+        <div class="max-w-xl mx-auto space-y-2.5">
+            <!-- แถบสถิติการเข้าชม + ปุ่มติดต่อส่งเกียรติบัตร -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <div id="footer-visit-stats" class="hidden inline-flex items-center justify-center gap-2 bg-gray-50 border border-gray-100 rounded-full px-3.5 py-1 text-[11px] text-gray-500">
+                    <span class="inline-flex items-center gap-1">
+                        <i class="ph-fill ph-eye text-[#d91b42]"></i>
+                        เข้าชมทั้งหมด <strong id="footer-total-visits" class="text-gray-800 font-bold">0</strong> ครั้ง
+                    </span>
+                    <span class="text-gray-300">•</span>
+                    <span>
+                        วันนี้ <strong id="footer-today-visits" class="text-emerald-600 font-bold">0</strong> ครั้ง
+                    </span>
+                </div>
+
+                <button type="button" onclick="openSubmitCertModal()" class="inline-flex items-center gap-1.5 bg-red-50/80 hover:bg-red-100/80 border border-red-100 text-[#d91b42] rounded-full px-3.5 py-1 text-[11px] font-bold transition-colors cursor-pointer">
+                    <i class="ph-fill ph-paper-plane-tilt"></i>
+                    <span>ติดต่อส่งเกียรติบัตรลงระบบ</span>
+                </button>
             </div>
 
             <div class="space-y-1">
@@ -778,7 +822,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">คำอธิบายสั้นๆ</label>
-                    <textarea id="act-desc" rows="2" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm"></textarea>
+                    <textarea id="act-desc" rows="2" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1">ภาพปกกิจกรรม (ไม่บังคับ)</label>
@@ -960,55 +1004,134 @@
         </div>
     </div>
 
-    <!-- 8. AI Uncertain Review & Teach Modal -->
-    <div id="modal-ai-review" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[125] hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2 bg-amber-50/70">
-                <div class="flex items-center gap-2 min-w-0">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
-                        <i class="ph-fill ph-question text-lg"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <h3 class="text-sm font-extrabold text-gray-900 truncate">AI ไม่มั่นใจ — ช่วยตรวจสอบใบนี้หน่อย</h3>
-                        <p id="ai-review-reason" class="text-[11px] text-amber-800 font-semibold truncate">ฟอนต์หรือภาพบางจุดไม่ชัดเจน</p>
-                    </div>
+    <!-- 8. AI Review Uncertain Modal (ถามก่อนเมื่อ AI ไม่มั่นใจ + จำไปใช้ใบถัดไป) -->
+    <div id="modal-ai-review" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[125] hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-3xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2 bg-violet-50/70">
+                <div class="min-w-0">
+                    <h3 class="text-sm sm:text-base font-extrabold text-violet-950 flex items-center gap-1.5">
+                        <i class="ph-fill ph-sparkle text-violet-600"></i> AI ไม่มั่นใจ — ช่วยตรวจสอบใบนี้หน่อย
+                    </h3>
+                    <p id="ai-review-reason" class="text-[11px] text-violet-700 truncate">ฟอนต์หรือภาพบางจุดไม่ชัดเจน</p>
                 </div>
-                <button type="button" id="ai-review-close-btn" class="text-gray-400 hover:text-gray-700 bg-white rounded-full p-1.5 shrink-0">
+                <button type="button" id="ai-review-close-btn" class="text-gray-400 hover:text-gray-700 bg-white rounded-full p-1.5 shrink-0 shadow-sm">
                     <i class="ph-bold ph-x"></i>
                 </button>
             </div>
 
             <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5">
-                <div id="ai-review-preview" class="bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center min-h-[180px] max-h-[260px] border border-gray-200"></div>
+                <div class="bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center p-2 border border-gray-200">
+                    <img id="ai-review-img" src="" alt="ตัวอย่างเกียรติบัตร" class="max-h-60 sm:max-h-72 object-contain rounded-xl bg-white shadow-sm">
+                </div>
 
                 <div class="space-y-2.5">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">ชื่อ-นามสกุลผู้ได้รับ (AI เดาไว้ให้แล้ว แก้ไขได้เลย)</label>
-                        <input type="text" id="ai-review-name-input" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-bold text-gray-900 focus:outline-none focus:border-violet-600">
+                        <input type="text" id="ai-review-name" class="w-full border border-gray-300 rounded-xl py-2.5 px-3 text-sm font-bold text-gray-900 focus:outline-none focus:border-violet-600">
                     </div>
 
-                    <div id="ai-review-certno-wrap" class="hidden">
+                    <div id="ai-review-certno-wrap">
                         <label class="block text-xs font-bold text-gray-700 mb-1">เลขที่เกียรติบัตร (เลขอารบิก)</label>
-                        <input type="text" id="ai-review-certno-input" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm font-mono text-gray-900 focus:outline-none focus:border-violet-600">
+                        <input type="text" id="ai-review-certno" class="w-full border border-gray-300 rounded-xl py-2 px-3 text-sm font-mono focus:outline-none focus:border-violet-600">
                     </div>
 
-                    <div class="bg-violet-50/70 border border-violet-100 rounded-2xl p-3 space-y-2">
-                        <label class="block text-[11px] font-extrabold text-violet-900 flex items-center gap-1">
-                            <i class="ph-fill ph-sparkle text-violet-600"></i> สอน AI สำหรับใบถัดๆ ไปในชุดนี้ (ไม่บังคับ)
-                        </label>
-                        <input type="text" id="ai-review-hint-input" placeholder="เช่น ตัวที่คล้าย น คือ ณ, หรือ คำว่า ด.ญ. ให้เขียนเต็มว่า เด็กหญิง" class="w-full bg-white border border-violet-200 rounded-xl py-2 px-3 text-xs text-gray-800 focus:outline-none focus:border-violet-600">
+                    <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-3 space-y-2">
+                        <label class="block text-xs font-bold text-violet-900">สอน AI สำหรับใบถัดๆ ไปในชุดนี้ (ไม่บังคับ)</label>
+                        <input type="text" id="ai-review-hint" placeholder="เช่น ตัวที่คล้าย น คือ ณ, หรือ คำนำหน้าคือ เด็กหญิง" class="w-full bg-white border border-violet-200 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-violet-600">
                         <label class="inline-flex items-center gap-2 text-[11px] text-violet-800 font-medium cursor-pointer select-none">
-                            <input type="checkbox" id="ai-review-remember-cb" checked class="w-3.5 h-3.5 rounded accent-violet-600">
+                            <input type="checkbox" id="ai-review-remember" checked class="w-4 h-4 rounded accent-violet-600">
                             <span>จำชื่อที่แก้ใบนี้เป็นตัวอย่างให้ AI ใช้กับใบที่คล้ายกัน</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div class="px-5 py-3.5 border-t border-gray-100 flex items-center gap-2 bg-white">
-                <button type="button" id="ai-review-skip-btn" class="px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold text-gray-600">ข้ามใบนี้</button>
-                <button type="button" id="ai-review-save-btn" class="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="ph-bold ph-check-circle"></i> ยืนยันบันทึกและไปต่อ
+            <div class="px-5 py-3.5 border-t border-gray-100 bg-white flex items-center justify-end gap-2">
+                <button type="button" id="ai-review-skip-btn" class="px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-bold">ข้ามใบนี้</button>
+                <button type="button" id="ai-review-save-btn" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <i class="ph-bold ph-check"></i> ยืนยันบันทึกและไปต่อ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Submit Certificate Contact Modal (สำหรับครู / หน่วยงาน) -->
+    <div id="modal-submit-cert" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-start gap-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-certificate text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900 leading-tight">ส่งเกียรติบัตรลงระบบ</h3>
+                        <p class="text-[11px] text-gray-500">สำหรับคุณครู กลุ่มสาระฯ และหน่วยงาน</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-submit-cert').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1.5 shrink-0">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-3.5 text-xs text-gray-700">
+                <!-- ส่วนที่ 1: ข้อมูลที่ต้องเตรียม -->
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 space-y-2.5">
+                    <p class="font-extrabold text-gray-900 flex items-center gap-1.5">
+                        <i class="ph-fill ph-list-checks text-[#d91b42] text-base"></i> ข้อมูลที่ต้องเตรียมก่อนส่ง
+                    </p>
+                    <div class="space-y-2 pl-0.5 leading-relaxed">
+                        <div class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-red-100 text-[#d91b42] text-[10px] font-extrabold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                            <span><strong>ชื่อกิจกรรม</strong> และ <strong>ปีการศึกษา</strong></span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-red-100 text-[#d91b42] text-[10px] font-extrabold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                            <span><strong>ชื่อผู้ดูแล / กลุ่มสาระฯ / หน่วยงาน</strong> <span class="text-gray-500">(และวันที่ออกเกียรติบัตร ถ้ามี)</span></span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-red-100 text-[#d91b42] text-[10px] font-extrabold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                            <span><strong>ลิงก์โฟลเดอร์ Google Drive</strong> <span class="text-gray-500">(ตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์สามารถดูได้")</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ส่วนที่ 2: คำแนะนำการจัดเตรียมไฟล์ -->
+                <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 space-y-2">
+                    <p class="font-extrabold text-amber-950 flex items-center gap-1.5">
+                        <i class="ph-fill ph-lightbulb text-amber-500 text-base"></i> คำแนะนำการจัดเตรียมไฟล์ (เพื่อความสะดวกในการค้นหา)
+                    </p>
+                    <ul class="space-y-1.5 text-[11px] sm:text-xs text-amber-950/90 leading-relaxed">
+                        <li class="flex items-start gap-1.5">
+                            <i class="ph-fill ph-check-circle text-amber-600 shrink-0 mt-0.5"></i>
+                            <span><strong>ตั้งชื่อไฟล์เป็นชื่อ-นามสกุลผู้รับ</strong> เช่น <span class="font-mono bg-white/80 px-1 rounded text-[11px]">เด็กหญิงใจดี มีสุข.pdf</span> หรือ <span class="font-mono bg-white/80 px-1 rounded text-[11px]">1612-2569_นายสมชาย รักเรียน.jpg</span> เพื่อให้นักเรียนพิมพ์ค้นหาชื่อตัวเองได้ทันที</span>
+                        </li>
+                        <li class="flex items-start gap-1.5">
+                            <i class="ph-fill ph-check-circle text-amber-600 shrink-0 mt-0.5"></i>
+                            <span><strong>แยกโฟลเดอร์ย่อยตามห้องหรือหมวดหมู่ได้</strong> เช่น <span class="font-mono bg-white/80 px-1 rounded text-[11px]">ม.1/1</span> หรือชื่อรายการแข่งขัน ระบบจะจัดหมวดหมู่ให้อัตโนมัติ</span>
+                        </li>
+                        <li class="flex items-start gap-1.5">
+                            <i class="ph-fill ph-check-circle text-amber-600 shrink-0 mt-0.5"></i>
+                            <span><strong>กรณีไฟล์ไม่ได้ตั้งชื่อตามรายชื่อ</strong> สามารถส่งมาได้เลย ระบบรองรับแบบ <strong>แกลเลอรี</strong> ให้เปิดดูรูปและดาวน์โหลดได้เช่นกัน</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- หมายเหตุเพิ่มเติม (แสดงเฉพาะเมื่อแอดมินตั้งค่าไว้) -->
+                <div id="contact-note-box" class="hidden bg-blue-50/70 border border-blue-100 rounded-2xl px-3.5 py-2.5 text-[11px] text-blue-900 flex items-start gap-2">
+                    <i class="ph-fill ph-info text-blue-600 text-sm shrink-0 mt-0.5"></i>
+                    <span id="contact-note-text"></span>
+                </div>
+            </div>
+
+            <div class="px-5 py-4 border-t border-gray-100 bg-white space-y-2">
+                <a id="contact-line-btn" href="#" target="_blank" rel="noopener" onclick="return handleContactLinkClick(event, 'line')" class="w-full py-2.5 px-4 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm transition-colors">
+                    <i class="ph-fill ph-chat-circle-dots text-base"></i> <span id="contact-line-btn-text">ทัก LINE ส่งข้อมูลให้สภานักเรียน</span>
+                </a>
+                <a id="contact-fb-btn" href="#" target="_blank" rel="noopener" onclick="return handleContactLinkClick(event, 'fb')" class="hidden w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm transition-colors">
+                    <i class="ph-fill ph-messenger-logo text-base"></i> ทักแชตเพจ Facebook สภานักเรียน
+                </a>
+                <button type="button" onclick="copySubmitTemplate()" class="w-full py-2 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors">
+                    <i class="ph-bold ph-copy"></i> คัดลอกแบบฟอร์มข้อความสำหรับส่งในแชต
                 </button>
             </div>
         </div>
@@ -1027,6 +1150,7 @@
         let publicCertificates = [];
         let adminActivities = [];
         let adminCertificates = [];
+        let contactSettings = { line: '', fb: '', note: '' };
         let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
         let adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
         let currentActivityDetail = null;
@@ -1161,7 +1285,7 @@
             return `${d} ${THAI_MONTHS[m - 1]} ${beYear}`;
         }
 
-        // แปลงวันที่จากชีต (รองรับทั้ง ISO เช่น 2569-06-25T12:00:00.000Z และข้อความภาษาไทย)
+        // แปลงวันที่จากชีตให้เป็นภาษาไทยสวยงาม (รองรับ ISO string เช่น 2569-06-25T12:00:00.000Z)
         function formatThaiDateDisplay(val) {
             const s = String(val || '').trim();
             if (!s) return '';
@@ -1176,11 +1300,16 @@
                     const dt = new Date(s);
                     if (!isNaN(dt.getTime())) {
                         const th = new Date(dt.getTime() + (7 * 60 * 60 * 1000));
-                        return `${th.getUTCDate()} ${THAI_MONTHS[th.getUTCMonth()]} ${th.getUTCFullYear() + 543}`;
+                        const d = th.getUTCDate();
+                        const m = th.getUTCMonth();
+                        const y = th.getUTCFullYear() + 543;
+                        return `${d} ${THAI_MONTHS[m]} ${y}`;
                     }
                 }
             }
-            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return formatThaiDateFromInput(s);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                return formatThaiDateFromInput(s);
+            }
             return s;
         }
 
@@ -1440,6 +1569,7 @@
 
                 publicActivities = sortActivitiesList(res.activities || []);
                 publicCertificates = res.certificates || [];
+                if (res.contactSettings) contactSettings = res.contactSettings;
                 renderVisitStats(res.stats);
                 populatePublicYearFilters();
                 renderGlobalSearch();
@@ -1574,17 +1704,17 @@
             if (!q && !year && typeVal === 'all') {
                 box.innerHTML = `
                     <div class="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
-                        <div class="px-6 py-9 sm:py-11 text-center">
-                            <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3.5">
+                        <div class="px-6 py-9 sm:py-10 text-center">
+                            <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3.5 shadow-sm">
                                 <i class="ph-bold ph-magnifying-glass text-2xl"></i>
                             </div>
                             <h4 class="text-sm sm:text-base font-extrabold text-gray-900 mb-1.5">พิมพ์ชื่อ-นามสกุล, ห้องเรียน หรือ ชื่อกิจกรรมเพื่อค้นหา</h4>
-                            <p class="text-xs sm:text-sm text-gray-400">มีเกียรติบัตรพร้อมดาวน์โหลดในระบบทั้งหมด <span class="font-bold text-gray-600">${publicCertificates.length.toLocaleString('th-TH')}</span> รายการ</p>
+                            <p class="text-xs sm:text-sm text-gray-400">มีเกียรติบัตรพร้อมดาวน์โหลดในระบบทั้งหมด <strong class="text-gray-600">${publicCertificates.length.toLocaleString('th-TH')}</strong> รายการ</p>
                         </div>
-                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/65 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 text-center transition-colors flex items-center justify-center gap-1.5 group cursor-pointer">
-                            <span class="text-xs sm:text-sm text-gray-600">หาไม่เจอใช่ไหม? เลือกดูจาก</span>
-                            <span class="text-xs sm:text-sm font-extrabold text-[#d91b42] group-hover:underline underline-offset-4">"กิจกรรมทั้งหมด"</span>
-                            <i class="ph-bold ph-arrow-right text-[#d91b42] text-sm group-hover:translate-x-0.5 transition-transform"></i>
+                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/70 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#d91b42] transition-colors cursor-pointer group">
+                            <i class="ph-bold ph-squares-four text-base"></i>
+                            <span>หาไม่เจอใช่ไหม? เลือกดูจาก <span class="underline underline-offset-2">"กิจกรรมทั้งหมด"</span></span>
+                            <i class="ph-bold ph-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
                         </button>
                     </div>`;
                 return;
@@ -1623,13 +1753,13 @@
                             <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
                                 <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
                             </div>
-                            <p class="text-sm font-extrabold text-gray-800 mb-1">ไม่พบเกียรติบัตรที่ตรงกับคำค้นหา</p>
+                            <p class="text-sm font-bold text-gray-800 mb-1">ไม่พบเกียรติบัตรที่ตรงกับคำค้นหา</p>
                             <p class="text-xs text-gray-400">ลองตรวจสอบการสะกดชื่อ หรือค้นหาด้วยชื่อกิจกรรมดูอีกครั้ง</p>
                         </div>
-                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/65 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 text-center transition-colors flex items-center justify-center gap-1.5 group cursor-pointer">
-                            <span class="text-xs sm:text-sm text-gray-600">หาไม่เจอใช่ไหม? เลือกดูจาก</span>
-                            <span class="text-xs sm:text-sm font-extrabold text-[#d91b42] group-hover:underline underline-offset-4">"กิจกรรมทั้งหมด"</span>
-                            <i class="ph-bold ph-arrow-right text-[#d91b42] text-sm group-hover:translate-x-0.5 transition-transform"></i>
+                        <button type="button" onclick="switchPublicTab('activities')" class="w-full bg-red-50/70 hover:bg-red-50 border-t border-red-100/80 px-5 py-3.5 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#d91b42] transition-colors cursor-pointer group">
+                            <i class="ph-bold ph-squares-four text-base"></i>
+                            <span>หาไม่เจอใช่ไหม? เลือกดูจาก <span class="underline underline-offset-2">"กิจกรรมทั้งหมด"</span></span>
+                            <i class="ph-bold ph-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
                         </button>
                     </div>`;
                 return;
@@ -2178,7 +2308,7 @@
             }
         }
 
-        // ================= TAB 3: VERIFY CERTIFICATE (แถบเขียว + รายละเอียดซ้าย-ขวา) =================
+        // ================= TAB 3: VERIFY CERTIFICATE =================
 
         async function handleVerifyCert(e) {
             e.preventDefault();
@@ -2211,8 +2341,8 @@
                     const isValid = res.status === 'published';
                     const isSuspended = res.status === 'suspended';
                     const headerBg = isValid
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                        : (isSuspended ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : (isSuspended ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-900');
                     const iconWrap = isValid
                         ? 'bg-emerald-500 text-white'
                         : (isSuspended ? 'bg-amber-500 text-white' : 'bg-red-500 text-white');
@@ -2221,64 +2351,54 @@
                         : (isSuspended ? 'เกียรติบัตรฉบับนี้ถูกระงับชั่วคราว' : 'เกียรติบัตรฉบับนี้ถูกยกเลิก');
                     const statusSub = isValid
                         ? 'ยืนยันความถูกต้อง พบข้อมูลในระบบคลังเกียรติบัตรโรงเรียนคำม่วง'
-                        : 'กรุณาติดต่อผู้ดูแลระบบหรือหน่วยงานที่จัดกิจกรรมเพื่อสอบถามรายละเอียดเพิ่มเติม';
-
-                    const gradeRoom = formatGradeRoom(c);
-                    const formattedDate = formatThaiDateDisplay(c.issueDate);
+                        : (isSuspended ? 'กรุณาติดต่อผู้ดูแลระบบหรือหน่วยงานที่เกี่ยวข้อง' : 'เอกสารฉบับนี้ไม่มีผลใช้งานในระบบแล้ว');
+                    const displayDate = formatThaiDateDisplay(c.issueDate) || '-';
 
                     box.innerHTML = `
                         <div class="bg-white rounded-[24px] border ${isValid ? 'border-emerald-200' : (isSuspended ? 'border-amber-200' : 'border-red-200')} shadow-sm overflow-hidden animate-fade-in">
                             <div class="${headerBg} border-b px-5 py-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl ${iconWrap} flex items-center justify-center shrink-0 shadow-sm">
+                                <div class="w-10 h-10 rounded-full ${iconWrap} flex items-center justify-center shrink-0 shadow-sm">
                                     <i class="ph-fill ${isValid ? 'ph-seal-check' : 'ph-warning-circle'} text-2xl"></i>
                                 </div>
                                 <div class="min-w-0">
-                                    <h4 class="text-sm sm:text-base font-extrabold leading-snug">${statusTitle}</h4>
-                                    <p class="text-[11px] opacity-85">${statusSub}</p>
+                                    <h4 class="text-sm sm:text-base font-extrabold leading-tight">${statusTitle}</h4>
+                                    <p class="text-[11px] sm:text-xs opacity-80 mt-0.5">${statusSub}</p>
                                 </div>
                             </div>
 
-                            <div class="p-5 sm:p-6">
-                                <div class="divide-y divide-gray-100 text-xs sm:text-sm">
-                                    <div class="py-2.5 flex items-start justify-between gap-4">
-                                        <span class="text-gray-500 font-medium shrink-0">เลขที่เกียรติบัตร</span>
-                                        <span class="font-mono font-extrabold text-[#d91b42] text-right">${escapeHtml(c.certNo || '-')}</span>
-                                    </div>
-                                    <div class="py-2.5 flex items-start justify-between gap-4">
-                                        <span class="text-gray-500 font-medium shrink-0">ผู้ได้รับเกียรติบัตร</span>
-                                        <span class="font-extrabold text-gray-900 text-right">${escapeHtml(c.recipientName || '-')}</span>
-                                    </div>
-                                    ${gradeRoom ? `
-                                        <div class="py-2.5 flex items-start justify-between gap-4">
-                                            <span class="text-gray-500 font-medium shrink-0">ระดับชั้น / ห้อง / หมวด</span>
-                                            <span class="font-bold text-gray-800 text-right">${escapeHtml(gradeRoom)}</span>
-                                        </div>` : ''}
-                                    <div class="py-2.5 flex items-start justify-between gap-4">
-                                        <span class="text-gray-500 font-medium shrink-0">กิจกรรม</span>
-                                        <span class="font-bold text-gray-900 text-right">${escapeHtml(c.activityName || '-')}</span>
-                                    </div>
-                                    <div class="py-2.5 flex items-start justify-between gap-4">
-                                        <span class="text-gray-500 font-medium shrink-0">รางวัล / ประเภท</span>
-                                        <span class="font-bold text-amber-700 text-right">${escapeHtml(c.award || '-')}</span>
-                                    </div>
-                                    <div class="py-2.5 flex items-start justify-between gap-4">
-                                        <span class="text-gray-500 font-medium shrink-0">ปีการศึกษา</span>
-                                        <span class="font-bold text-gray-800 text-right">ปีการศึกษา ${escapeHtml(c.year || '-')}</span>
-                                    </div>
-                                    ${formattedDate ? `
-                                        <div class="py-2.5 flex items-start justify-between gap-4">
-                                            <span class="text-gray-500 font-medium shrink-0">วันที่ออกเกียรติบัตร</span>
-                                            <span class="font-bold text-gray-800 text-right">${escapeHtml(formattedDate)}</span>
-                                        </div>` : ''}
+                            <div class="px-5 py-2 divide-y divide-gray-100 text-xs sm:text-sm">
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">เลขที่เกียรติบัตร</span>
+                                    <span class="font-mono font-extrabold text-[#d91b42] text-right">${escapeHtml(c.certNo || '-')}</span>
                                 </div>
-
-                                ${c.fileId ? `
-                                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-end">
-                                        <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm transition-colors">
-                                            <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดเกียรติบัตรฉบับนี้
-                                        </a>
-                                    </div>` : ''}
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">ผู้ได้รับเกียรติบัตร</span>
+                                    <span class="font-extrabold text-gray-900 text-right">${escapeHtml(c.recipientName || '-')}</span>
+                                </div>
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">กิจกรรม</span>
+                                    <span class="font-bold text-gray-900 text-right">${escapeHtml(c.activityName || '-')}</span>
+                                </div>
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">รางวัล / ประเภท</span>
+                                    <span class="font-bold text-gray-800 text-right">${escapeHtml(c.award || '-')}</span>
+                                </div>
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">ปีการศึกษา</span>
+                                    <span class="font-bold text-gray-800 text-right">${escapeHtml(c.year || '-')}</span>
+                                </div>
+                                <div class="py-3 flex items-start justify-between gap-4">
+                                    <span class="text-gray-500 font-medium shrink-0">วันที่ออกเกียรติบัตร</span>
+                                    <span class="font-bold text-gray-800 text-right">${escapeHtml(displayDate)}</span>
+                                </div>
                             </div>
+
+                            ${c.fileId ? `
+                                <div class="px-5 py-4 bg-gray-50/70 border-t border-gray-100 flex justify-end">
+                                    <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-colors">
+                                        <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดเกียรติบัตรฉบับนี้
+                                    </a>
+                                </div>` : ''}
                         </div>`;
                 }
             } catch (err) {
@@ -2405,8 +2525,10 @@
                 adminActivities = sortActivitiesList(res.activities || []);
                 adminCertificates = res.certificates || [];
                 hasGeminiKey = Boolean(res.hasGeminiKey);
+                if (res.contactSettings) contactSettings = res.contactSettings;
 
                 renderAdminDashboard(res.stats);
+                populateContactSettingsForm();
                 renderAdminActivitiesList();
                 populateAdminActivityDropdowns();
                 renderAdminCertsTable();
@@ -3081,7 +3203,7 @@
             document.getElementById('edit-cert-sid').value = cert.studentId || '';
             document.getElementById('edit-cert-grade').value = cert.grade || '';
             document.getElementById('edit-cert-room').value = cert.room || '';
-            document.getElementById('edit-cert-date').value = formatThaiDateDisplay(cert.issueDate);
+            document.getElementById('edit-cert-date').value = formatThaiDateDisplay(cert.issueDate) || '';
             document.getElementById('edit-cert-file').value = '';
 
             const awardSel = document.getElementById('edit-cert-award-select');
@@ -3160,110 +3282,15 @@
             }
         }
 
-        // ================= ADMIN: GEMINI AI SCAN (ถามก่อนเมื่อไม่มั่นใจ + จำไปใช้ใบถัดไป) =================
+        // ================= ADMIN: GEMINI AI SCAN =================
 
         function updateGeminiKeyStatusUI() {
             const el = document.getElementById('gemini-key-status');
             if (!el) return;
-            const hintNote = aiSessionHints.length > 0
-                ? ` • <span class="text-violet-900 font-bold">จำคำแนะนำไว้แล้ว ${aiSessionHints.length} ข้อ</span> <button type="button" onclick="clearAiSessionHints()" class="underline text-red-600 ml-1">ล้างความจำ</button>`
-                : '';
             if (hasGeminiKey) {
-                el.innerHTML = `<span class="text-emerald-700 font-bold">ตั้งค่า API Key พร้อมใช้งานแล้ว ✓</span> • หาก AI ไม่มั่นใจจะถามก่อนบันทึก${hintNote}`;
+                el.innerHTML = `<span class="text-emerald-700 font-bold">ตั้งค่า API Key พร้อมใช้งานแล้ว ✓</span> • กดปุ่มประกายดาวท้ายแถว หรือติ๊กเลือกหลายใบเพื่อสแกนพร้อมกัน`;
             } else {
                 el.textContent = 'ยังไม่ได้ตั้งค่า API Key — กดปุ่มขวาเพื่อตั้งค่าฟรี';
-            }
-        }
-
-        function clearAiSessionHints() {
-            aiSessionHints = [];
-            updateGeminiKeyStatusUI();
-            showToast('ล้างคำแนะนำที่ AI จำไว้แล้ว', 'info');
-        }
-
-        function addAiSessionHint(hintText) {
-            const clean = String(hintText || '').trim();
-            if (!clean) return;
-            if (!aiSessionHints.includes(clean)) {
-                aiSessionHints.push(clean);
-                if (aiSessionHints.length > 8) aiSessionHints.shift();
-                updateGeminiKeyStatusUI();
-            }
-        }
-
-        function openAiReviewModal(reviewData, includeCertNo) {
-            return new Promise(resolve => {
-                const modal = document.getElementById('modal-ai-review');
-                const previewEl = document.getElementById('ai-review-preview');
-                const reasonEl = document.getElementById('ai-review-reason');
-                const nameInp = document.getElementById('ai-review-name-input');
-                const certNoWrap = document.getElementById('ai-review-certno-wrap');
-                const certNoInp = document.getElementById('ai-review-certno-input');
-                const hintInp = document.getElementById('ai-review-hint-input');
-                const rememberCb = document.getElementById('ai-review-remember-cb');
-
-                reasonEl.textContent = reviewData.uncertainReason || 'ฟอนต์หรือภาพบางจุดไม่ชัดเจน กรุณาช่วยตรวจสอบ';
-                nameInp.value = reviewData.recipientName || '';
-                certNoInp.value = reviewData.certNo || '';
-                certNoWrap.classList.toggle('hidden', !includeCertNo);
-                hintInp.value = '';
-                rememberCb.checked = true;
-
-                if (reviewData.fileId) {
-                    const thumb = getDriveThumbUrl(reviewData.fileId, 'w1000');
-                    previewEl.innerHTML = `<img src="${escapeHtml(thumb)}" alt="ตัวอย่างเกียรติบัตร" class="max-w-full max-h-[250px] object-contain" onerror="this.onerror=null;this.src='${escapeHtml(getDriveImageUrl(reviewData.fileId))}'">`;
-                } else {
-                    previewEl.innerHTML = `<p class="text-xs text-gray-400">ไม่สามารถแสดงภาพตัวอย่างได้</p>`;
-                }
-
-                modal.classList.remove('hidden');
-                setTimeout(() => nameInp.focus(), 120);
-
-                const saveBtn = document.getElementById('ai-review-save-btn');
-                const skipBtn = document.getElementById('ai-review-skip-btn');
-                const closeBtn = document.getElementById('ai-review-close-btn');
-
-                function cleanup(result) {
-                    modal.classList.add('hidden');
-                    saveBtn.onclick = null;
-                    skipBtn.onclick = null;
-                    closeBtn.onclick = null;
-                    resolve(result);
-                }
-
-                saveBtn.onclick = () => cleanup({
-                    action: 'save',
-                    recipientName: nameInp.value.trim(),
-                    certNo: certNoInp.value.trim(),
-                    customHint: hintInp.value.trim(),
-                    rememberExample: rememberCb.checked
-                });
-                skipBtn.onclick = () => cleanup({ action: 'skip' });
-                closeBtn.onclick = () => cleanup({ action: 'skip' });
-            });
-        }
-
-        async function saveReviewedAiCert(certId, reviewRes, includeCertNo, origGuess) {
-            const patch = { id: certId };
-            if (reviewRes.recipientName) patch.recipientName = reviewRes.recipientName;
-            if (includeCertNo && reviewRes.certNo) patch.certNo = reviewRes.certNo;
-
-            const saveApi = await apiPost({
-                action: 'bulkUpdateCertificates',
-                token: adminToken,
-                data: { items: [patch] }
-            });
-            if (!saveApi || !saveApi.success) {
-                throw new Error((saveApi && saveApi.error) || 'บันทึกชื่อที่ตรวจสอบแล้วไม่สำเร็จ');
-            }
-
-            if (reviewRes.customHint) addAiSessionHint(reviewRes.customHint);
-            if (reviewRes.rememberExample && reviewRes.recipientName) {
-                if (origGuess && origGuess !== reviewRes.recipientName) {
-                    addAiSessionHint(`ตัวอย่างการแก้: ที่อ่านว่า "${origGuess}" จริงๆ คือ "${reviewRes.recipientName}"`);
-                } else {
-                    addAiSessionHint(`ตัวอย่างรูปแบบชื่อที่ถูกต้องในชุดนี้: "${reviewRes.recipientName}"`);
-                }
             }
         }
 
@@ -3293,6 +3320,87 @@
             }
         }
 
+        function promptAiReviewModal(res, includeCertNo) {
+            return new Promise(resolve => {
+                const modal = document.getElementById('modal-ai-review');
+                const img = document.getElementById('ai-review-img');
+                const reasonEl = document.getElementById('ai-review-reason');
+                const nameInp = document.getElementById('ai-review-name');
+                const certNoWrap = document.getElementById('ai-review-certno-wrap');
+                const certNoInp = document.getElementById('ai-review-certno');
+                const hintInp = document.getElementById('ai-review-hint');
+                const rememberCb = document.getElementById('ai-review-remember');
+
+                img.src = res.fileId ? getDriveThumbUrl(res.fileId, 'w1000') : '';
+                reasonEl.textContent = res.uncertainReason || 'ฟอนต์หรือภาพบางจุดไม่ชัดเจน กรุณาช่วยตรวจสอบ';
+                nameInp.value = res.recipientName || '';
+                certNoInp.value = res.certNo || '';
+                certNoWrap.classList.toggle('hidden', !includeCertNo);
+                hintInp.value = '';
+                rememberCb.checked = true;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => nameInp.focus(), 100);
+
+                const saveBtn = document.getElementById('ai-review-save-btn');
+                const skipBtn = document.getElementById('ai-review-skip-btn');
+                const closeBtn = document.getElementById('ai-review-close-btn');
+
+                function done(payload) {
+                    modal.classList.add('hidden');
+                    saveBtn.onclick = null;
+                    skipBtn.onclick = null;
+                    closeBtn.onclick = null;
+                    resolve(payload);
+                }
+
+                saveBtn.onclick = () => {
+                    done({
+                        confirmed: true,
+                        recipientName: nameInp.value.trim(),
+                        certNo: certNoInp.value.trim(),
+                        hint: hintInp.value.trim(),
+                        rememberExample: rememberCb.checked
+                    });
+                };
+                skipBtn.onclick = () => done({ confirmed: false });
+                closeBtn.onclick = () => done({ confirmed: false });
+            });
+        }
+
+        async function applyAiReviewResult(certId, res, includeCertNo) {
+            const review = await promptAiReviewModal(res, includeCertNo);
+            if (!review || !review.confirmed) return false;
+
+            if (review.hint) {
+                aiSessionHints.push(review.hint);
+            }
+            if (review.rememberExample && review.recipientName) {
+                if (res.recipientName && res.recipientName !== review.recipientName) {
+                    aiSessionHints.push(`ตัวอย่างที่แก้: AI อ่านเป็น "${res.recipientName}" แต่ที่ถูกต้องคือ "${review.recipientName}"`);
+                } else {
+                    aiSessionHints.push(`ตัวอย่างรูปแบบชื่อที่ถูกต้องในชุดนี้: "${review.recipientName}"`);
+                }
+            }
+            if (aiSessionHints.length > 8) {
+                aiSessionHints = aiSessionHints.slice(-8);
+            }
+
+            const patch = { id: certId };
+            if (review.recipientName) patch.recipientName = review.recipientName;
+            if (includeCertNo && review.certNo) patch.certNo = review.certNo;
+
+            const updRes = await apiPost({
+                action: 'bulkUpdateCertificates',
+                token: adminToken,
+                data: { items: [patch] }
+            });
+            if (!updRes || !updRes.success) {
+                throw new Error((updRes && updRes.error) || 'บันทึกผลตรวจสอบไม่สำเร็จ');
+            }
+            return true;
+        }
+
         async function handleSingleAiScan(certId) {
             if (!hasGeminiKey) {
                 openGeminiKeyModal();
@@ -3317,13 +3425,8 @@
                     throw new Error((res && res.error) || 'AI อ่านชื่อไม่สำเร็จ');
                 }
                 if (res.needsReview) {
-                    const decision = await openAiReviewModal(res, includeCertNo);
-                    if (decision.action === 'save' && decision.recipientName) {
-                        await saveReviewedAiCert(certId, decision, includeCertNo, res.recipientName);
-                        showToast(`บันทึกชื่อแล้ว: ${decision.recipientName}`, 'success');
-                    } else {
-                        showToast('ข้ามการบันทึกใบนี้แล้ว', 'info');
-                    }
+                    const saved = await applyAiReviewResult(certId, res, includeCertNo);
+                    showToast(saved ? 'บันทึกชื่อที่ตรวจสอบแล้ว และจำไว้ช่วยอ่านใบถัดไป' : 'ข้ามใบนี้แล้ว', saved ? 'success' : 'info');
                 } else {
                     showToast(res.message || 'อ่านชื่อสำเร็จ', res.skipped ? 'info' : 'success');
                 }
@@ -3390,12 +3493,8 @@
                         }
                         showToast(res && res.error ? res.error : 'สแกนไม่สำเร็จ', 'error');
                     } else if (res.needsReview) {
-                        progText.textContent = `รอการยืนยันใบที่ ${i + 1} / ${ids.length}...`;
-                        const decision = await openAiReviewModal(res, includeCertNo);
-                        if (decision.action === 'save' && decision.recipientName) {
-                            await saveReviewedAiCert(ids[i], decision, includeCertNo, res.recipientName);
-                            okCount++;
-                        }
+                        const saved = await applyAiReviewResult(ids[i], res, includeCertNo);
+                        if (saved) okCount++;
                     } else if (!res.skipped) {
                         okCount++;
                     }
@@ -3413,7 +3512,125 @@
             await loadAdminData();
         }
 
-        // ================= INITIALIZATION =================
+        // ================= CONTACT SETTINGS & INITIALIZATION =================
+
+        function resolveLineUrl(raw) {
+            const val = String(raw || '').trim();
+            if (!val) return '';
+            if (/^https?:\/\//i.test(val)) return val;
+            if (val.startsWith('@')) {
+                return `https://line.me/R/ti/p/${encodeURIComponent(val)}`;
+            }
+            return `https://line.me/ti/p/~${encodeURIComponent(val)}`;
+        }
+
+        function populateContactSettingsForm() {
+            const lineInp = document.getElementById('setting-contact-line');
+            const fbInp = document.getElementById('setting-contact-fb');
+            const noteInp = document.getElementById('setting-contact-note');
+            if (lineInp) lineInp.value = contactSettings.line || '';
+            if (fbInp) fbInp.value = contactSettings.fb || '';
+            if (noteInp) noteInp.value = contactSettings.note || '';
+        }
+
+        async function handleSaveContactSettings(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-contact-settings');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก...`;
+
+            try {
+                const payload = {
+                    line: document.getElementById('setting-contact-line').value.trim(),
+                    fb: document.getElementById('setting-contact-fb').value.trim(),
+                    note: document.getElementById('setting-contact-note').value.trim()
+                };
+                const res = await apiPost({ action: 'saveContactSettings', token: adminToken, data: payload });
+                if (!res || !res.success) throw new Error((res && res.error) || 'บันทึกช่องทางติดต่อไม่สำเร็จ');
+                contactSettings = res.contactSettings || payload;
+                showToast(res.message || 'บันทึกช่องทางติดต่อเรียบร้อยแล้ว', 'success');
+            } catch (err) {
+                showToast(err.message || 'บันทึกช่องทางติดต่อไม่สำเร็จ', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk"></i> บันทึกช่องทางติดต่อ`;
+            }
+        }
+
+        function openSubmitCertModal() {
+            const lineBtn = document.getElementById('contact-line-btn');
+            const lineBtnText = document.getElementById('contact-line-btn-text');
+            const fbBtn = document.getElementById('contact-fb-btn');
+            const noteBox = document.getElementById('contact-note-box');
+            const noteText = document.getElementById('contact-note-text');
+
+            const rawLine = String(contactSettings.line || '').trim();
+            const lineUrl = resolveLineUrl(rawLine);
+            if (lineBtn) {
+                lineBtn.href = lineUrl || '#';
+                if (lineBtnText) {
+                    const showId = rawLine && !/^https?:\/\//i.test(rawLine) ? ` (${rawLine})` : '';
+                    lineBtnText.textContent = `ทัก LINE ส่งข้อมูลให้สภานักเรียน${showId}`;
+                }
+            }
+
+            const fbUrl = String(contactSettings.fb || '').trim();
+            if (fbBtn) {
+                if (fbUrl) {
+                    fbBtn.href = fbUrl;
+                    fbBtn.classList.remove('hidden');
+                } else {
+                    fbBtn.classList.add('hidden');
+                }
+            }
+
+            const note = String(contactSettings.note || '').trim();
+            if (noteBox && noteText) {
+                if (note) {
+                    noteText.textContent = note;
+                    noteBox.classList.remove('hidden');
+                } else {
+                    noteBox.classList.add('hidden');
+                }
+            }
+
+            document.getElementById('modal-submit-cert').classList.remove('hidden');
+        }
+
+        function handleContactLinkClick(e, channel) {
+            const url = channel === 'line' ? resolveLineUrl(contactSettings.line) : String(contactSettings.fb || '').trim();
+            if (!url) {
+                e.preventDefault();
+                showToast('ผู้ดูแลระบบยังไม่ได้ตั้งค่าช่องทางติดต่อนี้ในหน้า Admin', 'info');
+                return false;
+            }
+            return true;
+        }
+
+        function copySubmitTemplate() {
+            const template = [
+                'ขอส่งเกียรติบัตรลงระบบคลังเกียรติบัตรออนไลน์',
+                '1. ชื่อกิจกรรม: ',
+                '2. ปีการศึกษา: ',
+                '3. ผู้ดูแล / กลุ่มสาระฯ / หน่วยงาน: ',
+                '4. วันที่ออกเกียรติบัตร (ถ้ามี): ',
+                '5. ลิงก์ Google Drive: '
+            ].join('\n');
+
+            const ta = document.createElement('textarea');
+            ta.value = template;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('คัดลอกแบบฟอร์มข้อความแล้ว นำไปวางในแชตได้เลย', 'success');
+            } catch (err) {
+                showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
+            }
+            ta.remove();
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             initSecretLogoTap();
