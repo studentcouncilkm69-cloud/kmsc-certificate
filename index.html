@@ -67,6 +67,218 @@
         .animate-fade-in {
             animation: fadeIn 0.25s ease-out forwards;
         }
+
+        /* ==================== SHREDDER DELETE BUTTON (RED THEME) ==================== */
+        .shred-stage {
+            position: relative;
+            width: 220px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .shred-top-mask {
+            width: 118px;
+            height: 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 5;
+            transition: height 0.22s ease;
+        }
+        .shred-stage.is-shredding .shred-top-mask {
+            height: 76px;
+        }
+        .shred-paper-card {
+            width: 108px;
+            height: 86px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+            padding: 8px 7px;
+            box-sizing: border-box;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .shred-paper-feed {
+            transform: translateY(-4px);
+            will-change: transform;
+        }
+        .shred-stage.is-shredding .shred-paper-feed {
+            animation: shredFeedDown 1.15s cubic-bezier(0.35, 0.05, 0.55, 0.95) forwards;
+        }
+        @keyframes shredFeedDown {
+            0%   { transform: translateY(-4px); }
+            100% { transform: translateY(84px); }
+        }
+        .shred-paper-title {
+            font-size: 7.5px;
+            font-weight: 800;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+        }
+        .shred-paper-line {
+            height: 3px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-bottom: 4px;
+        }
+        .shred-paper-stamp {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-8deg);
+            border: 1.5px solid #d91b42;
+            color: #d91b42;
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(255, 241, 242, 0.9);
+            white-space: nowrap;
+        }
+        .shred-btn {
+            position: relative;
+            z-index: 10;
+            width: 220px;
+            height: 50px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(180deg, #e11d48 0%, #b91c3c 100%);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 18px rgba(217, 27, 66, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+            outline: none;
+        }
+        .shred-btn:hover:not(:disabled) {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(217, 27, 66, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        .shred-btn:active:not(:disabled) {
+            transform: translateY(1px) scale(0.98);
+        }
+        .shred-slot {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 114px;
+            height: 5px;
+            border-radius: 999px;
+            background: #4c0519;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+        .shred-teeth {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 112px;
+            height: 5px;
+            background-image: repeating-linear-gradient(
+                90deg,
+                #881337 0px,
+                #881337 5px,
+                transparent 5px,
+                transparent 9px
+            );
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        .shred-stage.is-shredding .shred-teeth {
+            opacity: 1;
+        }
+        .shred-stage.is-shredding .shred-btn {
+            animation: shredVibrate 0.09s linear infinite;
+            cursor: default;
+        }
+        @keyframes shredVibrate {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-0.8px, 0.5px); }
+            75% { transform: translate(0.8px, -0.5px); }
+        }
+        .shred-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+        }
+        .shred-bars span {
+            width: 2.5px;
+            background: #ffffff;
+            border-radius: 2px;
+            animation: shredEqualizer 0.45s ease-in-out infinite alternate;
+        }
+        .shred-bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
+        .shred-bars span:nth-child(2) { height: 11px; animation-delay: 0.14s; }
+        .shred-bars span:nth-child(3) { height: 7px; animation-delay: 0.28s; }
+        @keyframes shredEqualizer {
+            from { transform: scaleY(0.45); opacity: 0.7; }
+            to   { transform: scaleY(1); opacity: 1; }
+        }
+        .shred-bottom-mask {
+            width: 118px;
+            height: 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 4;
+            transition: height 0.22s ease;
+        }
+        .shred-stage.is-shredding .shred-bottom-mask {
+            height: 102px;
+        }
+        .shred-strips-wrap {
+            position: relative;
+            width: 108px;
+            height: 98px;
+            margin: 0 auto;
+        }
+        .shred-strip {
+            position: absolute;
+            top: -86px;
+            height: 86px;
+            overflow: hidden;
+            border-right: 1px solid rgba(148, 163, 184, 0.35);
+            box-sizing: border-box;
+            will-change: transform, opacity;
+            animation: shredStripFall 1.18s cubic-bezier(0.32, 0.08, 0.55, 1) forwards;
+        }
+        .shred-strip > .shred-paper-card {
+            position: absolute;
+            top: 0;
+            margin: 0;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        @keyframes shredStripFall {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            72% {
+                transform: translateY(90px) translateX(var(--sx, 0px)) rotate(var(--sr, 0deg));
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(138px) translateX(calc(var(--sx, 0px) * 1.8)) rotate(calc(var(--sr, 0deg) * 1.6));
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col overflow-x-hidden">
@@ -959,18 +1171,41 @@
         </div>
     </div>
 
-    <!-- 6. Custom Confirm Modal -->
+    <!-- 6. Custom Confirm Modal (Red Shredder Delete Animation) -->
     <div id="modal-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-[330px] shadow-2xl text-center">
             <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3">
-                <i class="ph-duotone ph-warning-circle text-3xl"></i>
+                <i class="ph-duotone ph-trash text-3xl"></i>
             </div>
             <h3 id="confirm-title" class="text-base font-extrabold text-gray-900 mb-1">ยืนยันการดำเนินการ</h3>
-            <p id="confirm-message" class="text-xs text-gray-500 mb-5"></p>
-            <div class="flex gap-2">
-                <button type="button" id="confirm-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600">ยกเลิก</button>
-                <button type="button" id="confirm-ok-btn" class="flex-1 py-2.5 rounded-xl bg-[#d91b42] text-white text-xs font-bold hover:bg-[#b51435]">ยืนยัน</button>
+            <p id="confirm-message" class="text-xs text-gray-500 mb-4 leading-relaxed"></p>
+
+            <!-- Shredder Delete Stage -->
+            <div id="shred-stage" class="shred-stage mb-3">
+                <div class="shred-top-mask">
+                    <div id="shred-paper-template" class="shred-paper-card shred-paper-feed">
+                        <div id="shred-paper-name" class="shred-paper-title">certificate.pdf</div>
+                        <div class="shred-paper-line" style="width: 85%;"></div>
+                        <div class="shred-paper-line" style="width: 65%;"></div>
+                        <div class="shred-paper-line" style="width: 75%;"></div>
+                        <div class="shred-paper-stamp">DELETE</div>
+                    </div>
+                </div>
+
+                <button type="button" id="confirm-ok-btn" class="shred-btn">
+                    <span class="shred-slot"></span>
+                    <span id="confirm-ok-label" class="inline-flex items-center gap-1.5 mt-0.5">
+                        <i class="ph-bold ph-trash text-base"></i> ยืนยันการลบ
+                    </span>
+                    <span class="shred-teeth"></span>
+                </button>
+
+                <div class="shred-bottom-mask">
+                    <div id="shred-strips-wrap" class="shred-strips-wrap"></div>
+                </div>
             </div>
+
+            <button type="button" id="confirm-cancel-btn" class="w-full py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold text-gray-600 transition-colors">ยกเลิก</button>
         </div>
     </div>
 
@@ -1285,7 +1520,7 @@
             return `${d} ${THAI_MONTHS[m - 1]} ${beYear}`;
         }
 
-        // แปลงวันที่จากชีตให้เป็นภาษาไทยสวยงาม (รองรับ ISO string เช่น 2569-06-25T12:00:00.000Z)
+        // แปลงวันที่จากชีตให้เป็นวันที่ภาษาไทยสะอาดๆ (รองรับทั้ง ISO string และข้อความภาษาไทย)
         function formatThaiDateDisplay(val) {
             const s = String(val || '').trim();
             if (!s) return '';
@@ -1357,25 +1592,106 @@
             }, type === 'error' ? 5000 : 3200);
         }
 
+        function buildShredStrips(paperEl, wrapEl) {
+            const STRIPS = 12;
+            const W = 108;
+            const sw = W / STRIPS;
+            wrapEl.innerHTML = '';
+
+            for (let i = 0; i < STRIPS; i++) {
+                const strip = document.createElement('div');
+                strip.className = 'shred-strip';
+                strip.style.left = `${i * sw}px`;
+                strip.style.width = `${sw + 0.5}px`;
+
+                // กระจายเส้นกระดาษให้บานออกเล็กน้อยและมีความเหลื่อมเวลาเป็นธรรมชาติ
+                const spread = (i - (STRIPS - 1) / 2) * 2.2;
+                const rot = (i - (STRIPS - 1) / 2) * 1.4;
+                strip.style.setProperty('--sx', `${spread.toFixed(1)}px`);
+                strip.style.setProperty('--sr', `${rot.toFixed(1)}deg`);
+                strip.style.animationDelay = `${((i % 3) * 0.03).toFixed(2)}s`;
+
+                const slice = paperEl.cloneNode(true);
+                slice.removeAttribute('id');
+                slice.classList.remove('shred-paper-feed');
+                slice.style.left = `${-i * sw}px`;
+                strip.appendChild(slice);
+                wrapEl.appendChild(strip);
+            }
+        }
+
         function showConfirm(title, message) {
             return new Promise(resolve => {
                 const modal = document.getElementById('modal-confirm');
+                const stage = document.getElementById('shred-stage');
+                const okBtn = document.getElementById('confirm-ok-btn');
+                const okLabel = document.getElementById('confirm-ok-label');
+                const cancelBtn = document.getElementById('confirm-cancel-btn');
+                const paperEl = document.getElementById('shred-paper-template');
+                const paperNameEl = document.getElementById('shred-paper-name');
+                const stripsWrap = document.getElementById('shred-strips-wrap');
+
                 document.getElementById('confirm-title').textContent = title || 'ยืนยันการดำเนินการ';
                 document.getElementById('confirm-message').textContent = message || '';
-                modal.classList.remove('hidden');
 
-                const okBtn = document.getElementById('confirm-ok-btn');
-                const cancelBtn = document.getElementById('confirm-cancel-btn');
+                // ดึงชื่อรายการในเครื่องหมายคำพูดมาโชว์บนใบเอกสารจิ๋ว
+                const quoted = String(message || '').match(/"([^"]+)"/);
+                paperNameEl.textContent = (quoted && quoted[1]) ? quoted[1] : (title || 'document.pdf');
+
+                // รีเซ็ตสถานะเครื่องย่อยกระดาษก่อนเปิด
+                let isRunning = false;
+                stage.classList.remove('is-shredding');
+                stripsWrap.innerHTML = '';
+                okBtn.disabled = false;
+                cancelBtn.disabled = false;
+                okLabel.innerHTML = `<i class="ph-bold ph-trash text-base"></i> ยืนยันการลบ`;
+
+                modal.classList.remove('hidden');
 
                 function cleanup(val) {
                     modal.classList.add('hidden');
+                    stage.classList.remove('is-shredding');
+                    stripsWrap.innerHTML = '';
+                    okBtn.disabled = false;
+                    cancelBtn.disabled = false;
                     okBtn.onclick = null;
                     cancelBtn.onclick = null;
                     resolve(val);
                 }
 
-                okBtn.onclick = () => cleanup(true);
-                cancelBtn.onclick = () => cleanup(false);
+                okBtn.onclick = () => {
+                    if (isRunning) return;
+                    isRunning = true;
+                    okBtn.disabled = true;
+                    cancelBtn.disabled = true;
+
+                    buildShredStrips(paperEl, stripsWrap);
+                    // บังคับรีเฟรช layout ให้แอนิเมชันเล่นตั้งแต่ 0%
+                    void stage.offsetWidth;
+                    stage.classList.add('is-shredding');
+
+                    const duration = 1150;
+                    const startTime = performance.now();
+
+                    function tick(now) {
+                        const pct = Math.min(100, Math.round(((now - startTime) / duration) * 100));
+                        okLabel.innerHTML = `
+                            <span class="shred-bars"><span></span><span></span><span></span></span>
+                            <span>กำลังลบ... ${pct}%</span>`;
+                        if (pct < 100) {
+                            requestAnimationFrame(tick);
+                        } else {
+                            okLabel.innerHTML = `<i class="ph-bold ph-check-circle text-base"></i> กำลังดำเนินการ...`;
+                            setTimeout(() => cleanup(true), 220);
+                        }
+                    }
+                    requestAnimationFrame(tick);
+                };
+
+                cancelBtn.onclick = () => {
+                    if (isRunning) return;
+                    cleanup(false);
+                };
             });
         }
 
