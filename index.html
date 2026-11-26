@@ -20,6 +20,9 @@
     <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- Google Identity Services (เข้าสู่ระบบด้วย Google) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
         body {
             font-family: 'Noto Sans Thai', sans-serif;
@@ -306,6 +309,9 @@
                     <i class="ph-bold ph-sign-out"></i> <span class="hidden sm:inline">ออกจากระบบ</span>
                 </button>
             </div>
+
+            <!-- ปุ่มเข้าสู่ระบบด้วย Google / โปรไฟล์ผู้ใช้ (แสดงในหน้า Public) -->
+            <div id="header-user-controls" class="hidden items-center gap-1.5 sm:gap-2 shrink-0"></div>
         </div>
     </header>
 
@@ -617,115 +623,36 @@
                     </div>
                 </form>
             </div>
-        </section>
 
-        <!-- ADMIN TAB 2: MANAGE ACTIVITIES -->
-        <section id="admin-sec-activities" class="hidden">
-            <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-                <div>
-                    <h3 class="text-base font-bold text-gray-900">รายการกิจกรรมทั้งหมด</h3>
-                    <p id="act-order-status" class="text-[11px] text-gray-500 mt-0.5">กดปักหมุด หรือปุ่มลูกศร (บนสุด / ขึ้น / ลง / ล่างสุด) เพื่อจัดลำดับการแสดงผลหน้าเว็บ</p>
-                </div>
-                <button type="button" onclick="openActivityModal()" class="px-4 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                    <i class="ph-bold ph-plus"></i> เพิ่มกิจกรรมใหม่
-                </button>
-            </div>
-            <div id="admin-activities-list" class="space-y-3"></div>
-        </section>
-
-        <!-- ADMIN TAB 3: UPLOAD CERTIFICATES -->
-        <section id="admin-sec-upload" class="hidden space-y-5">
-            <!-- ตั้งค่าเริ่มต้นก่อนอัปโหลด -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h3 class="text-sm font-extrabold text-gray-900 mb-3 flex items-center gap-1.5">
-                    <i class="ph-fill ph-sliders text-[#d91b42]"></i> 1. เลือกกิจกรรมและค่าเริ่มต้น
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">เลือกกิจกรรม *</label>
-                        <select id="upload-activity-select" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs font-bold bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
-                            <option value="">-- กรุณาเลือกกิจกรรม --</option>
-                        </select>
+            <!-- ตั้งค่าระบบเข้าสู่ระบบด้วย Google และอีเมลแอดมิน -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mt-4">
+                <div class="flex items-center gap-2.5 mb-3.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-google-logo text-xl"></i>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">ประเภทผู้รับ</label>
-                        <select id="upload-default-certtype" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs bg-gray-50 focus:bg-white">
-                            <option value="รายบุคคล">รายบุคคล</option>
-                            <option value="ห้องเรียน">ห้องเรียน</option>
-                        </select>
+                        <h3 class="text-sm font-extrabold text-gray-900">ตั้งค่าเข้าสู่ระบบด้วย Google & อีเมลแอดมิน</h3>
+                        <p class="text-[11px] text-gray-500">เปิดให้นักเรียนล็อกอินสร้างโปรไฟล์เก็บเกียรติบัตร และให้แอดมินล็อกอินด้วยอีเมล Google ได้เลย</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handleSaveGoogleSettings(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Google OAuth Client ID</label>
+                        <input type="text" id="setting-google-clientid" placeholder="เช่น 1234567890-xxxxxxxx.apps.googleusercontent.com" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs font-mono bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                        <p class="text-[10px] text-gray-400 mt-1">สร้างฟรีได้ที่ Google Cloud Console → Credentials → OAuth client ID (Web application) โดยเพิ่ม Authorized JavaScript origins เป็นเว็บของคุณ</p>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">วันที่ออกเกียรติบัตร</label>
-                        <input type="date" id="upload-default-date" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-xs bg-gray-50 focus:bg-white">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">อีเมลแอดมิน (ใส่ได้หลายอีเมล คั่นด้วยเครื่องหมายจุลภาค ,)</label>
+                        <input type="text" id="setting-google-admin-emails" placeholder="เช่น admin1@gmail.com, president@gmail.com" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs font-mono bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                        <p class="text-[10px] text-gray-400 mt-1">เมื่ออีเมลที่ระบุไว้ล็อกอินด้วย Google จะได้รับสิทธิ์เข้าหน้าจัดการหลังบ้าน (Admin) ทันที</p>
                     </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">รางวัล / ประเภทเริ่มต้น (ไม่บังคับ)</label>
-                        <select id="upload-default-award" onchange="toggleCustomAward('upload')" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-xs bg-gray-50 focus:bg-white">
-                            <option value="">-- ไม่ระบุ --</option>
-                            <option value="เข้าร่วมกิจกรรม">เข้าร่วมกิจกรรม</option>
-                            <option value="รางวัลชนะเลิศ">รางวัลชนะเลิศ</option>
-                            <option value="รางวัลรองชนะเลิศ อันดับ 1">รางวัลรองชนะเลิศ อันดับ 1</option>
-                            <option value="รางวัลรองชนะเลิศ อันดับ 2">รางวัลรองชนะเลิศ อันดับ 2</option>
-                            <option value="รางวัลชมเชย">รางวัลชมเชย</option>
-                            <option value="คณะกรรมการ / จิตอาสา">คณะกรรมการ / จิตอาสา</option>
-                            <option value="__custom__">พิมพ์เอง...</option>
-                        </select>
-                        <input type="text" id="upload-custom-award" placeholder="พิมพ์ชื่อรางวัล..." class="hidden mt-2 w-full border border-gray-200 rounded-xl py-2 px-3 text-xs">
+                    <div class="flex justify-end pt-1">
+                        <button type="submit" id="btn-save-google-settings" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                            <i class="ph-bold ph-floppy-disk"></i> บันทึกการตั้งค่า Google
+                        </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- วิธีที่ A: ดึงไฟล์ยกโฟลเดอร์ Google Drive -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h3 class="text-sm font-extrabold text-gray-900 mb-1 flex items-center gap-1.5">
-                    <i class="ph-fill ph-google-drive-logo text-emerald-600 text-base"></i> 2A. ดึงไฟล์ยกโฟลเดอร์จาก Google Drive (แนะนำ)
-                </h3>
-                <p class="text-xs text-gray-500 mb-3">รองรับทั้งโฟลเดอร์เดี่ยวและโฟลเดอร์ใหญ่ที่มีโฟลเดอร์ย่อยแยกห้อง/แยกหมวด (ตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์สามารถดูได้")</p>
-
-                <div class="flex flex-col sm:flex-row gap-2.5 mb-3">
-                    <input type="text" id="drive-folder-url" placeholder="วางลิงก์โฟลเดอร์ Google Drive ที่นี่..." class="flex-1 border border-gray-200 rounded-xl py-2.5 px-3.5 text-xs bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
-                    <button type="button" id="btn-import-drive" onclick="handleImportDriveFolder()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shrink-0">
-                        <i class="ph-bold ph-download-simple"></i> ดึงไฟล์ยกโฟลเดอร์
-                    </button>
-                </div>
-
-                <label class="inline-flex items-center gap-2 text-xs text-gray-700 font-medium cursor-pointer select-none">
-                    <input type="checkbox" id="drive-skip-certno" class="w-4 h-4 rounded accent-[#d91b42]">
-                    <span>ไม่ระบุเลขที่เกียรติบัตร (ซ่อนป้ายเลขที่บนการ์ด ไม่รันเลขอัตโนมัติ)</span>
-                </label>
-            </div>
-
-            <!-- วิธีที่ B: อัปโหลดไฟล์จากเครื่อง -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h3 class="text-sm font-extrabold text-gray-900 mb-1 flex items-center gap-1.5">
-                    <i class="ph-fill ph-upload-simple text-[#d91b42] text-base"></i> 2B. อัปโหลดไฟล์เกียรติบัตรจากเครื่อง (PDF / PNG / JPG)
-                </h3>
-                <p class="text-xs text-gray-500 mb-3">เลือกหลายไฟล์พร้อมกันได้ ระบบจะดึงชื่อ-นามสกุลและเลขที่จากชื่อไฟล์ให้อัตโนมัติ</p>
-
-                <label class="block border-2 border-dashed border-gray-200 hover:border-[#d91b42] rounded-2xl p-6 text-center cursor-pointer transition-colors bg-gray-50/50">
-                    <i class="ph-duotone ph-cloud-arrow-up text-4xl text-[#d91b42] mb-2"></i>
-                    <p class="text-xs font-bold text-gray-700">คลิกเพื่อเลือกไฟล์เกียรติบัตร (เลือกได้หลายไฟล์)</p>
-                    <p class="text-[11px] text-gray-400 mt-1">รองรับ .pdf, .png, .jpg, .jpeg</p>
-                    <input type="file" id="upload-file-input" multiple accept=".pdf,.png,.jpg,.jpeg" onchange="handleFilesSelected(event)" class="hidden">
-                </label>
-
-                <div id="upload-queue-section" class="hidden mt-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <p class="text-xs font-bold text-gray-700">คิวรออัปโหลด (<span id="upload-queue-count">0</span> ไฟล์)</p>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="clearUploadQueue()" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold">ล้างคิว</button>
-                            <button type="button" id="btn-start-upload" onclick="startBatchUpload()" class="px-4 py-1.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1">
-                                <i class="ph-bold ph-paper-plane-tilt"></i> เริ่มอัปโหลดทั้งหมด
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="upload-progress-wrap" class="hidden w-full bg-gray-100 rounded-full h-2 mb-3 overflow-hidden">
-                        <div id="upload-progress-bar" class="bg-emerald-500 h-2 transition-all duration-300" style="width: 0%"></div>
-                    </div>
-
-                    <div id="upload-queue-list" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
-                </div>
+                </form>
             </div>
         </section>
 
@@ -1372,6 +1299,142 @@
         </div>
     </div>
 
+    <!-- 10. Google Sign-In Modal -->
+    <div id="modal-google-login" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center animate-fade-in">
+            <div class="flex justify-between items-center mb-3">
+                <span class="px-2.5 py-1 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-extrabold uppercase tracking-wider">Member & Admin</span>
+                <button type="button" onclick="document.getElementById('modal-google-login').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1.5">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <i class="ph-fill ph-user-circle-check text-3xl"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-gray-900 mb-1">เข้าสู่ระบบด้วยบัญชี Google</h3>
+            <p class="text-xs text-gray-500 leading-relaxed mb-5">
+                ตั้งค่าโปรไฟล์เพื่อรวมเกียรติบัตรของคุณไว้ในแฟ้มส่วนตัวอัตโนมัติ หรือเข้าสู่ระบบผู้ดูแลด้วยอีเมลที่ได้รับอนุญาต
+            </p>
+            <div id="google-signin-btn-container" class="flex justify-center min-h-[44px] mb-3"></div>
+            <p id="google-signin-status" class="text-[11px] text-gray-400"></p>
+        </div>
+    </div>
+
+    <!-- 11. User Profile & My Portfolio Modal -->
+    <div id="modal-user-profile" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+            <!-- Header โปรไฟล์ -->
+            <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-red-50/70 to-white flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img id="profile-avatar-img" src="" alt="รูปโปรไฟล์" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0 bg-gray-100">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h3 id="profile-display-name" class="text-sm sm:text-base font-extrabold text-gray-900 truncate">ชื่อผู้ใช้</h3>
+                            <span id="profile-admin-badge" class="hidden px-2 py-0.5 rounded-full bg-[#d91b42] text-white text-[10px] font-bold shrink-0">Admin</span>
+                        </div>
+                        <p id="profile-email-text" class="text-[11px] text-gray-500 truncate"></p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-user-profile').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 bg-white border border-gray-200 rounded-full p-1.5 shrink-0">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- ปุ่มทางลัดเข้าหน้า Admin (แสดงเฉพาะอีเมลแอดมิน) -->
+            <div id="profile-admin-bar" class="hidden px-5 py-2.5 bg-red-50/70 border-b border-red-100 flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-[#d91b42] flex items-center gap-1.5">
+                    <i class="ph-fill ph-shield-star text-base"></i> บัญชีนี้มีสิทธิ์ผู้ดูแลระบบ
+                </span>
+                <button type="button" onclick="openAdminFromProfile()" class="px-3.5 py-1.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                    <i class="ph-bold ph-gear-six"></i> เปิดหน้าจัดการหลังบ้าน
+                </button>
+            </div>
+
+            <!-- แท็บสลับ แฟ้มเกียรติบัตรของฉัน / ตั้งค่าโปรไฟล์ -->
+            <div class="flex items-center gap-5 px-5 border-b border-gray-100 bg-white shrink-0">
+                <button type="button" id="proftab-portfolio" onclick="switchProfileTab('portfolio')" class="tab-active py-3 text-xs sm:text-sm flex items-center gap-1.5">
+                    <i class="ph-bold ph-certificate"></i> แฟ้มเกียรติบัตรของฉัน
+                </button>
+                <button type="button" id="proftab-settings" onclick="switchProfileTab('settings')" class="tab-inactive py-3 text-xs sm:text-sm flex items-center gap-1.5">
+                    <i class="ph-bold ph-user-gear"></i> ตั้งค่าโปรไฟล์
+                </button>
+            </div>
+
+            <!-- เนื้อหาภายใน Modal -->
+            <div class="p-5 overflow-y-auto flex-1 bg-gray-50/40">
+                <!-- TAB A: แฟ้มเกียรติบัตรของฉัน -->
+                <div id="profsec-portfolio" class="space-y-4">
+                    <div id="profile-portfolio-summary" class="grid grid-cols-2 gap-3">
+                        <div class="bg-white rounded-2xl border border-gray-100 p-3.5 shadow-sm">
+                            <p class="text-[11px] text-gray-500 font-medium">เกียรติบัตรทั้งหมดของฉัน</p>
+                            <p id="my-cert-total-count" class="text-xl font-extrabold text-[#d91b42] mt-0.5">0 ใบ</p>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-gray-100 p-3.5 shadow-sm">
+                            <p class="text-[11px] text-gray-500 font-medium">ระดับชั้น / ห้อง</p>
+                            <p id="my-profile-class-text" class="text-sm sm:text-base font-extrabold text-gray-800 mt-1 truncate">-</p>
+                        </div>
+                    </div>
+                    <div id="profile-portfolio-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- TAB B: ตั้งค่าโปรไฟล์ -->
+                <div id="profsec-settings" class="hidden">
+                    <form onsubmit="handleSaveUserProfile(event)" class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-3">
+                        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-900 flex items-start gap-2">
+                            <i class="ph-fill ph-info text-blue-600 text-sm shrink-0 mt-0.5"></i>
+                            <span>กรอก <strong>ชื่อ-นามสกุลจริง (ตามที่ปรากฏบนเกียรติบัตร)</strong> เพื่อให้ระบบรวบรวมเกียรติบัตรของคุณมาแสดงในแฟ้มส่วนตัวโดยอัตโนมัติ</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อ-นามสกุลจริง (สำหรับจับคู่เกียรติบัตร)</label>
+                                <input type="text" id="prof-input-fullname" placeholder="เช่น นายภูธนากร หงษ์ทอง" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อเล่น / ชื่อที่แสดง</label>
+                                <input type="text" id="prof-input-nickname" placeholder="เช่น ภู" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">เลขประจำตัว</label>
+                                <input type="text" id="prof-input-sid" placeholder="เช่น 12345" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ระดับชั้น</label>
+                                <input type="text" id="prof-input-grade" placeholder="เช่น ม.5" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ห้อง</label>
+                                <input type="text" id="prof-input-room" placeholder="เช่น 1" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">แนะนำตัวสั้นๆ (ไม่บังคับ)</label>
+                            <textarea id="prof-input-bio" rows="2" placeholder="เช่น สมาชิกสภานักเรียน / สายวิทย์-คณิต" class="w-full border border-gray-200 rounded-xl py-2 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]"></textarea>
+                        </div>
+
+                        <div class="flex justify-end pt-1">
+                            <button type="submit" id="btn-save-user-profile" class="px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                                <i class="ph-bold ph-floppy-disk"></i> บันทึกโปรไฟล์
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer ของ Modal -->
+            <div class="px-5 py-3 border-t border-gray-100 bg-white flex items-center justify-between">
+                <button type="button" onclick="logoutUser()" class="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1.5 transition-colors">
+                    <i class="ph-bold ph-sign-out"></i> ออกจากระบบ
+                </button>
+                <button type="button" onclick="document.getElementById('modal-user-profile').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[130] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
@@ -1386,6 +1449,11 @@
         let adminActivities = [];
         let adminCertificates = [];
         let contactSettings = { line: '', fb: '', note: '' };
+        let googleClientId = '';
+        let googleSettings = { clientId: '', adminEmails: '' };
+        let userToken = sessionStorage.getItem('kmsc_user_token') || '';
+        let currentUser = JSON.parse(sessionStorage.getItem('kmsc_user_profile') || 'null');
+        let isGoogleAdmin = sessionStorage.getItem('kmsc_user_is_admin') === '1';
         let adminToken = sessionStorage.getItem('kmsc_admin_token') || '';
         let adminUser = JSON.parse(sessionStorage.getItem('kmsc_admin_user') || 'null');
         let currentActivityDetail = null;
@@ -1886,6 +1954,8 @@
                 publicActivities = sortActivitiesList(res.activities || []);
                 publicCertificates = res.certificates || [];
                 if (res.contactSettings) contactSettings = res.contactSettings;
+                googleClientId = String(res.googleClientId || '').trim();
+                renderHeaderUserUI();
                 renderVisitStats(res.stats);
                 populatePublicYearFilters();
                 renderGlobalSearch();
@@ -2793,6 +2863,11 @@
             const controls = document.getElementById('header-admin-controls');
             controls.classList.remove('hidden');
             controls.classList.add('flex');
+            const userControls = document.getElementById('header-user-controls');
+            if (userControls) {
+                userControls.classList.add('hidden');
+                userControls.classList.remove('flex');
+            }
             document.getElementById('admin-welcome-text').textContent = `ผู้ใช้งาน: ${(adminUser && adminUser.displayName) || 'ผู้ดูแลระบบ'}`;
             loadAdminData();
         }
@@ -2803,6 +2878,7 @@
             const controls = document.getElementById('header-admin-controls');
             controls.classList.add('hidden');
             controls.classList.remove('flex');
+            renderHeaderUserUI();
             loadPublicData();
         }
 
@@ -2842,9 +2918,14 @@
                 adminCertificates = res.certificates || [];
                 hasGeminiKey = Boolean(res.hasGeminiKey);
                 if (res.contactSettings) contactSettings = res.contactSettings;
+                if (res.googleSettings) {
+                    googleSettings = res.googleSettings;
+                    googleClientId = String(res.googleSettings.clientId || '').trim();
+                }
 
                 renderAdminDashboard(res.stats);
                 populateContactSettingsForm();
+                populateGoogleSettingsForm();
                 renderAdminActivitiesList();
                 populateAdminActivityDropdowns();
                 renderAdminCertsTable();
@@ -3946,6 +4027,318 @@
                 showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
             }
             ta.remove();
+        }
+
+        // ================= GOOGLE SIGN-IN & USER PROFILE =================
+
+        function renderHeaderUserUI() {
+            const wrap = document.getElementById('header-user-controls');
+            const adminView = document.getElementById('admin-view');
+            if (!wrap || (adminView && !adminView.classList.contains('hidden'))) return;
+
+            if (!googleClientId && !currentUser) {
+                wrap.classList.add('hidden');
+                wrap.classList.remove('flex');
+                return;
+            }
+
+            wrap.classList.remove('hidden');
+            wrap.classList.add('flex');
+
+            if (currentUser && userToken) {
+                const displayName = currentUser.nickname || currentUser.fullName || currentUser.googleName || 'โปรไฟล์';
+                const avatar = currentUser.picture || `https://placehold.co/64x64/d91b42/ffffff?text=${encodeURIComponent(displayName.charAt(0).toUpperCase())}`;
+                wrap.innerHTML = `
+                    ${isGoogleAdmin && adminToken ? `
+                        <button type="button" onclick="enterAdminView()" class="px-2.5 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1 transition-colors" title="เข้าหน้าจัดการแอดมิน">
+                            <i class="ph-fill ph-gear-six"></i> <span class="hidden sm:inline">แอดมิน</span>
+                        </button>` : ''}
+                    <button type="button" onclick="openUserProfileModal()" class="pl-1 pr-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center gap-1.5 transition-colors max-w-[150px] sm:max-w-[190px]">
+                        <img src="${escapeHtml(avatar)}" alt="avatar" class="w-7 h-7 rounded-full object-cover shrink-0 bg-white">
+                        <span class="text-xs font-bold text-gray-800 truncate">${escapeHtml(displayName)}</span>
+                    </button>`;
+            } else {
+                wrap.innerHTML = `
+                    <button type="button" onclick="openGoogleLoginModal()" class="px-3 sm:px-3.5 py-1.5 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                        <i class="ph-fill ph-google-logo text-[#d91b42] text-sm"></i>
+                        <span>เข้าสู่ระบบ</span>
+                    </button>`;
+            }
+        }
+
+        function openGoogleLoginModal() {
+            if (!googleClientId) {
+                return showToast('ผู้ดูแลระบบยังไม่ได้ตั้งค่า Google Client ID', 'info');
+            }
+            const modal = document.getElementById('modal-google-login');
+            const container = document.getElementById('google-signin-btn-container');
+            const statusEl = document.getElementById('google-signin-status');
+            statusEl.textContent = '';
+            container.innerHTML = '';
+            modal.classList.remove('hidden');
+
+            if (window.google && google.accounts && google.accounts.id) {
+                google.accounts.id.initialize({
+                    client_id: googleClientId,
+                    callback: handleGoogleCredentialResponse
+                });
+                google.accounts.id.renderButton(container, {
+                    theme: 'outline',
+                    size: 'large',
+                    shape: 'pill',
+                    text: 'signin_with',
+                    locale: 'th',
+                    width: 280
+                });
+            } else {
+                statusEl.textContent = 'กำลังโหลดระบบ Google Sign-In กรุณารอสักครู่แล้วลองใหม่...';
+            }
+        }
+
+        async function handleGoogleCredentialResponse(response) {
+            const statusEl = document.getElementById('google-signin-status');
+            if (!response || !response.credential) {
+                if (statusEl) statusEl.textContent = 'ไม่สามารถรับข้อมูลจาก Google ได้';
+                return;
+            }
+            if (statusEl) statusEl.textContent = 'กำลังตรวจสอบบัญชี Google...';
+
+            try {
+                const res = await apiPost({ action: 'googleLogin', idToken: response.credential });
+                if (!res || !res.success) {
+                    throw new Error((res && res.error) || 'เข้าสู่ระบบด้วย Google ไม่สำเร็จ');
+                }
+
+                userToken = res.userToken || '';
+                currentUser = res.profile || null;
+                isGoogleAdmin = Boolean(res.isAdmin);
+                sessionStorage.setItem('kmsc_user_token', userToken);
+                sessionStorage.setItem('kmsc_user_profile', JSON.stringify(currentUser));
+                sessionStorage.setItem('kmsc_user_is_admin', isGoogleAdmin ? '1' : '0');
+
+                if (isGoogleAdmin && res.adminToken) {
+                    adminToken = res.adminToken;
+                    adminUser = res.adminUser;
+                    sessionStorage.setItem('kmsc_admin_token', adminToken);
+                    sessionStorage.setItem('kmsc_admin_user', JSON.stringify(adminUser));
+                }
+
+                document.getElementById('modal-google-login').classList.add('hidden');
+                renderHeaderUserUI();
+
+                if (isGoogleAdmin) {
+                    showToast('เข้าสู่ระบบด้วยสิทธิ์แอดมินเรียบร้อยแล้ว', 'success');
+                } else {
+                    showToast('เข้าสู่ระบบด้วย Google เรียบร้อยแล้ว', 'success');
+                    if (currentUser && !currentUser.fullName) {
+                        openUserProfileModal('settings');
+                    }
+                }
+            } catch (err) {
+                if (statusEl) statusEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ';
+                showToast(err.message || 'เข้าสู่ระบบด้วย Google ไม่สำเร็จ', 'error');
+            }
+        }
+
+        function logoutUser() {
+            userToken = '';
+            currentUser = null;
+            if (isGoogleAdmin) {
+                adminToken = '';
+                adminUser = null;
+                sessionStorage.removeItem('kmsc_admin_token');
+                sessionStorage.removeItem('kmsc_admin_user');
+            }
+            isGoogleAdmin = false;
+            sessionStorage.removeItem('kmsc_user_token');
+            sessionStorage.removeItem('kmsc_user_profile');
+            sessionStorage.removeItem('kmsc_user_is_admin');
+
+            if (window.google && google.accounts && google.accounts.id) {
+                try { google.accounts.id.disableAutoSelect(); } catch (e) {}
+            }
+            document.getElementById('modal-user-profile').classList.add('hidden');
+            renderHeaderUserUI();
+            showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+        }
+
+        function openAdminFromProfile() {
+            document.getElementById('modal-user-profile').classList.add('hidden');
+            enterAdminView();
+        }
+
+        function openUserProfileModal(initialTab = 'portfolio') {
+            if (!currentUser || !userToken) {
+                openGoogleLoginModal();
+                return;
+            }
+
+            const displayName = currentUser.nickname || currentUser.fullName || currentUser.googleName || 'ผู้ใช้';
+            const avatar = currentUser.picture || `https://placehold.co/80x80/d91b42/ffffff?text=${encodeURIComponent(displayName.charAt(0).toUpperCase())}`;
+
+            document.getElementById('profile-avatar-img').src = avatar;
+            document.getElementById('profile-display-name').textContent = displayName;
+            document.getElementById('profile-email-text').textContent = currentUser.email || '';
+            document.getElementById('profile-admin-badge').classList.toggle('hidden', !isGoogleAdmin);
+            document.getElementById('profile-admin-bar').classList.toggle('hidden', !(isGoogleAdmin && adminToken));
+
+            document.getElementById('prof-input-fullname').value = currentUser.fullName || '';
+            document.getElementById('prof-input-nickname').value = currentUser.nickname || '';
+            document.getElementById('prof-input-sid').value = currentUser.studentId || '';
+            document.getElementById('prof-input-grade').value = currentUser.grade || '';
+            document.getElementById('prof-input-room').value = currentUser.room || '';
+            document.getElementById('prof-input-bio').value = currentUser.bio || '';
+
+            const classText = formatGradeRoom(currentUser) || '-';
+            document.getElementById('my-profile-class-text').textContent = classText;
+
+            renderMyPortfolioCerts();
+            switchProfileTab(initialTab);
+            document.getElementById('modal-user-profile').classList.remove('hidden');
+        }
+
+        function switchProfileTab(tab) {
+            ['portfolio', 'settings'].forEach(t => {
+                const sec = document.getElementById(`profsec-${t}`);
+                const btn = document.getElementById(`proftab-${t}`);
+                if (t === tab) {
+                    sec.classList.remove('hidden');
+                    btn.classList.remove('tab-inactive');
+                    btn.classList.add('tab-active');
+                } else {
+                    sec.classList.add('hidden');
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive');
+                }
+            });
+        }
+
+        function normalizeThaiNameForMatch(name) {
+            return String(name || '')
+                .trim()
+                .replace(/^(เด็กชาย|เด็กหญิง|นาย|นางสาว|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.)\s*/i, '')
+                .replace(/\s+/g, ' ')
+                .toLowerCase();
+        }
+
+        function renderMyPortfolioCerts() {
+            const listEl = document.getElementById('profile-portfolio-list');
+            const countEl = document.getElementById('my-cert-total-count');
+            if (!currentUser) return;
+
+            const normFull = normalizeThaiNameForMatch(currentUser.fullName);
+            const sid = String(currentUser.studentId || '').trim();
+
+            if (!normFull && !sid) {
+                countEl.textContent = '0 ใบ';
+                listEl.innerHTML = `
+                    <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-7 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-2.5">
+                            <i class="ph-duotone ph-identification-card text-3xl"></i>
+                        </div>
+                        <p class="text-sm font-extrabold text-gray-900 mb-1">ยังไม่ได้ตั้งค่าชื่อ-นามสกุลจริง</p>
+                        <p class="text-xs text-gray-500 mb-4">กรอกชื่อ-นามสกุลจริงในแท็บตั้งค่าโปรไฟล์ เพื่อให้ระบบดึงเกียรติบัตรของคุณมารวมไว้ที่นี่อัตโนมัติ</p>
+                        <button type="button" onclick="switchProfileTab('settings')" class="px-4 py-2 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold">ไปตั้งค่าโปรไฟล์</button>
+                    </div>`;
+                return;
+            }
+
+            const actMap = {};
+            publicActivities.forEach(a => { actMap[a.id] = a; });
+
+            const matched = publicCertificates.filter(c => {
+                if (sid && String(c.studentId || '').trim() === sid) return true;
+                if (normFull) {
+                    const certNorm = normalizeThaiNameForMatch(c.recipientName);
+                    if (certNorm && certNorm.includes(normFull)) return true;
+                }
+                return false;
+            });
+
+            countEl.textContent = `${matched.length.toLocaleString('th-TH')} ใบ`;
+
+            if (matched.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-7 text-center">
+                        <i class="ph-duotone ph-folder-dashed text-4xl text-gray-300 mb-2"></i>
+                        <p class="text-sm font-bold text-gray-700 mb-1">ยังไม่พบเกียรติบัตรที่ตรงกับชื่อ "${escapeHtml(currentUser.fullName || sid)}"</p>
+                        <p class="text-xs text-gray-400">ลองตรวจสอบการสะกดชื่อ-นามสกุลในแท็บตั้งค่าโปรไฟล์ให้ตรงกับบนเกียรติบัตร</p>
+                    </div>`;
+                return;
+            }
+
+            listEl.innerHTML = matched.map(c => buildCertCardHTML(c, actMap[c.activityId], true)).join('');
+        }
+
+        async function handleSaveUserProfile(e) {
+            e.preventDefault();
+            if (!userToken) return openGoogleLoginModal();
+
+            const btn = document.getElementById('btn-save-user-profile');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก...`;
+
+            try {
+                const data = {
+                    fullName: document.getElementById('prof-input-fullname').value.trim(),
+                    nickname: document.getElementById('prof-input-nickname').value.trim(),
+                    studentId: document.getElementById('prof-input-sid').value.trim(),
+                    grade: document.getElementById('prof-input-grade').value.trim(),
+                    room: document.getElementById('prof-input-room').value.trim(),
+                    bio: document.getElementById('prof-input-bio').value.trim()
+                };
+                const res = await apiPost({ action: 'saveUserProfile', userToken, data });
+                if (!res || !res.success) {
+                    if (res && res.userAuthError) logoutUser();
+                    throw new Error((res && res.error) || 'บันทึกโปรไฟล์ไม่สำเร็จ');
+                }
+
+                currentUser = res.profile || Object.assign({}, currentUser, data);
+                sessionStorage.setItem('kmsc_user_profile', JSON.stringify(currentUser));
+                renderHeaderUserUI();
+                document.getElementById('profile-display-name').textContent = currentUser.nickname || currentUser.fullName || currentUser.googleName || 'ผู้ใช้';
+                document.getElementById('my-profile-class-text').textContent = formatGradeRoom(currentUser) || '-';
+                renderMyPortfolioCerts();
+                showToast(res.message || 'บันทึกโปรไฟล์เรียบร้อยแล้ว', 'success');
+                switchProfileTab('portfolio');
+            } catch (err) {
+                showToast(err.message || 'บันทึกโปรไฟล์ไม่สำเร็จ', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk"></i> บันทึกโปรไฟล์`;
+            }
+        }
+
+        function populateGoogleSettingsForm() {
+            const cidInp = document.getElementById('setting-google-clientid');
+            const emailsInp = document.getElementById('setting-google-admin-emails');
+            if (cidInp) cidInp.value = googleSettings.clientId || '';
+            if (emailsInp) emailsInp.value = googleSettings.adminEmails || '';
+        }
+
+        async function handleSaveGoogleSettings(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-google-settings');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก...`;
+
+            try {
+                const payload = {
+                    clientId: document.getElementById('setting-google-clientid').value.trim(),
+                    adminEmails: document.getElementById('setting-google-admin-emails').value.trim()
+                };
+                const res = await apiPost({ action: 'saveGoogleSettings', token: adminToken, data: payload });
+                if (!res || !res.success) throw new Error((res && res.error) || 'บันทึกการตั้งค่า Google ไม่สำเร็จ');
+                googleSettings = res.googleSettings || payload;
+                googleClientId = googleSettings.clientId || '';
+                populateGoogleSettingsForm();
+                showToast(res.message || 'บันทึกการตั้งค่า Google เรียบร้อยแล้ว', 'success');
+            } catch (err) {
+                showToast(err.message || 'บันทึกการตั้งค่า Google ไม่สำเร็จ', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk"></i> บันทึกการตั้งค่า Google`;
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
