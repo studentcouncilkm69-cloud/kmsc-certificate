@@ -656,6 +656,134 @@
             </div>
         </section>
 
+        <!-- ADMIN TAB 2: MANAGE ACTIVITIES -->
+        <section id="admin-sec-activities" class="hidden space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-gray-900">รายการกิจกรรมทั้งหมด</h3>
+                    <p id="act-order-status" class="text-[11px] text-gray-500">ใช้ปุ่มลูกศรหรือปักหมุดเพื่อจัดลำดับการแสดงผลหน้าเว็บ</p>
+                </div>
+                <button type="button" onclick="openActivityModal()" class="px-4 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                    <i class="ph-bold ph-plus"></i> เพิ่มกิจกรรมใหม่
+                </button>
+            </div>
+
+            <div id="admin-activities-list" class="space-y-3"></div>
+        </section>
+
+        <!-- ADMIN TAB 3: UPLOAD & DRIVE IMPORT -->
+        <section id="admin-sec-upload" class="hidden space-y-5">
+            <!-- ตั้งค่ากลางสำหรับการอัปโหลด / นำเข้า -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-red-50 text-[#d91b42] flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-sliders-horizontal text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-gray-900">ตั้งค่ากิจกรรมและข้อมูลพื้นฐาน</h3>
+                        <p class="text-[11px] text-gray-500">เลือกกิจกรรมปลายทางก่อนดึงไฟล์จาก Google Drive หรืออัปโหลดจากเครื่อง</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">เลือกกิจกรรม *</label>
+                        <select id="upload-activity-select" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            <option value="">-- กรุณาเลือกกิจกรรม --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ประเภทผู้รับ</label>
+                        <select id="upload-default-certtype" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white">
+                            <option value="รายบุคคล">รายบุคคล</option>
+                            <option value="ห้องเรียน">ห้องเรียน</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">วันที่ออกเกียรติบัตร (ไม่บังคับ)</label>
+                        <input type="date" id="upload-default-date" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">รางวัล / ประเภทเริ่มต้น (ไม่บังคับ)</label>
+                        <select id="upload-default-award" onchange="toggleCustomAward('upload')" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white">
+                            <option value="">-- ไม่ระบุ --</option>
+                            <option value="เข้าร่วมกิจกรรม">เข้าร่วมกิจกรรม</option>
+                            <option value="รางวัลชนะเลิศ">รางวัลชนะเลิศ</option>
+                            <option value="รางวัลรองชนะเลิศ อันดับ 1">รางวัลรองชนะเลิศ อันดับ 1</option>
+                            <option value="รางวัลรองชนะเลิศ อันดับ 2">รางวัลรองชนะเลิศ อันดับ 2</option>
+                            <option value="รางวัลชมเชย">รางวัลชมเชย</option>
+                            <option value="คณะกรรมการ / จิตอาสา">คณะกรรมการ / จิตอาสา</option>
+                            <option value="__custom__">พิมพ์เอง...</option>
+                        </select>
+                        <input type="text" id="upload-custom-award" placeholder="พิมพ์ชื่อรางวัล..." class="hidden mt-2 w-full border border-gray-200 rounded-xl py-2 px-3 text-sm bg-white focus:outline-none focus:border-[#d91b42]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- วิธีที่ 1: ดึงไฟล์ยกโฟลเดอร์จาก Google Drive -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-google-drive-logo text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-gray-900">วิธีที่ 1: นำเข้ายกโฟลเดอร์จาก Google Drive (แนะนำ)</h3>
+                        <p class="text-[11px] text-gray-500">รองรับโฟลเดอร์ย่อยอัตโนมัติ (เช่น แยกโฟลเดอร์ตามห้อง ม.1/1 หรือชื่อรายการแข่งขัน)</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <input type="url" id="drive-folder-url" placeholder="วางลิงก์โฟลเดอร์ Google Drive ที่นี่..." class="flex-1 border border-gray-200 rounded-xl py-2.5 px-3 text-xs sm:text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                    <button type="button" id="btn-import-drive" onclick="handleImportDriveFolder()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors shrink-0">
+                        <i class="ph-bold ph-download-simple"></i> ดึงไฟล์ยกโฟลเดอร์
+                    </button>
+                </div>
+
+                <label class="inline-flex items-center gap-2 text-xs text-gray-600 font-medium cursor-pointer select-none">
+                    <input type="checkbox" id="drive-skip-certno" class="w-4 h-4 rounded accent-[#d91b42]">
+                    <span>ไม่ดึงเลขที่เกียรติบัตรจากชื่อไฟล์ (ซ่อนป้ายเลขที่)</span>
+                </label>
+            </div>
+
+            <!-- วิธีที่ 2: อัปโหลดไฟล์จากเครื่องทีละหลายไฟล์ -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-cloud-arrow-up text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-gray-900">วิธีที่ 2: อัปโหลดไฟล์จากเครื่องโดยตรง</h3>
+                        <p class="text-[11px] text-gray-500">เลือกไฟล์ PDF หรือรูปภาพ (.jpg, .png) ได้หลายไฟล์พร้อมกัน</p>
+                    </div>
+                </div>
+
+                <label class="block border-2 border-dashed border-gray-200 hover:border-[#d91b42] hover:bg-red-50/30 rounded-2xl p-6 text-center cursor-pointer transition-colors">
+                    <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp" onchange="handleFilesSelected(event)" class="hidden">
+                    <i class="ph-duotone ph-file-arrow-up text-4xl text-[#d91b42] mb-2"></i>
+                    <p class="text-xs sm:text-sm font-bold text-gray-800">คลิกเพื่อเลือกไฟล์เกียรติบัตร</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">รองรับ PDF, PNG, JPG เลือกได้หลายไฟล์พร้อมกัน</p>
+                </label>
+
+                <div id="upload-queue-section" class="hidden space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="text-xs font-extrabold text-gray-800">คิวรออัปโหลด (<span id="upload-queue-count">0</span> ไฟล์)</p>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="clearUploadQueue()" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold">ล้างคิว</button>
+                            <button type="button" id="btn-start-upload" onclick="startBatchUpload()" class="px-4 py-1.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                                <i class="ph-bold ph-upload-simple"></i> เริ่มอัปโหลดทั้งหมด
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="upload-progress-wrap" class="hidden w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div id="upload-progress-bar" class="bg-[#d91b42] h-2 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div id="upload-queue-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- ADMIN TAB 4: MANAGE CERTIFICATES -->
         <section id="admin-sec-certs" class="hidden">
             <!-- แถบสถานะและตั้งค่า AI อ่านชื่อ -->
@@ -890,10 +1018,15 @@
                 </button>
             </div>
             <div id="preview-body" class="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-3 min-h-[320px]"></div>
-            <div class="px-5 py-3.5 border-t border-gray-100 flex items-center justify-between gap-2 bg-white">
-                <a id="preview-open-drive" href="#" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center gap-1.5">
-                    <i class="ph-bold ph-arrow-square-out"></i> เปิดใน Drive
-                </a>
+            <div class="px-5 py-3.5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 bg-white">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="preview-save-btn" onclick="handlePreviewToggleSave()" class="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1.5 transition-colors">
+                        <i class="ph-bold ph-bookmark-simple"></i> เก็บเข้าแฟ้ม
+                    </button>
+                    <a id="preview-open-drive" href="#" target="_blank" rel="noopener" class="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center gap-1.5">
+                        <i class="ph-bold ph-arrow-square-out"></i> <span class="hidden sm:inline">เปิดใน Drive</span>
+                    </a>
+                </div>
                 <a id="preview-download-btn" href="#" target="_blank" rel="noopener" class="px-5 py-2 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดไฟล์ต้นฉบับ
                 </a>
@@ -1374,29 +1507,71 @@
                             <p id="my-profile-class-text" class="text-sm sm:text-base font-extrabold text-gray-800 mt-1 truncate">-</p>
                         </div>
                     </div>
+
+                    <!-- แถบตัวกรองปีการศึกษา & คัดลอกสรุปผลงาน -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 bg-white rounded-2xl border border-gray-100 p-3 shadow-sm">
+                        <div class="relative min-w-[140px] flex-1 sm:flex-none">
+                            <select id="my-portfolio-year-filter" onchange="renderMyPortfolioCerts()" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 pl-3 pr-8 text-xs font-bold text-gray-700 focus:outline-none focus:border-[#d91b42] appearance-none">
+                                <option value="">ทุกปีการศึกษา</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                        </div>
+                        <button type="button" onclick="copyMyPortfolioSummary()" class="px-3.5 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
+                            <i class="ph-bold ph-copy"></i> คัดลอกสรุปผลงาน (Portfolio)
+                        </button>
+                    </div>
+
                     <div id="profile-portfolio-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
 
                 <!-- TAB B: ตั้งค่าโปรไฟล์ -->
                 <div id="profsec-settings" class="hidden">
-                    <form onsubmit="handleSaveUserProfile(event)" class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-3">
-                        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-900 flex items-start gap-2">
+                    <form onsubmit="handleSaveUserProfile(event)" class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-3.5">
+                        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-900 flex items-start gap-2 leading-relaxed">
                             <i class="ph-fill ph-info text-blue-600 text-sm shrink-0 mt-0.5"></i>
-                            <span>กรอก <strong>ชื่อ-นามสกุลจริง (ตามที่ปรากฏบนเกียรติบัตร)</strong> เพื่อให้ระบบรวบรวมเกียรติบัตรของคุณมาแสดงในแฟ้มส่วนตัวโดยอัตโนมัติ</span>
+                            <span>แยกกรอก <strong>ชื่อ-นามสกุล (ภาษาไทย และ ภาษาอังกฤษ)</strong> เพื่อให้ระบบจับคู่เกียรติบัตรได้ครบทุกใบ แม้ใบนั้นจะไม่มีคำนำหน้าหรือเปลี่ยนคำนำหน้าจาก ด.ช./ด.ญ. เป็น นาย/นางสาว</span>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อ-นามสกุลจริง (สำหรับจับคู่เกียรติบัตร)</label>
-                                <input type="text" id="prof-input-fullname" placeholder="เช่น นายภูธนากร หงษ์ทอง" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                        <!-- ชื่อภาษาไทย -->
+                        <div class="grid grid-cols-12 gap-2.5">
+                            <div class="col-span-4 sm:col-span-3">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">คำนำหน้า</label>
+                                <select id="prof-input-prefix" class="w-full border border-gray-200 rounded-xl py-2.5 px-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                                    <option value="">ไม่ระบุ</option>
+                                    <option value="เด็กชาย">เด็กชาย</option>
+                                    <option value="เด็กหญิง">เด็กหญิง</option>
+                                    <option value="นาย">นาย</option>
+                                    <option value="นางสาว">นางสาว</option>
+                                    <option value="นาง">นาง</option>
+                                </select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อเล่น / ชื่อที่แสดง</label>
-                                <input type="text" id="prof-input-nickname" placeholder="เช่น ภู" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            <div class="col-span-8 sm:col-span-4">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อจริง (ไทย)</label>
+                                <input type="text" id="prof-input-fname-th" placeholder="เช่น ภูธนากร" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                            <div class="col-span-12 sm:col-span-5">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">นามสกุล (ไทย)</label>
+                                <input type="text" id="prof-input-lname-th" placeholder="เช่น หงษ์ทอง" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2.5">
+                        <!-- ชื่อภาษาอังกฤษ -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อจริง (ภาษาอังกฤษ / ไม่บังคับ)</label>
+                                <input type="text" id="prof-input-fname-en" placeholder="เช่น Phuthanakorn" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">นามสกุล (ภาษาอังกฤษ / ไม่บังคับ)</label>
+                                <input type="text" id="prof-input-lname-en" placeholder="เช่น Hongthong" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อเล่น</label>
+                                <input type="text" id="prof-input-nickname" placeholder="เช่น ภีม" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-600 mb-1">เลขประจำตัว</label>
                                 <input type="text" id="prof-input-sid" placeholder="เช่น 12345" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
@@ -1407,7 +1582,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-600 mb-1">ห้อง</label>
-                                <input type="text" id="prof-input-room" placeholder="เช่น 1" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
+                                <input type="text" id="prof-input-room" placeholder="เช่น 4" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:border-[#d91b42]">
                             </div>
                         </div>
 
@@ -1463,6 +1638,8 @@
         let currentActivityTotalCerts = 0;
         let currentActivityDuplicateNames = new Set();
         let detailVisibleCount = 24;
+        let currentPreviewCertId = '';
+        let lastMyPortfolioCerts = [];
         let uploadQueue = [];
         let selectedCertIds = new Set();
         let lastRenderedAdminCerts = [];
@@ -1962,8 +2139,14 @@
                 renderPublicActivities();
 
                 const params = new URLSearchParams(window.location.search);
+                const verifyParam = params.get('verify');
                 const actParam = params.get('act');
-                if (actParam) {
+                if (verifyParam) {
+                    switchPublicTab('verify');
+                    const vInp = document.getElementById('verify-certno-input');
+                    if (vInp) vInp.value = verifyParam;
+                    runVerifyCert(verifyParam);
+                } else if (actParam) {
                     const matched = publicActivities.find(a => String(a.id) === String(actParam));
                     if (matched) {
                         openActivityDetail(matched.id, false);
@@ -2010,37 +2193,45 @@
                 icon.className = 'ph ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none';
             } else {
                 input.placeholder = 'ค้นหาชื่อ-นามสกุล หรือ ชื่อกิจกรรม...';
-                icon.className = 'ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none';
+                icon.className = 'ph ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none';
             }
             renderGlobalSearch();
         }
 
-        function matchesCertTypeFilter(cert, filterVal) {
-            if (!filterVal || filterVal === 'all') return true;
-            const t = String(cert.certType || '').trim();
-            if (filterVal === 'classroom') return t === 'ห้องเรียน';
-            if (filterVal === 'individual') return t !== 'ห้องเรียน';
+        function matchesCertTypeFilter(c, typeVal) {
+            if (!typeVal || typeVal === 'all') return true;
+            const isClass = String(c.certType || '').trim() === 'ห้องเรียน';
+            if (typeVal === 'classroom') return isClass;
+            if (typeVal === 'individual') return !isClass;
             return true;
         }
 
-        function buildCertCardHTML(c, act, showActivityName = true) {
+        function buildCertCardHTML(c, act, showActivityName = true, options = {}) {
             const safeId = escapeHtml(c.id).replace(/'/g, "\\'");
             const gradeRoom = formatGradeRoom(c);
             const hasCertNo = Boolean(String(c.certNo || '').trim());
             const isClass = String(c.certType || '').trim() === 'ห้องเรียน';
             const displayName = isRandomFileName(c.recipientName) ? (gradeRoom || 'เกียรติบัตร') : c.recipientName;
             const displayDate = formatThaiDateDisplay(c.issueDate);
+            const isSaved = isCertSavedByUser(c.id);
+            const safeCertNo = escapeHtml(c.certNo || '').replace(/'/g, "\\'");
 
             return `
                 <div class="bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md hover:border-red-100 transition-all p-4 flex flex-col justify-between gap-3">
                     <div>
-                        <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+                        <div class="flex items-start justify-between gap-2 mb-2">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 ${hasCertNo ? `<span class="px-2 py-0.5 rounded-full bg-red-50 text-[#d91b42] text-[10px] font-mono font-bold">เลขที่ ${escapeHtml(c.certNo)}</span>` : ''}
                                 ${isClass ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold">ห้องเรียน</span>` : ''}
                                 ${gradeRoom ? `<span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">${escapeHtml(gradeRoom)}</span>` : ''}
+                                ${options.savedBadge ? `<span class="px-2 py-0.5 rounded-full bg-pink-50 text-[#d91b42] text-[10px] font-bold">เก็บไว้เอง</span>` : ''}
                             </div>
-                            ${act && act.year ? `<span class="text-[10px] font-bold text-gray-400">ปี ${escapeHtml(act.year)}</span>` : ''}
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                ${act && act.year ? `<span class="text-[10px] font-bold text-gray-400">ปี ${escapeHtml(act.year)}</span>` : ''}
+                                <button type="button" onclick="toggleSaveCertToPortfolio('${safeId}', event)" title="${isSaved ? 'นำออกจากแฟ้มของฉัน' : 'เก็บเข้าแฟ้มของฉัน'}" class="w-7 h-7 rounded-full ${isSaved ? 'bg-red-50 text-[#d91b42]' : 'bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-[#d91b42]'} flex items-center justify-center transition-colors">
+                                    <i class="${isSaved ? 'ph-fill' : 'ph-bold'} ph-bookmark-simple text-sm"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <h4 class="text-sm sm:text-base font-extrabold text-gray-900 leading-snug mb-1">${escapeHtml(displayName)}</h4>
@@ -2057,13 +2248,19 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-gray-50">
-                        <button type="button" onclick="openPreviewModal('${safeId}')" class="py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
-                            <i class="ph-bold ph-eye"></i> ดูตัวอย่าง
-                        </button>
-                        <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="py-2 px-3 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors">
-                            <i class="ph-bold ph-download-simple"></i> ดาวน์โหลด
-                        </a>
+                    <div class="space-y-1.5 pt-2.5 border-t border-gray-50">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="openPreviewModal('${safeId}')" class="py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+                                <i class="ph-bold ph-eye"></i> ดูตัวอย่าง
+                            </button>
+                            <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="py-2 px-3 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors">
+                                <i class="ph-bold ph-download-simple"></i> ดาวน์โหลด
+                            </a>
+                        </div>
+                        ${options.showVerifyLink && hasCertNo ? `
+                            <button type="button" onclick="copyCertVerifyLink('${safeCertNo}')" class="w-full py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors">
+                                <i class="ph-bold ph-shield-check"></i> คัดลอกลิงก์ยืนยันสำหรับแปะ Portfolio
+                            </button>` : ''}
                     </div>
                 </div>`;
         }
@@ -2581,11 +2778,15 @@
                     const hasCertNo = Boolean(String(c.certNo || '').trim());
                     const hideName = isRandomFileName(c.recipientName) || currentActivityDuplicateNames.has(String(c.recipientName || '').trim());
                     const thumbUrl = getDriveThumbUrl(c.fileId, 'w800');
+                    const isSaved = isCertSavedByUser(c.id);
 
                     return `
                         <div class="bg-white rounded-[22px] border border-gray-100 shadow-sm hover:shadow-md overflow-hidden flex flex-col transition-all">
                             <div onclick="openPreviewModal('${safeId}')" class="aspect-[1.414/1] bg-gray-100 relative overflow-hidden cursor-pointer group">
                                 <img src="${escapeHtml(thumbUrl)}" alt="ตัวอย่างเกียรติบัตร" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" onerror="this.src='https://placehold.co/600x420/f1f5f9/94a3b8?text=Certificate'">
+                                <button type="button" onclick="toggleSaveCertToPortfolio('${safeId}', event)" title="${isSaved ? 'นำออกจากแฟ้มของฉัน' : 'เก็บเข้าแฟ้มของฉัน'}" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full ${isSaved ? 'bg-[#d91b42] text-white' : 'bg-white/90 hover:bg-white text-gray-600 hover:text-[#d91b42]'} shadow-sm flex items-center justify-center transition-colors">
+                                    <i class="${isSaved ? 'ph-fill' : 'ph-bold'} ph-bookmark-simple text-sm"></i>
+                                </button>
                                 <span class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-sm text-white text-[10px] font-bold inline-flex items-center gap-1">
                                     <i class="ph-bold ph-magnifying-glass-plus"></i> ขยายดู
                                 </span>
@@ -2696,12 +2897,38 @@
 
         // ================= TAB 3: VERIFY CERTIFICATE =================
 
+        function copyCertVerifyLink(certNo) {
+            const cleanNo = String(certNo || '').trim();
+            if (!cleanNo) return;
+            const url = new URL(window.location.href);
+            url.search = '';
+            url.searchParams.set('verify', cleanNo);
+            const link = url.toString();
+
+            const ta = document.createElement('textarea');
+            ta.value = link;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('คัดลอกลิงก์ยืนยันเกียรติบัตรแล้ว นำไปทำ QR แปะ Portfolio ได้เลย', 'success');
+            } catch (e) {
+                showToast('ไม่สามารถคัดลอกลิงก์ได้', 'error');
+            }
+            ta.remove();
+        }
+
         async function handleVerifyCert(e) {
             e.preventDefault();
             const input = document.getElementById('verify-certno-input');
             const certNo = String(input.value || '').trim();
             if (!certNo) return;
+            await runVerifyCert(certNo);
+        }
 
+        async function runVerifyCert(certNo) {
             const btn = document.getElementById('btn-verify-submit');
             const box = document.getElementById('verify-result-box');
             btn.disabled = true;
@@ -2780,7 +3007,11 @@
                             </div>
 
                             ${c.fileId ? `
-                                <div class="px-5 py-4 bg-gray-50/70 border-t border-gray-100 flex justify-end">
+                                <div class="px-5 py-4 bg-gray-50/70 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
+                                    ${c.certNo ? `
+                                        <button type="button" onclick="copyCertVerifyLink('${escapeHtml(c.certNo).replace(/'/g, "\\'")}')" class="px-4 py-2.5 rounded-xl bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-700 text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-colors">
+                                            <i class="ph-bold ph-link"></i> คัดลอกลิงก์ยืนยันใบนี้
+                                        </button>` : ''}
                                     <a href="${escapeHtml(getDriveDownloadUrl(c.fileId))}" target="_blank" rel="noopener" class="px-5 py-2.5 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-colors">
                                         <i class="ph-bold ph-download-simple"></i> ดาวน์โหลดเกียรติบัตรฉบับนี้
                                     </a>
@@ -2797,10 +3028,35 @@
 
         // ================= PREVIEW MODAL =================
 
+        function updatePreviewSaveBtnUI() {
+            const btn = document.getElementById('preview-save-btn');
+            if (!btn || !currentPreviewCertId) return;
+            const saved = isCertSavedByUser(currentPreviewCertId);
+            if (saved) {
+                btn.className = 'px-3.5 py-2 rounded-xl bg-[#d91b42] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors';
+                btn.innerHTML = `<i class="ph-fill ph-bookmark-simple"></i> อยู่ในแฟ้มแล้ว`;
+            } else {
+                btn.className = 'px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-[#d91b42] text-xs font-bold flex items-center gap-1.5 transition-colors';
+                btn.innerHTML = `<i class="ph-bold ph-bookmark-simple"></i> เก็บเข้าแฟ้ม`;
+            }
+        }
+
+        function handlePreviewToggleSave() {
+            if (!currentPreviewCertId) return;
+            toggleSaveCertToPortfolio(currentPreviewCertId);
+        }
+
         function openPreviewModal(certId, isAdminSource = false) {
             const list = isAdminSource ? adminCertificates : publicCertificates;
             const cert = list.find(c => String(c.id) === String(certId)) || publicCertificates.find(c => String(c.id) === String(certId));
             if (!cert) return;
+
+            currentPreviewCertId = String(cert.id);
+            const saveBtn = document.getElementById('preview-save-btn');
+            if (saveBtn) {
+                saveBtn.classList.toggle('hidden', isAdminSource);
+                if (!isAdminSource) updatePreviewSaveBtnUI();
+            }
 
             const acts = isAdminSource ? adminActivities : publicActivities;
             const act = acts.find(a => String(a.id) === String(cert.activityId));
@@ -4167,6 +4423,77 @@
             enterAdminView();
         }
 
+        function parseLegacyFullName(fullName) {
+            const raw = String(fullName || '').trim();
+            if (!raw) return { prefix: '', firstNameTh: '', lastNameTh: '' };
+            const m = raw.match(/^(เด็กชาย|เด็กหญิง|นาย|นางสาว|นาง)\s*(.+)$/);
+            let prefix = '';
+            let rest = raw;
+            if (m) {
+                prefix = m[1];
+                rest = m[2].trim();
+            }
+            const parts = rest.split(/\s+/).filter(Boolean);
+            return {
+                prefix,
+                firstNameTh: parts[0] || '',
+                lastNameTh: parts.slice(1).join(' ')
+            };
+        }
+
+        function getUserSavedCertIdSet() {
+            const set = new Set();
+            if (!currentUser || !currentUser.savedCertIds) return set;
+            try {
+                const raw = currentUser.savedCertIds;
+                const arr = Array.isArray(raw) ? raw : JSON.parse(String(raw || '[]'));
+                if (Array.isArray(arr)) arr.forEach(id => set.add(String(id)));
+            } catch (e) {}
+            return set;
+        }
+
+        function isCertSavedByUser(certId) {
+            if (!currentUser || !userToken) return false;
+            return getUserSavedCertIdSet().has(String(certId));
+        }
+
+        async function toggleSaveCertToPortfolio(certId, ev) {
+            if (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+            if (!userToken || !currentUser) {
+                if (googleClientId) {
+                    showToast('กรุณาเข้าสู่ระบบด้วย Google เพื่อเก็บเกียรติบัตรเข้าแฟ้มส่วนตัว', 'info');
+                    openGoogleLoginModal();
+                } else {
+                    showToast('ระบบเข้าสู่ระบบด้วย Google ยังไม่ได้เปิดใช้งาน', 'info');
+                }
+                return;
+            }
+
+            try {
+                const res = await apiPost({ action: 'toggleSavedCert', userToken, data: { certId: String(certId) } });
+                if (!res || !res.success) {
+                    if (res && res.userAuthError) logoutUser();
+                    throw new Error((res && res.error) || 'บันทึกไม่สำเร็จ');
+                }
+                currentUser.savedCertIds = JSON.stringify(res.savedCertIds || []);
+                sessionStorage.setItem('kmsc_user_profile', JSON.stringify(currentUser));
+                showToast(res.message || (res.saved ? 'เก็บเข้าแฟ้มของฉันแล้ว' : 'นำออกจากแฟ้มแล้ว'), 'success');
+
+                updatePreviewSaveBtnUI();
+                renderGlobalSearch();
+                if (currentActivityDetail) renderActivityDetailCerts();
+                const profModal = document.getElementById('modal-user-profile');
+                if (profModal && !profModal.classList.contains('hidden')) {
+                    renderMyPortfolioCerts();
+                }
+            } catch (err) {
+                showToast(err.message || 'ไม่สามารถบันทึกเกียรติบัตรได้', 'error');
+            }
+        }
+
         function openUserProfileModal(initialTab = 'portfolio') {
             if (!currentUser || !userToken) {
                 openGoogleLoginModal();
@@ -4182,7 +4509,12 @@
             document.getElementById('profile-admin-badge').classList.toggle('hidden', !isGoogleAdmin);
             document.getElementById('profile-admin-bar').classList.toggle('hidden', !(isGoogleAdmin && adminToken));
 
-            document.getElementById('prof-input-fullname').value = currentUser.fullName || '';
+            const fallback = (!currentUser.firstNameTh && currentUser.fullName) ? parseLegacyFullName(currentUser.fullName) : null;
+            document.getElementById('prof-input-prefix').value = currentUser.prefix || (fallback ? fallback.prefix : '');
+            document.getElementById('prof-input-fname-th').value = currentUser.firstNameTh || (fallback ? fallback.firstNameTh : '');
+            document.getElementById('prof-input-lname-th').value = currentUser.lastNameTh || (fallback ? fallback.lastNameTh : '');
+            document.getElementById('prof-input-fname-en').value = currentUser.firstNameEn || '';
+            document.getElementById('prof-input-lname-en').value = currentUser.lastNameEn || '';
             document.getElementById('prof-input-nickname').value = currentUser.nickname || '';
             document.getElementById('prof-input-sid').value = currentUser.studentId || '';
             document.getElementById('prof-input-grade').value = currentUser.grade || '';
@@ -4192,6 +4524,7 @@
             const classText = formatGradeRoom(currentUser) || '-';
             document.getElementById('my-profile-class-text').textContent = classText;
 
+            populateMyPortfolioYearFilter();
             renderMyPortfolioCerts();
             switchProfileTab(initialTab);
             document.getElementById('modal-user-profile').classList.remove('hidden');
@@ -4213,12 +4546,55 @@
             });
         }
 
-        function normalizeThaiNameForMatch(name) {
+        function normalizeCompactNameForMatch(name) {
             return String(name || '')
+                .normalize('NFC')
                 .trim()
-                .replace(/^(เด็กชาย|เด็กหญิง|นาย|นางสาว|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.)\s*/i, '')
-                .replace(/\s+/g, ' ')
+                .replace(/^(เด็กชาย|เด็กหญิง|นาย|นางสาว|นาง|ด\.ช\.|ด\.ญ\.|น\.ส\.|mr\.?|mrs\.?|ms\.?|miss|master)\s*/i, '')
+                .replace(/[\s_\-\.]+/g, '')
                 .toLowerCase();
+        }
+
+        function getMyPortfolioMatchedCerts() {
+            if (!currentUser) return [];
+            const savedSet = getUserSavedCertIdSet();
+            const sid = String(currentUser.studentId || '').trim();
+
+            const thFirst = String(currentUser.firstNameTh || '').trim();
+            const thLast = String(currentUser.lastNameTh || '').trim();
+            const enFirst = String(currentUser.firstNameEn || '').trim();
+            const enLast = String(currentUser.lastNameEn || '').trim();
+
+            const normTh = normalizeCompactNameForMatch(
+                (thFirst || thLast) ? `${thFirst} ${thLast}` : (currentUser.fullName || '')
+            );
+            const normEn = normalizeCompactNameForMatch(`${enFirst} ${enLast}`);
+
+            return publicCertificates.filter(c => {
+                if (savedSet.has(String(c.id))) return true;
+                if (sid && String(c.studentId || '').trim() === sid) return true;
+                const certCompact = normalizeCompactNameForMatch(c.recipientName);
+                if (!certCompact) return false;
+                if (normTh && normTh.length >= 3 && certCompact.includes(normTh)) return true;
+                if (normEn && normEn.length >= 3 && certCompact.includes(normEn)) return true;
+                return false;
+            });
+        }
+
+        function populateMyPortfolioYearFilter() {
+            const sel = document.getElementById('my-portfolio-year-filter');
+            if (!sel) return;
+            const actMap = {};
+            publicActivities.forEach(a => { actMap[a.id] = a; });
+            const allMyCerts = getMyPortfolioMatchedCerts();
+            const years = Array.from(new Set(
+                allMyCerts.map(c => actMap[c.activityId] ? String(actMap[c.activityId].year || '').trim() : '').filter(Boolean)
+            )).sort((a, b) => Number(b) - Number(a));
+
+            const prev = sel.value;
+            sel.innerHTML = `<option value="">ทุกปีการศึกษา (${allMyCerts.length} ใบ)</option>` +
+                years.map(y => `<option value="${escapeHtml(y)}">ปีการศึกษา ${escapeHtml(y)}</option>`).join('');
+            if (years.includes(prev)) sel.value = prev;
         }
 
         function renderMyPortfolioCerts() {
@@ -4226,48 +4602,96 @@
             const countEl = document.getElementById('my-cert-total-count');
             if (!currentUser) return;
 
-            const normFull = normalizeThaiNameForMatch(currentUser.fullName);
-            const sid = String(currentUser.studentId || '').trim();
+            const savedSet = getUserSavedCertIdSet();
+            const hasProfileName = Boolean(
+                String(currentUser.firstNameTh || '').trim() ||
+                String(currentUser.firstNameEn || '').trim() ||
+                String(currentUser.fullName || '').trim() ||
+                String(currentUser.studentId || '').trim()
+            );
 
-            if (!normFull && !sid) {
-                countEl.textContent = '0 ใบ';
+            const actMap = {};
+            publicActivities.forEach(a => { actMap[a.id] = a; });
+
+            const allMatched = getMyPortfolioMatchedCerts();
+            const yearFilter = document.getElementById('my-portfolio-year-filter') ? document.getElementById('my-portfolio-year-filter').value : '';
+            const filtered = allMatched.filter(c => {
+                if (!yearFilter) return true;
+                const act = actMap[c.activityId];
+                return act && String(act.year) === String(yearFilter);
+            });
+
+            lastMyPortfolioCerts = filtered;
+            countEl.textContent = `${allMatched.length.toLocaleString('th-TH')} ใบ`;
+
+            if (!hasProfileName && allMatched.length === 0) {
                 listEl.innerHTML = `
                     <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-7 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d91b42] flex items-center justify-center mx-auto mb-2.5">
                             <i class="ph-duotone ph-identification-card text-3xl"></i>
                         </div>
                         <p class="text-sm font-extrabold text-gray-900 mb-1">ยังไม่ได้ตั้งค่าชื่อ-นามสกุลจริง</p>
-                        <p class="text-xs text-gray-500 mb-4">กรอกชื่อ-นามสกุลจริงในแท็บตั้งค่าโปรไฟล์ เพื่อให้ระบบดึงเกียรติบัตรของคุณมารวมไว้ที่นี่อัตโนมัติ</p>
+                        <p class="text-xs text-gray-500 mb-4">กรอกชื่อ-นามสกุล (ไทย/อังกฤษ) ในแท็บตั้งค่าโปรไฟล์ เพื่อให้ระบบดึงเกียรติบัตรของคุณมารวมไว้ที่นี่อัตโนมัติ</p>
                         <button type="button" onclick="switchProfileTab('settings')" class="px-4 py-2 rounded-xl bg-[#d91b42] hover:bg-[#b51435] text-white text-xs font-bold">ไปตั้งค่าโปรไฟล์</button>
                     </div>`;
                 return;
             }
 
-            const actMap = {};
-            publicActivities.forEach(a => { actMap[a.id] = a; });
-
-            const matched = publicCertificates.filter(c => {
-                if (sid && String(c.studentId || '').trim() === sid) return true;
-                if (normFull) {
-                    const certNorm = normalizeThaiNameForMatch(c.recipientName);
-                    if (certNorm && certNorm.includes(normFull)) return true;
-                }
-                return false;
-            });
-
-            countEl.textContent = `${matched.length.toLocaleString('th-TH')} ใบ`;
-
-            if (matched.length === 0) {
+            if (filtered.length === 0) {
+                const labelName = currentUser.fullName || [currentUser.firstNameTh, currentUser.lastNameTh].filter(Boolean).join(' ') || currentUser.studentId || '';
                 listEl.innerHTML = `
                     <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-7 text-center">
                         <i class="ph-duotone ph-folder-dashed text-4xl text-gray-300 mb-2"></i>
-                        <p class="text-sm font-bold text-gray-700 mb-1">ยังไม่พบเกียรติบัตรที่ตรงกับชื่อ "${escapeHtml(currentUser.fullName || sid)}"</p>
-                        <p class="text-xs text-gray-400">ลองตรวจสอบการสะกดชื่อ-นามสกุลในแท็บตั้งค่าโปรไฟล์ให้ตรงกับบนเกียรติบัตร</p>
+                        <p class="text-sm font-bold text-gray-700 mb-1">ยังไม่พบเกียรติบัตรที่ตรงกับ "${escapeHtml(labelName)}"</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">หากเกียรติบัตรของคุณอยู่ในโหมดแกลเลอรี หรือชื่อสะกดต่างกัน สามารถเปิดดูใบนั้นแล้วกดปุ่ม <strong>ไอคอนบุ๊กมาร์ก (เก็บเข้าแฟ้ม)</strong> เพื่อดึงมาเก็บไว้ที่นี่ได้ทันที</p>
                     </div>`;
                 return;
             }
 
-            listEl.innerHTML = matched.map(c => buildCertCardHTML(c, actMap[c.activityId], true)).join('');
+            listEl.innerHTML = filtered.map(c => buildCertCardHTML(c, actMap[c.activityId], true, {
+                savedBadge: savedSet.has(String(c.id)),
+                showVerifyLink: true
+            })).join('');
+        }
+
+        function copyMyPortfolioSummary() {
+            if (!lastMyPortfolioCerts || lastMyPortfolioCerts.length === 0) {
+                return showToast('ยังไม่มีรายการเกียรติบัตรในแฟ้มสำหรับคัดลอก', 'info');
+            }
+
+            const actMap = {};
+            publicActivities.forEach(a => { actMap[a.id] = a; });
+
+            const fullName = currentUser.fullName || [currentUser.prefix + (currentUser.firstNameTh || ''), currentUser.lastNameTh].filter(Boolean).join(' ').trim() || currentUser.googleName || '';
+            const classText = formatGradeRoom(currentUser);
+            const lines = [
+                `สรุปผลงานและเกียรติบัตร: ${fullName}${classText ? ` (${classText})` : ''}`,
+                `จำนวนทั้งหมด ${lastMyPortfolioCerts.length} รายการ`,
+                '----------------------------------------'
+            ];
+
+            lastMyPortfolioCerts.forEach((c, idx) => {
+                const act = actMap[c.activityId];
+                const actName = act ? act.name : 'กิจกรรมโรงเรียนคำม่วง';
+                const year = act && act.year ? `ปีการศึกษา ${act.year}` : '';
+                const award = c.award ? `[${c.award}] ` : '';
+                const certNo = c.certNo ? ` (เลขที่ ${c.certNo})` : '';
+                lines.push(`${idx + 1}. ${award}${actName}${year ? ` - ${year}` : ''}${certNo}`);
+            });
+
+            const ta = document.createElement('textarea');
+            ta.value = lines.join('\n');
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('คัดลอกสรุปผลงานสำหรับใส่ Portfolio เรียบร้อยแล้ว', 'success');
+            } catch (e) {
+                showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
+            }
+            ta.remove();
         }
 
         async function handleSaveUserProfile(e) {
@@ -4280,7 +4704,11 @@
 
             try {
                 const data = {
-                    fullName: document.getElementById('prof-input-fullname').value.trim(),
+                    prefix: document.getElementById('prof-input-prefix').value,
+                    firstNameTh: document.getElementById('prof-input-fname-th').value.trim(),
+                    lastNameTh: document.getElementById('prof-input-lname-th').value.trim(),
+                    firstNameEn: document.getElementById('prof-input-fname-en').value.trim(),
+                    lastNameEn: document.getElementById('prof-input-lname-en').value.trim(),
                     nickname: document.getElementById('prof-input-nickname').value.trim(),
                     studentId: document.getElementById('prof-input-sid').value.trim(),
                     grade: document.getElementById('prof-input-grade').value.trim(),
@@ -4298,6 +4726,7 @@
                 renderHeaderUserUI();
                 document.getElementById('profile-display-name').textContent = currentUser.nickname || currentUser.fullName || currentUser.googleName || 'ผู้ใช้';
                 document.getElementById('my-profile-class-text').textContent = formatGradeRoom(currentUser) || '-';
+                populateMyPortfolioYearFilter();
                 renderMyPortfolioCerts();
                 showToast(res.message || 'บันทึกโปรไฟล์เรียบร้อยแล้ว', 'success');
                 switchProfileTab('portfolio');
